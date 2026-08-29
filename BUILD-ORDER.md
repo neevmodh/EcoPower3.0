@@ -138,6 +138,7 @@ Only two issues, and they carry the single strongest moment in the demo.
 If you reach this, take them in this order. The first three punch above their tier.
 
 ```
+#28  net-metering state machine ← the DISCOM demo segment shows this SLA clock ticking
 #33  demand response          ← Narasimhan ran Grid Controller of India; he will look for it
 #71  no-data drill            ← the regression test for 2.0's exact public failure
 #85  unit economics + pilot   ← no code; answers "what happens Monday?"
