@@ -4,6 +4,8 @@
 
 Every row in the tracker below is a GitHub issue in this repo. Update the Status column as you go — this table is the single record.
 
+Visual design is governed by **[DESIGN.md](DESIGN.md)** — read it before building any UI.
+
 ---
 
 ## 1. Tracker
@@ -73,6 +75,11 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 59 | Plant findable defects in demo seed | M7 | demo | critical | — | ☐ | 58, 27 |
 | 60 | SPOF diagram + architecture slide | M7 | docs | normal | — | ☐ | — |
 | 61 | Demo runbook + fallback video | M7 | demo | critical | — | ☐ | 59, 49 |
+| 67 | Design tokens + validated colour system | M0 | design | high | — | ☐ | 1 |
+| 68 | Stat tile — no badge without a basis | M0 | design | critical | — | ☐ | 67 |
+| 69 | Five states for every data component | M0 | design | critical | — | ☐ | 67 |
+| 70 | Single honest ConnectionState indicator | M1 | design | high | — | ☐ | 18 |
+| 71 | No-data drill (regression for 2.0's failure) | M7 | design | critical | — | ☐ | 68, 69 |
 
 ### Blockers — do these first (issues #62–#66)
 
@@ -99,7 +106,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 
 ### Labels
 
-`M0`…`M7` · `blocker` · `area:db` `area:web` `area:mobile` `area:ingest` `area:ml` `area:billing` `area:discom` `area:payments` `area:infra` `area:demo` `area:security` `area:test` `area:docs` · `priority:critical` `priority:high` `priority:normal` `priority:low` · `ps:1`…`ps:5`
+`M0`…`M7` · `blocker` · `area:db` `area:web` `area:mobile` `area:ingest` `area:ml` `area:billing` `area:discom` `area:payments` `area:infra` `area:demo` `area:security` `area:test` `area:docs` · `area:design` · `priority:critical` `priority:high` `priority:normal` `priority:low` · `ps:1`…`ps:5`
 
 ---
 
