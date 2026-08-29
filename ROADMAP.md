@@ -84,6 +84,11 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 73 | Encode real GERC tariffs, IS 1180 / IS 15959, PM Surya Ghar | M2 | data | high | 1 | ☐ | 20 |
 | 74 | Calibrate synthetic population to published AT&C losses | M3 | data | critical | — | ☐ | 72, 12 |
 | 75 | Data provenance table + visible synthetic-data disclosure | M7 | data | high | — | ☐ | 74 |
+| 76 | Performance & uptime guarantee engine (meter-verified) | M2 | commercial | critical | 1 | ☐ | 19, 21 |
+| 77 | Multi-service catalog — solar, backup, cooling, lighting | M2 | commercial | high | 1 | ☐ | 19 |
+| 78 | Subscription lifecycle: transfer, pause, upgrade, buyout | M6 | commercial | high | 1 | ☐ | 19, 25 |
+| 79 | Deposit-free onboarding via bill-history credit assessment | M4 | commercial | high | 1 | ☐ | 35, 38 |
+| 80 | Carbon as a settled asset — I-REC certificates with provenance | M6 | commercial | normal | 1 | ☐ | 21, 50 |
 
 ### Blockers — do these first (issues #62–#66)
 
@@ -110,7 +115,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 
 ### Labels
 
-`M0`…`M7` · `blocker` · `area:db` `area:web` `area:mobile` `area:ingest` `area:ml` `area:billing` `area:discom` `area:payments` `area:infra` `area:demo` `area:security` `area:test` `area:docs` · `area:design` `area:data` · `priority:critical` `priority:high` `priority:normal` `priority:low` · `ps:1`…`ps:5`
+`M0`…`M7` · `blocker` · `area:db` `area:web` `area:mobile` `area:ingest` `area:ml` `area:billing` `area:discom` `area:payments` `area:infra` `area:demo` `area:security` `area:test` `area:docs` · `area:design` `area:data` `area:commercial` · `priority:critical` `priority:high` `priority:normal` `priority:low` · `ps:1`…`ps:5`
 
 ---
 
