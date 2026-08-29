@@ -4,7 +4,7 @@
 
 Every row in the tracker below is a GitHub issue in this repo. Update the Status column as you go — this table is the single record.
 
-Visual design is governed by **[DESIGN.md](DESIGN.md)**. Where every number comes from is governed by **[DATA.md](DATA.md)**. Read both before building.
+**[BUILD-ORDER.md](BUILD-ORDER.md)** is the sequence to solve these in — start there. Visual design is governed by **[DESIGN.md](DESIGN.md)**. Where every number comes from is governed by **[DATA.md](DATA.md)**. Read both before building.
 
 ---
 

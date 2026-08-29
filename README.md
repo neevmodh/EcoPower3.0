@@ -103,6 +103,7 @@ tools/loadtest/    k6
 | File | What's in it |
 |---|---|
 | **[ROADMAP.md](ROADMAP.md)** | The build plan and tracker — 85 issues across 8 milestones, numbered to match GitHub issues, with a Tier A/B/C ship order |
+| **[BUILD-ORDER.md](BUILD-ORDER.md)** | **Start here.** The sequence to solve them in — sprints, checkpoints, critical path |
 | **[DESIGN.md](DESIGN.md)** | Design system — validated colour palette, chart specs, component states, accessibility |
 | **[DATA.md](DATA.md)** | Data strategy — what's real, what's synthetic, and every source cited |
 
