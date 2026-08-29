@@ -4,7 +4,7 @@
 
 Every row in the tracker below is a GitHub issue in this repo. Update the Status column as you go — this table is the single record.
 
-Visual design is governed by **[DESIGN.md](DESIGN.md)** — read it before building any UI.
+Visual design is governed by **[DESIGN.md](DESIGN.md)**. Where every number comes from is governed by **[DATA.md](DATA.md)**. Read both before building.
 
 ---
 
@@ -80,6 +80,10 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 69 | Five states for every data component | M0 | design | critical | — | ☐ | 67 |
 | 70 | Single honest ConnectionState indicator | M1 | design | high | — | ☐ | 18 |
 | 71 | No-data drill (regression for 2.0's failure) | M7 | design | critical | — | ☐ | 68, 69 |
+| 72 | Ingest Tier-1 real datasets (NSRDB, PVGIS, Open-Meteo, OSM) | M1 | data | high | — | ☐ | 1 |
+| 73 | Encode real GERC tariffs, IS 1180 / IS 15959, PM Surya Ghar | M2 | data | high | 1 | ☐ | 20 |
+| 74 | Calibrate synthetic population to published AT&C losses | M3 | data | critical | — | ☐ | 72, 12 |
+| 75 | Data provenance table + visible synthetic-data disclosure | M7 | data | high | — | ☐ | 74 |
 
 ### Blockers — do these first (issues #62–#66)
 
@@ -106,7 +110,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 
 ### Labels
 
-`M0`…`M7` · `blocker` · `area:db` `area:web` `area:mobile` `area:ingest` `area:ml` `area:billing` `area:discom` `area:payments` `area:infra` `area:demo` `area:security` `area:test` `area:docs` · `area:design` · `priority:critical` `priority:high` `priority:normal` `priority:low` · `ps:1`…`ps:5`
+`M0`…`M7` · `blocker` · `area:db` `area:web` `area:mobile` `area:ingest` `area:ml` `area:billing` `area:discom` `area:payments` `area:infra` `area:demo` `area:security` `area:test` `area:docs` · `area:design` `area:data` · `priority:critical` `priority:high` `priority:normal` `priority:low` · `ps:1`…`ps:5`
 
 ---
 
@@ -348,7 +352,7 @@ The differentiator. Nobody else will build the utility's own side.
 **#56 Uptime.** External monitor (Better Stack / UptimeRobot free) on `/api/health` every 60 s **starting now**; `/api/health` itself checks DB, MQTT, and ML service and returns per-component status. By pitch day you have weeks of real data: *"99.94% over 26 days, 2 incidents, MTTR 4 min."* **A real 99.94% beats a claimed 99.99%.** Render it as a live component-status widget in the operator panel.
 
 **#57 Load test.** `tools/loadtest/`: ingest 5,000 msg/s sustained 10 min; 500 concurrent dashboard sessions; billing run over 100,000 connections. Report p99, rows/s, DB CPU, wall-clock. Then extrapolate arithmetically:
-> *"20M meters at one 30-minute block-profile read each = 960M rows/day ≈ 11,000 rows/s sustained. Our single ingest worker sustained 5,000 rows/s on 1 vCPU; the path partitions horizontally by NIC/DCU using MQTT shared subscriptions, so 3–4 workers cover national scale. Postgres at that volume needs Timescale or Citus — which is why the schema is already partition-keyed."*
+> *"20M meters at a 15-minute block interval = 96 reads/day each = 1.92 billion rows/day ≈ 22,000 rows/s sustained. Our single ingest worker sustained 5,000 rows/s on 1 vCPU; the path partitions horizontally by NIC/DCU using MQTT shared subscriptions, so 4–5 workers cover national scale. Postgres at that volume needs Timescale or Citus — which is why the schema is already partition-keyed."*
 
 Also: RLS `EXPLAIN (ANALYZE, BUFFERS)` benchmarks as `authenticated` with real claims, checked into `supabase/tests/perf/`.
 
