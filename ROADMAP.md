@@ -109,14 +109,14 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 
 | M | Name | Issues | Demoable outcome |
 |---|---|---|---|
-| M0 | Foundations & security baseline | 1–9 | 5 logins → 5 shells; RLS tests prove cross-tenant reads return 0 rows |
-| M1 | AMI spine (real telemetry) | 10–18 | Trigger a fault in a terminal, dashboard reacts in <1s |
-| M2 | Billing engine | 19–25 | Invoice where every line traces to two meter register reads |
-| M3 | DISCOM panel | 26–34 | Officer finds theft on a DT, raises a work order |
-| M4 | Onboarding, OCR, payments | 35–42 | Bill photo → active subscription in under 5 minutes |
+| M0 | Foundations & security baseline | 1–9, 67–69 | 5 logins → 5 shells; RLS tests prove cross-tenant reads return 0 rows |
+| M1 | AMI spine (real telemetry) | 10–18, 70, 72 | Trigger a fault in a terminal, dashboard reacts in <1s |
+| M2 | Billing engine | 19–25, 73, 76, 77, 84 | Invoice where every line traces to two meter register reads |
+| M3 | DISCOM panel | 26–34, 74 | Officer finds theft on a DT, raises a work order |
+| M4 | Onboarding, OCR, payments | 35–42, 79, 83 | Bill photo → active subscription in under 5 minutes |
 | M5 | Mobile + field technician | 43–49 | Commission a meter on a phone in airplane mode |
-| M6 | Society, ML, copilot | 50–55 | Allocation conservation check; predicted fault |
-| M7 | Hardening & demo proof | 56–61 | Real uptime number, k6 results, rehearsed 7-min demo |
+| M6 | Society, ML, copilot | 50–55, 78, 80, 81, 82 | Allocation conservation check; predicted fault |
+| M7 | Hardening & demo proof | 56–61, 71, 75, 85 | Real uptime number, k6 results, rehearsed 7-min demo |
 
 ### Labels
 
@@ -128,32 +128,36 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 
 **85 issues will not all ship. That is fine, and it is planned for.** The tiers below exist so that when you fall behind — you will — you cut from the bottom without deliberating.
 
-### Tier A — the demo does not exist without these (32)
+### Tier A — the demo does not exist without these (35)
 
 ```
 Foundation   1  2  3  4  5  8
-AMI spine   10 11 12 13 14 15 16 18
+AMI spine   10 11 12 13 14 15 16 17 18
 Billing     19 20 21
 DISCOM      26 27
 Onboarding  35 36 38 39
 Mobile      43 45 47 49
-Design      68 69
-Proof       59 61
+Design      67 68 69
+Proof       58 59 61
 Guarantee   76
 ```
 
+**Tier A is dependency-closed** — no Tier A issue depends on anything outside Tier A. Verified, not assumed. `#17` (aggregates) and `#58` (10M-row seed) were pulled up because `#26` and `#59` cannot run without them, and `#67` (design tokens) because `#68` and `#69` cannot.
+
+**Tier A spans all eight milestones.** You cannot finish the demo by working M0→M3 in order. Work milestone by milestone, but inside each milestone do the Tier A items first and leave the rest.
+
 **Tier A alone is a winning pitch.** It delivers every beat of the 7-minute demo: bill photo → subscription in under 5 minutes, a technician commissioning offline, live telemetry with a fault injected on stage, the DISCOM finding theft on a DT, an invoice line tracing to two register reads, and a guarantee settling from meter data. Everything below is upside.
 
-### Tier B — ship if on track (28)
+### Tier B — ship if on track (26)
 
-`7 9 17 22 24 25 28 32 33 34 37 42 44 46 48 50 51 56 57 58 70 71 72 73 74 83 84 85`
+`7 9 22 24 25 28 32 33 34 37 42 44 46 48 50 51 56 57 70 71 72 73 74 83 84 85`
 
 Three of these punch above their tier and should be pulled up if you can:
 - **#33 demand response** — SR Narasimhan ran Grid Controller of India; load management is his domain and he will look for it
 - **#71 no-data drill** — the regression test for 2.0's exact public failure
 - **#85 unit economics + pilot** — no code, and it answers the "what happens Monday?" question that decides commercialization offers
 
-### Tier C — cut first, without guilt (25)
+### Tier C — cut first, without guilt (19)
 
 `6 23 29 30 31 40 41 52 53 54 55 60 75 77 78 79 80 81 82`
 
@@ -307,7 +311,8 @@ Build this **before any UI polish**. It's what separates the project from every 
 **#20 Tariff seed.** `tariffs`, `tariff_slabs`, `tariff_tou_windows` with **real cited values** and the gazette URL in `source_document_url`; `effective_from` versioning. Gujarat specifics: residential exempt from banking charges; banking ~₹1.50/unit demand-based, ~₹1.10 MSME/non-demand; annual surplus at APPC (~₹3.85/kWh); FPPPA as a quarterly adjustment. Ravi Kumar (FSR Global) is on the jury — cite the orders.
 
 **#21 Invoice provenance.** `invoices` carries `opening_reading_ts/kwh` and `closing_reading_ts/kwh`; `invoice_lines` carries `source_reading_start_id`, `source_reading_end_id`, `obis_ref`, `tariff_slab_id`. On screen:
-> `1,247.300 kWh @ 2026-08-01 05:30:12` → `1,589.700 kWh @ 2026-09-01 05:30:07` = **342.400 kWh**, GERC RGP FY26 slab 2 @ ₹4.55 = ₹1,557.92
+> `1,247.300 kWh @ 2026-08-01 05:30:12` → `1,589.700 kWh @ 2026-09-01 05:30:07` = **342.400 kWh**
+> telescopic on GERC RGP-Urban FY26 — 50 @ ₹3.05 · 50 @ ₹3.50 · 150 @ ₹4.15 · 92.400 @ ₹5.20 = **₹1,430.48**
 
 That turns "provably correct billing" from a claim into a clickable UI element, and it's the direct answer to 2.0's `Math.random()`.
 

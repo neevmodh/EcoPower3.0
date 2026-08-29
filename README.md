@@ -2,7 +2,7 @@
 
 **An Energy-as-a-Service platform that sits on top of AMI — the layer between a DISCOM's metering infrastructure and the consumer.**
 
-Built for the final round of **INSTINCT 4.0**, the innovation challenge run by [IntelliSmart Infra](https://www.intellismartinfra.com/) — the EESL + NIIF joint venture executing India's largest smart-meter rollout — in partnership with The Energy Society, IIT Delhi.
+Built for the final round of **INSTINCT 4.0**, the innovation challenge run by [IntelliSmart Infra](https://www.intellismartinfra.in/) — the EESL + NIIF joint venture executing India's largest smart-meter rollout — in partnership with The Energy Society, IIT Delhi.
 
 ```
 Smart Meter → NIC → HES → MDM → EcoPower
@@ -45,8 +45,8 @@ INSTINCT 4.0 published five problem statements. They are one system, so we built
 
 **Billing is provable.** Every invoice line carries the two cumulative register reads that bracket it. Click a line and it expands:
 
-> `1,247.300 kWh @ 2026-08-01 05:30:12` → `1,589.700 kWh @ 2026-09-01 05:30:07`
-> = **342.400 kWh**, GERC RGP FY26 slab 2 @ ₹4.55 = **₹1,557.92**
+> `1,247.300 kWh @ 2026-08-01 05:30:12` → `1,589.700 kWh @ 2026-09-01 05:30:07` = **342.400 kWh**
+> telescopic on GERC RGP-Urban FY26 — 50 @ ₹3.05 · 50 @ ₹3.50 · 150 @ ₹4.15 · 92.400 @ ₹5.20 = **₹1,430.48**
 
 **Telemetry is real.** An AMI simulator publishes DLMS-shaped, OBIS-keyed payloads over MQTT from a physical solar and load model. An ingest worker verifies per-device HMAC, checks register monotonicity, handles rollover, and batch-writes to partitioned Postgres. Realtime pushes to web and mobile. A scenario API can inject theft, soiling, an inverter trip or a tamper event **live**, and you watch it surface in the DISCOM panel.
 
@@ -102,7 +102,7 @@ tools/loadtest/    k6
 
 | File | What's in it |
 |---|---|
-| **[ROADMAP.md](ROADMAP.md)** | The build plan and tracker — 66 issues across 8 milestones, numbered to match GitHub issues |
+| **[ROADMAP.md](ROADMAP.md)** | The build plan and tracker — 85 issues across 8 milestones, numbered to match GitHub issues, with a Tier A/B/C ship order |
 | **[DESIGN.md](DESIGN.md)** | Design system — validated colour palette, chart specs, component states, accessibility |
 | **[DATA.md](DATA.md)** | Data strategy — what's real, what's synthetic, and every source cited |
 
