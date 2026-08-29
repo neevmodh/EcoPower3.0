@@ -89,6 +89,11 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 78 | Subscription lifecycle: transfer, pause, upgrade, buyout | M6 | commercial | high | 1 | ☐ | 19, 25 |
 | 79 | Deposit-free onboarding via bill-history credit assessment | M4 | commercial | high | 1 | ☐ | 35, 38 |
 | 80 | Carbon as a settled asset — I-REC certificates with provenance | M6 | commercial | normal | 1 | ☐ | 21, 50 |
+| 81 | Multi-channel: WhatsApp, SMS, IVR (DLT-compliant) | M6 | consumer | high | 1,2 | ☐ | 34 |
+| 82 | Verified communication — anti-scam message checker | M6 | consumer | high | 1 | ☐ | 81 |
+| 83 | Real i18n — English, Hindi, Gujarati + low-literacy | M4 | consumer | high | 1,2 | ☐ | 8 |
+| 84 | "Why is my bill high?" — deterministic bill explainer | M2 | consumer | high | 1 | ☐ | 21 |
+| 85 | Unit economics + 90-day pilot proposal (docs) | M7 | docs | high | — | ☐ | — |
 
 ### Blockers — do these first (issues #62–#66)
 
@@ -115,7 +120,47 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 
 ### Labels
 
-`M0`…`M7` · `blocker` · `area:db` `area:web` `area:mobile` `area:ingest` `area:ml` `area:billing` `area:discom` `area:payments` `area:infra` `area:demo` `area:security` `area:test` `area:docs` · `area:design` `area:data` `area:commercial` · `priority:critical` `priority:high` `priority:normal` `priority:low` · `ps:1`…`ps:5`
+`M0`…`M7` · `blocker` · `area:db` `area:web` `area:mobile` `area:ingest` `area:ml` `area:billing` `area:discom` `area:payments` `area:infra` `area:demo` `area:security` `area:test` `area:docs` · `area:design` `area:data` `area:commercial` `area:consumer` · `priority:critical` `priority:high` `priority:normal` `priority:low` · `ps:1`…`ps:5`
+
+---
+
+## 1b. Ship order — read this before starting
+
+**85 issues will not all ship. That is fine, and it is planned for.** The tiers below exist so that when you fall behind — you will — you cut from the bottom without deliberating.
+
+### Tier A — the demo does not exist without these (32)
+
+```
+Foundation   1  2  3  4  5  8
+AMI spine   10 11 12 13 14 15 16 18
+Billing     19 20 21
+DISCOM      26 27
+Onboarding  35 36 38 39
+Mobile      43 45 47 49
+Design      68 69
+Proof       59 61
+Guarantee   76
+```
+
+**Tier A alone is a winning pitch.** It delivers every beat of the 7-minute demo: bill photo → subscription in under 5 minutes, a technician commissioning offline, live telemetry with a fault injected on stage, the DISCOM finding theft on a DT, an invoice line tracing to two register reads, and a guarantee settling from meter data. Everything below is upside.
+
+### Tier B — ship if on track (28)
+
+`7 9 17 22 24 25 28 32 33 34 37 42 44 46 48 50 51 56 57 58 70 71 72 73 74 83 84 85`
+
+Three of these punch above their tier and should be pulled up if you can:
+- **#33 demand response** — SR Narasimhan ran Grid Controller of India; load management is his domain and he will look for it
+- **#71 no-data drill** — the regression test for 2.0's exact public failure
+- **#85 unit economics + pilot** — no code, and it answers the "what happens Monday?" question that decides commercialization offers
+
+### Tier C — cut first, without guilt (25)
+
+`6 23 29 30 31 40 41 52 53 54 55 60 75 77 78 79 80 81 82`
+
+Good ideas, none demo-critical. **#55 (LLM copilot) is the first to go** — every team will have a chatbot and none of these six judges will be moved by one.
+
+### The rule
+If Tier A is not done, do not start Tier B. A finished Tier A beats a half-built Tier C every time, and a broken demo beats nothing at all only in the sense that both score zero.
 
 ---
 
