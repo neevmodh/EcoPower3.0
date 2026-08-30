@@ -315,7 +315,7 @@ Build this **before any UI polish**. It's what separates the project from every 
 
 **#21 Invoice provenance.** `invoices` carries `opening_reading_ts/kwh` and `closing_reading_ts/kwh`; `invoice_lines` carries `source_reading_start_id`, `source_reading_end_id`, `obis_ref`, `tariff_slab_id`. On screen:
 > `1,247.300 kWh @ 2026-08-01 05:30:12` → `1,589.700 kWh @ 2026-09-01 05:30:07` = **342.400 kWh**
-> telescopic on GERC RGP-Urban FY26 — 50 @ ₹3.05 · 50 @ ₹3.50 · 150 @ ₹4.15 · 92.400 @ ₹5.20 = **₹1,430.48**
+> telescopic on GERC RGP-Urban FY26 — 50 @ ₹3.20 · 150 @ ₹3.95 · 142.400 @ ₹5.00 = **₹1,464.50**
 
 That turns "provably correct billing" from a claim into a clickable UI element, and it's the direct answer to 2.0's `Math.random()`.
 

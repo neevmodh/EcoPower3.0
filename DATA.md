@@ -62,23 +62,48 @@ Open-Meteo (free, no key, hourly forecast + historical reanalysis) as primary; I
 
 ### 3.3 Tariffs — GERC, real and cited
 
-**RGP-Urban (residential), Gujarat, FY2026** — GERC retained the previous year's tariffs:
+**Corrected 2026-08-30, during #20:** the figures below were re-verified
+directly against the primary source (`pdftotext` on Torrent Power's actual
+FY2026-27 tariff order, not a secondary summary) while seeding `tariffs`.
+The previous version of this section had the wrong slab count, the wrong
+fixed-charge basis, and a ToU rebate that doesn't apply to RGP at all —
+left here as a note because a doc that silently self-corrects is exactly
+the kind of thing this section exists to prevent.
+
+**RGP (residential), Torrent Power — Ahmedabad, FY2026-27** — three slabs,
+not four:
 
 | Slab | Rate |
 |---|---|
-| 0–50 units | **₹3.05** |
-| 51–100 | **₹3.50** |
-| 101–250 | **₹4.15** |
-| above 250 | **₹5.20** |
+| First 50 units | **₹3.20** |
+| Next 150 units (51–200) | **₹3.95** |
+| Above 200 | **₹5.00** |
 
-**RGP-Rural:** ₹2.65 · ₹3.10 · ₹3.75 · ₹4.90
+**Fixed charge** is differentiated **by phase, not by sanctioned load**:
+₹25/month (single phase) · ₹65/month (three phase). BPL households: ₹5/month
+fixed, ₹1.50/unit for the first 50 units, RGP rate thereafter.
 
-**Fixed charge**, by sanctioned load: ₹15/mo ≤2 kW · ₹25 (2–4 kW) · ₹45 (4–6 kW) · ₹70 (>6 kW)
+**No RGP-Rural variant and no Time-of-Use/solar-hour rebate for RGP** —
+Torrent Power's Ahmedabad licence area is urban, and the order's solar-hour
+rebate (30 paise/kWh, 11:00–15:00) applies only to HT (high-tension,
+commercial/industrial) categories, confirmed by reading §9.7 of the order.
+An earlier pass at this section assumed both existed; neither does in the
+actual document.
 
-**Electricity duty:** 10% on energy + fixed charges
-**FPPPA:** quarterly Fuel & Power Purchase Price Adjustment, varies by DISCOM — modelled as its own invoice line, not folded into the unit rate
+**FPPPA:** base rate **₹3.72/kWh for FY2026-27** (§2.4.3 of the order,
+exact figure, not an estimate) — Gujarat's quarterly Fuel & Power Purchase
+Price Adjustment, modelled as its own invoice line, not folded into the
+unit rate.
+
+**Electricity duty and APPC (net-metering surplus settlement rate) are NOT
+in this tariff order** — duty is set by the separate Gujarat Electricity
+Duty Act, APPC by separate net-metering regulations. The seed (#20) carries
+placeholder values (10% duty, ₹3.85/kWh APPC) pending their own primary
+citation — flagged in the migration, not presented as equally sourced.
 
 Regulatory frame: **GERC Multi-Year Tariff Regulations, 2024**, effective 1 Apr 2025 – 31 Mar 2030.
+
+Source: [Torrent Power Ltd. – Distribution (Ahmedabad), Tariff Order for FY 2026-27](https://www.torrentpower.com/public/pdf/regulatory/TPL-D-A-2585-2025-Tariff-Order-of-FY-2026-27.pdf), GERC, dated March 2026.
 
 Every one of these goes into `tariff_slabs` with `effective_from` and `source_document_url` (#20). Swetha Ravi Kumar of FSR Global is on the jury — the citation is the point.
 

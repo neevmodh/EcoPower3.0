@@ -13,41 +13,42 @@ import {
 } from "./tariff-engine";
 import { kwhToMilli, rupeesToPaise } from "./money";
 
-// GERC RGP-Urban FY2026 (DATA.md §3.3, cited).
-const RGP_URBAN_SLABS = [
-  { uptoKwh: 50, ratePaisePerKwh: rupeesToPaise(3.05) },
-  { uptoKwh: 100, ratePaisePerKwh: rupeesToPaise(3.5) },
-  { uptoKwh: 250, ratePaisePerKwh: rupeesToPaise(4.15) },
-  { uptoKwh: null, ratePaisePerKwh: rupeesToPaise(5.2) },
+// RGP (residential), Torrent Power — Ahmedabad, FY2026-27. Verified
+// directly against the primary tariff order during #20 (pdftotext on the
+// actual PDF, not a secondary summary) — three slabs, not four. Matches
+// the rows seeded by 0008_tariff_seed.sql exactly.
+const RGP_SLABS = [
+  { uptoKwh: 50, ratePaisePerKwh: rupeesToPaise(3.2) },
+  { uptoKwh: 200, ratePaisePerKwh: rupeesToPaise(3.95) },
+  { uptoKwh: null, ratePaisePerKwh: rupeesToPaise(5.0) },
 ];
 
 describe("slabEngine", () => {
-  it("reproduces ROADMAP.md's exact worked example: 342.400 kWh -> ₹1,430.48", () => {
-    const result = slabEngine(kwhToMilli(342.4), RGP_URBAN_SLABS);
+  it("reproduces the real RGP tariff's worked example: 342.400 kWh -> ₹1,464.50", () => {
+    const result = slabEngine(kwhToMilli(342.4), RGP_SLABS);
 
-    expect(result.lines).toHaveLength(4);
-    expect(result.lines[0]).toMatchObject({ quantityMilliKwh: 50000n, amountPaise: 15250n }); // 50 @ 3.05 = 152.50
-    expect(result.lines[1]).toMatchObject({ quantityMilliKwh: 50000n, amountPaise: 17500n }); // 50 @ 3.50 = 175.00
-    expect(result.lines[2]).toMatchObject({ quantityMilliKwh: 150000n, amountPaise: 62250n }); // 150 @ 4.15 = 622.50
-    expect(result.lines[3]).toMatchObject({ quantityMilliKwh: 92400n, amountPaise: 48048n }); // 92.4 @ 5.20 = 480.48
+    expect(result.lines).toHaveLength(3);
+    expect(result.lines[0]).toMatchObject({ quantityMilliKwh: 50000n, amountPaise: 16000n }); // 50 @ 3.20 = 160.00
+    expect(result.lines[1]).toMatchObject({ quantityMilliKwh: 150000n, amountPaise: 59250n }); // 150 @ 3.95 = 592.50
+    expect(result.lines[2]).toMatchObject({ quantityMilliKwh: 142400n, amountPaise: 71200n }); // 142.4 @ 5.00 = 712.00
 
-    expect(result.totalPaise).toBe(143048n); // ₹1,430.48
+    expect(result.totalPaise).toBe(146450n); // ₹1,464.50
   });
 
   it("bills entirely within the first slab when consumption is low", () => {
-    const result = slabEngine(kwhToMilli(30), RGP_URBAN_SLABS);
+    const result = slabEngine(kwhToMilli(30), RGP_SLABS);
     expect(result.lines).toHaveLength(1);
-    expect(result.totalPaise).toBe(rupeesToPaise(30 * 3.05));
+    expect(result.totalPaise).toBe(rupeesToPaise(30 * 3.2));
   });
 
   it("bills zero consumption as zero, with no lines — not a fabricated line item", () => {
-    const result = slabEngine(0n, RGP_URBAN_SLABS);
+    const result = slabEngine(0n, RGP_SLABS);
     expect(result.lines).toHaveLength(0);
     expect(result.totalPaise).toBe(0n);
   });
 
   it("never produces a negative total regardless of slab configuration", () => {
-    const result = slabEngine(kwhToMilli(1000), RGP_URBAN_SLABS);
+    const result = slabEngine(kwhToMilli(1000), RGP_SLABS);
     expect(result.totalPaise).toBeGreaterThan(0n);
   });
 });

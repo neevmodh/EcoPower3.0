@@ -72,13 +72,13 @@ The longest sprint, and the one that separates this from every other entry. **Bu
 
 ```
 #19  pure tariff engine
-#20  real GERC tariff seed          ← telescopic: four lines, not one
+#20  real GERC tariff seed          ← telescopic: three slabs, not one
 #21  invoice schema with provenance
 #76  guarantee engine               ← the PS1 differentiator
 #39  Razorpay Orders + Checkout + webhook verify
 ```
 
-**Checkpoint:** click an invoice energy line, watch it expand to the two bracketing register reads. 342.400 kWh → 50 @ ₹3.05 · 50 @ ₹3.50 · 150 @ ₹4.15 · 92.400 @ ₹5.20 = ₹1,430.48.
+**Checkpoint:** click an invoice energy line, watch it expand to the two bracketing register reads. 342.400 kWh → 50 @ ₹3.20 · 150 @ ₹3.95 · 142.400 @ ₹5.00 = ₹1,464.50.
 
 ---
 

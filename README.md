@@ -46,7 +46,7 @@ INSTINCT 4.0 published five problem statement. They are one system, so we built 
 **Billing is provable.** Every invoice line carries the two cumulative register reads that bracket it. Click a line and it expands:
 
 > `1,247.300 kWh @ 2026-08-01 05:30:12` → `1,589.700 kWh @ 2026-09-01 05:30:07` = **342.400 kWh**
-> telescopic on GERC RGP-Urban FY26 — 50 @ ₹3.05 · 50 @ ₹3.50 · 150 @ ₹4.15 · 92.400 @ ₹5.20 = **₹1,430.48**
+> telescopic on GERC RGP-Urban FY26 — 50 @ ₹3.20 · 150 @ ₹3.95 · 142.400 @ ₹5.00 = **₹1,464.50**
 
 **Telemetry is real.** An AMI simulator publishes DLMS-shaped, OBIS-keyed payloads over MQTT from a physical solar and load model. An ingest worker verifies per-device HMAC, checks register monotonicity, handles rollover, and batch-writes to partitioned Postgres. Realtime pushes to web and mobile. A scenario API can inject theft, soiling, an inverter trip or a tamper event **live**, and you watch it surface in the DISCOM panel.
 
