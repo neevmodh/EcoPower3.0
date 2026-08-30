@@ -210,6 +210,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Reconciled the GitHub issue's own stale worked example (old ₹1,430.48/4-slab placeholder) with the real ₹1,464.50/3-slab figure in the closing comment, same discipline as #20.
 - CI green (run 33327354670), pushed to remote Supabase and GitHub. Committed (`d3cc297`), issue commented and closed.
 
+**04:15–04:50** — **Issue #76** (`Performance & uptime guarantee engine`) resolved and closed.
+- `packages/shared/src/billing/guarantee-engine.ts`: pure CUF/PR/availability/DMGE functions plus a capped linear `shortfallCredit`, tested against the real SECI/MNRE figures cited in the issue (15%/13.5% CUF floors, 75-80% PR) — not invented numbers.
+- `supabase/migrations/0010_guarantee_engine.sql`: `service_guarantees` + `guarantee_settlements`, same composite `(id, reading_ts)` provenance FK to `meter_readings` as #21.
+- **Deliberate forward-reference**: `subscription_id` is a bare column, no FK yet — `subscriptions` is #78's table (Sprint 3.5, after this). Guarantees scope off `service_connection_id` today, a real FK, matching every other billing table.
+- **Deliberately out of scope**: the actual scheduled worker that runs the engine monthly — no cron-worker infra exists yet even for #17's own aggregates; this issue was schema + settlement mechanism, same "schema, not the generation service" scoping call as #21.
+- No DISCOM policy on either table (same billing-privacy principle as #21), confirmed by pgTAP.
+- 109 shared tests (12 new), 49 pgTAP assertions across 9 files (new `service_guarantees.test.sql`). CI green (run 33327685254), pushed to remote Supabase and GitHub. Committed (`c4f14de`), issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.
