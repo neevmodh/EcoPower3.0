@@ -186,6 +186,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - **Real bug found by this verification**: ingest worker's broadcast payload wasn't tagged `private: true`, so it silently fanned out over the legacy public path instead of the authorization-gated one — subscription succeeded but zero messages arrived. No unit test would have caught this.
 - CI green, deployed to production (run 33306442121). Committed (`d4aaf92`), pushed, issue commented and closed.
 
+**01:20–02:00** — **PS1 refocus.** User: finish PS1 completely before anything else, focus on UI too. Tightened `PS1-PRIORITY-PLAN.md` with a §0 completion checklist and a hard gate in `BUILD-ORDER.md` — Sprint 4 (DISCOM)/Sprint 5 (OCR, that's PS4)/Sprint 6 (mobile) don't start until every PS1 row is checked. Also shipped, before this refocus, per the earlier "check errors / better UI / add login credentials" ask: full health check (all clean), one-click demo-account login buttons on `/login` (no password to remember, verified live in a real browser on production), and a UI pass on login/landing/panel-shell within the existing design system's own no-shadow rule.
+
+**02:00–02:35** — **Issue #19** (`Pure tariff engine`) resolved and closed. First Sprint 3 item.
+- `packages/shared/src/billing/`: all ten specified functions, zero I/O, bigint milli-kWh / bigint paise throughout, half-up rounding (not truncation).
+- **Verified against ROADMAP.md's own worked example**: 342.400 kWh on GERC RGP-Urban FY26 telescopes through all four slabs to exactly ₹1,430.48, each slab amount asserted individually.
+- `netMeteringSettlement`/`bankingCarryForward` encode Gujarat's specific rules (1:1 offset, APPC for surplus, residential banking exemption).
+- 97 tests (30 new), full workspace build green. CI: run 33326142724. Committed (`7903f2d`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.
