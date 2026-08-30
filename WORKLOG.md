@@ -92,6 +92,16 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
   - Status contrast made **advisory, not build-breaking** — §3.5 explicitly exempts status from the gate because status never ships as colour alone; icon + label is the mandatory relief. Amber warning at 2.17:1 on white is the documented consequence of that design, not a regression to fix by changing the hex. Still hard-fails for the three status colours that do clear 3:1, so a real regression is still caught.
 - `pnpm build` + `pnpm test` green (4 tests). Committed (`394cf67`), pushed, issue commented and closed.
 
+**14:15–16:00** — **Issue #8** (`Next.js shell + five role-routed panels + Vercel deploy`) resolved.
+- Scaffolded `apps/web`: Next.js 15 App Router, route groups for all five panels + marketing/login. Tailwind actually installed and wired to #67's tokens via CSS custom properties — the exact thing 2.0 never did.
+- Server Components read Supabase with `@supabase/ssr` + anon key + session cookie, no `service_role` in the app. `middleware.ts` does coarse role gating (404, not empty-dashboard flash); RLS (#5) is the real gate.
+- Route handlers: Razorpay webhook (HMAC signature verification wired), push registration stub, copilot stub (#55), health (for #56).
+- **Real bug found during verification**: `getUser()`'s returned user row has empty `app_metadata` — #4's scope claims exist only in the JWT, not the stored user. Every role check was silently failing (all 404s) until `lib/auth.ts` started decoding claims from the access token. Would have been very easy to ship broken and only notice at demo time.
+- `scripts/seed_demo_users.mjs` — seeds five demo logins + a two-division topology fixture, reusable against local or remote via env vars.
+- Deployed to Vercel (`vercel link` + `--root-directory apps/web` on the project, since the monorepo needs the workspace root for `pnpm install`). Set `NEXT_PUBLIC_SUPABASE_URL`/`_ANON_KEY`/`RAZORPAY_WEBHOOK_SECRET` as production env vars.
+- **Verified against the live deployment**, not just locally: seeded the remote Supabase project, ran the same 8-check verification script against `https://ecopower3.vercel.app` with real signed-in cookies — five logins → five panels, coarse gating, RLS isolation, anon redirect, all passing live. This is the issue's exact done-when criterion.
+- Committed (`f7d0a51`), pushed, issue commented (not yet closed — waiting on CI to confirm before closing).
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
