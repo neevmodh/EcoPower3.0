@@ -194,6 +194,13 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - `netMeteringSettlement`/`bankingCarryForward` encode Gujarat's specific rules (1:1 offset, APPC for surplus, residential banking exemption).
 - 97 tests (30 new), full workspace build green. CI: run 33326142724. Committed (`7903f2d`), pushed, issue commented and closed.
 
+**02:35–03:25** — **Issue #20** (`Real GERC / Torrent tariff seed`) resolved and closed.
+- `tariffs`/`tariff_slabs`/`tariff_tou_windows`/`tariff_fixed_charge_bands`, RLS'd (published data, authenticated-readable, still denied to anon).
+- **Found a real discrepancy**: DATA.md's RGP figures (4 slabs, kW-banded fixed charge, a ToU discount) don't match Torrent Power Ahmedabad's actual order. Installed poppler, ran `pdftotext` on the real PDF (WebFetch alone couldn't extract it), read the primary source directly: 3 slabs not 4, phase-based fixed charge not kW-banded, **no** ToU/solar-hour rebate for RGP at all (that's HT-only, confirmed by reading §9.7), real FPPPA ₹3.72/kWh.
+- Verified the seed and #19's engine compose: real seeded values run through `slabEngine`/`fixedCharge` bill exactly as expected.
+- New pgTAP file (3 tests), 34 total. Corrected DATA.md with a visible note (not a silent edit) and reconciled every pitch-line reference (ROADMAP/BUILD-ORDER/README/#19's test) to the real numbers — caught my own arithmetic slip mid-correction (wrong slab boundary) because `pnpm test` failed immediately, fixed before it went further.
+- CI green. Committed (`62edbf0`, `86d8707`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.
