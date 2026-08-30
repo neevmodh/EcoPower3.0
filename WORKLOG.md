@@ -53,6 +53,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Verified done-when criteria: `pnpm build` and `pnpm test` both pass at root.
 - Committed (`b3f55b7`), pushed to `origin/main`, issue commented and closed.
 
+**10:20–11:10** — **Issue #2** (`Supabase project + migration 0001 core schema`) resolved and closed.
+- Installed Docker Desktop for local Supabase stack (`supabase db reset` requires it). Homebrew cask install failed once (needed interactive sudo for a symlink step) — user completed the install manually.
+- `supabase init`, linked to the remote project (`vdjzhvlwwzxelckrjbuj`).
+- Wrote `supabase/migrations/0001_core_schema.sql`: identity & tenancy (`profiles`, `orgs`, `discom_divisions`, `user_roles`), grid topology (`substations → feeders → distribution_transformers → service_connections`), and the meters/assets split (`meters` DISCOM-owned with a single-parent CHECK constraint across service_connection_id/dt_id/feeder_id, `assets` RESCO-owned).
+- Local stack hit two dead ends before starting cleanly: `vector` (log shipper) panicked on a docker-internal URI parse and `edge_runtime` failed its health check — both disabled in `config.toml` (`analytics.enabled = false`, `edge_runtime.enabled = false`); neither is needed for schema work.
+- Verified: `supabase db reset` applies cleanly locally (10 tables created, CHECK constraint confirmed rejecting a row with two parents set). Pushed the same migration to the remote project via `supabase db push`; `supabase migration list` shows local/remote both at `0001`.
+- Committed (`4c4f692`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] Webhook URL is a placeholder (`https://example.com/webhook`) — update once #39's real endpoint is deployed.

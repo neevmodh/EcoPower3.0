@@ -15,7 +15,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | # | Issue | M | Area | Pri | PS | Status | Blocked by |
 |---|---|---|---|---|---|---|---|
 | 1 | Scaffold monorepo (Turborepo + pnpm) | M0 | infra | critical | — | ☑ | — |
-| 2 | Supabase project + migration 0001 core schema | M0 | db | critical | — | ☐ | [#63](../../issues/63) |
+| 2 | Supabase project + migration 0001 core schema | M0 | db | critical | — | ☑ | [#63](../../issues/63) |
 | 3 | Denormalized scope keys + maintenance triggers | M0 | db | critical | — | ☐ | 2 |
 | 4 | Custom access token hook — scope in the JWT | M0 | db | critical | — | ☐ | 2 |
 | 5 | RLS policies for all five roles | M0 | db | critical | — | ☐ | 3, 4 |
