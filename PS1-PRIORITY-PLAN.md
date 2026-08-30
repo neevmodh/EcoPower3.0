@@ -97,3 +97,13 @@ This needs a decision before Sprint 3.5 work reaches the point where mobile woul
 - Security/RLS work already done stays exactly as built — it's a genuine differentiator, not something to cut.
 - #79 (deposit-free onboarding) and #82 (anti-scam checker) stay in Tier C — real and clever, but not named in PS1's explicit requirement list, so lower priority than what is named.
 - The AMI spine (Sprint 2) is not abandoned — #12/#15/#18 still ship, because without live meter data the "real-time monitoring of energy usage" requirement (PS1 §3, first bullet) has nothing to point at.
+
+## 6. 2.0 feature parity — decided, deferred (2026-08-31)
+
+An audit of 2.0's full feature set (`app/consumer`, `app/admin`, `app/enterprise`, `server/routes`) turned up two categories:
+
+**Real, DB-backed, worth porting once the PS1 gate clears:** auth, users, devices, locations, plans, subscriptions (wizard/upgrade/pause/cancel), invoices + PDF/CSV export, support tickets (overlaps #87), notifications (overlaps #86), carbon stats, telemetry dashboard, an AI advisor with guardrails, a Leaflet map of Gujarat locations. Most of this is already covered by issues already in this roadmap (#77/#78/#86/#87/#80) or by Sprint 4+ (DISCOM, mobile); the rest — AI advisor, CSV export, PDF invoices — is real, was not previously scoped, and should get its own issue(s) after §0 is checked off.
+
+**Fully decorative in 2.0 — confirmed by reading the source, not assumed:** blockchain energy ledger, EV charging (vehicles/sessions/stations), P2P energy trading (wallet/listings), admin grid-balancing simulation, weather/solar forecast, DISCOM "live" grid parameters, firmware/OTA management, enterprise team management. Every one of these is `Math.random()` or a hardcoded seed array with **zero backend model or route** behind it in 2.0 — confirmed, not inferred from naming. **Decision: skip these.** DESIGN.md's founding principle (§1, P1 — "no component may outlive its data") exists specifically as a reaction against this exact pattern; rebuilding it, even "better," reintroduces the failure mode 3.0 was written to fix, and none of it is named in PS1's requirements.
+
+**Sequencing decision:** this whole port waits until every row in §0 is checked — it does not jump ahead of #39/#77/#78/#86/#87/#80.
