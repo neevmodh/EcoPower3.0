@@ -175,6 +175,24 @@ async function main() {
     ],
   });
 
+  // The demo consumer's smart meter — without this row, nothing AMI-shaped
+  // (live tile, seed_large_dataset.mjs's backfill, analytics) has anything
+  // to attach to. assets above provision the PV array/inverter; this is
+  // the meter that actually reports readings for them.
+  await sql({
+    path: "/rest/v1/meters",
+    rows: [
+      {
+        id: "30000000-0000-0000-0000-0000000000f1",
+        serial: "MTR-AHD-A-100001",
+        make: "L&T",
+        model: "TransNEO",
+        status: "active",
+        service_connection_id: "30000000-0000-0000-0000-0000000000a4",
+      },
+    ],
+  });
+
   await sql({
     path: "/rest/v1/user_roles",
     rows: USERS.map((u) => ({

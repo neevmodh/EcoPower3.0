@@ -11,6 +11,12 @@ importers:
       '@biomejs/biome':
         specifier: ^1.9.0
         version: 1.9.4
+      pg:
+        specifier: ^8.13.0
+        version: 8.23.0
+      pg-copy-streams:
+        specifier: ^7.0.0
+        version: 7.0.0
       turbo:
         specifier: ^2.5.0
         version: 2.10.12
