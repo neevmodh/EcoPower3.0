@@ -163,6 +163,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Tier A grew from 35 to 39 issues. ROADMAP.md tracker, milestone table, Tier A/B/C lists all updated to match. Committed (`691125a`), pushed.
 - **Resuming at #12** (AMI simulator) — Sprint 2 finishes first since the PS1 loop has nothing real to demo against without live meter data underneath it.
 
+**21:45–22:50** — **Issue #12** (`AMI simulator with a physical model`) resolved and closed.
+- `packages/shared/src/ami`: solar position (Cooper declination + hour angle), clear-sky irradiance (Haurwitz), stochastic appliance load model — seeded per meter, conditioned on sanctioned load and month.
+- Calibrated against DATA.md's own target: full-year hourly integration gives 1,695 kWh/kWp vs. a ~1,600 kWh/kWp target for Ahmedabad — a real check, not just "looks plausible."
+- `apps/simulator`: fetches live Open-Meteo weather, runs a fleet, publishes OBIS-keyed HMAC-signed readings to the live EMQX broker (#14). Provisioned 2 more demo devices (fleet of 3: one no-solar, two solar) via the same EMQX API pattern from #14.
+- **Verified against the actual live broker**: ran the simulator for real, watched physically distinct per-meter behavior (no-solar meter only imports, solar meters export when generation exceeds load), independently subscribed with `mosquitto_sub`, and independently recomputed the HMAC signature in Python (not reusing the JS code) — exact match.
+- Hit the same vitest-vs-tsc gap as #11, this time via `NodeNext` module resolution requiring `.js` extensions even inside `packages/shared`'s own source. Fixed by inheriting the monorepo's shared `Bundler` resolution.
+- 82 tests total (20 new). CI green (run 33305234781). Committed (`7bbf732`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.
