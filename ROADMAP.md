@@ -51,8 +51,10 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 35 | Bill OCR service | M4 | ml | critical | 1 | ☐ | [#65](../../issues/65) |
 | 36 | OCR confirmation UI (never auto-commit) | M4 | web | high | 1 | ☐ | 35 |
 | 37 | OCR eval set + measured accuracy | M4 | test | high | 4 | ☐ | 35 |
-| 38 | Deterministic plan recommender | M4 | billing | high | 1 | ☐ | 20, 35 |
-| 39 | Razorpay Orders + Checkout + webhook verify | M4 | payments | critical | 1 | ☐ | [#64](../../issues/64) |
+| 38 | Deterministic plan recommender | M2 | billing | high | 1 | ☐ | 20, 15 |
+| 39 | Razorpay Orders + Checkout + webhook verify | M2 | payments | critical | 1 | ☐ | [#64](../../issues/64) |
+| 86 | Notifications primitive — in-app bell + notification_deliveries | M2 | web | high | 1 | ☐ | 2, 5 |
+| 87 | Support / fault ticketing module | M2 | web | high | 1 | ☐ | 2, 5, 86 |
 | 40 | UPI Autopay mandate (intent/QR flow) | M4 | payments | normal | 1 | ☐ | 39 |
 | 41 | Settlement reconciliation screen | M4 | payments | normal | — | ☐ | 39 |
 | 42 | Sub-5-minute onboarding E2E test | M4 | test | high | 1 | ☐ | 36, 39 |
@@ -86,9 +88,9 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 75 | Data provenance table + visible synthetic-data disclosure | M7 | data | high | — | ☐ | 74 |
 | 76 | Performance & uptime guarantee engine (meter-verified) | M2 | commercial | critical | 1 | ☐ | 19, 21 |
 | 77 | Multi-service catalog — solar, backup, cooling, lighting | M2 | commercial | high | 1 | ☐ | 19 |
-| 78 | Subscription lifecycle: transfer, pause, upgrade, buyout | M6 | commercial | high | 1 | ☐ | 19, 25 |
+| 78 | Subscription lifecycle: transfer, pause, upgrade, buyout | M2 | commercial | high | 1 | ☐ | 19, 77 |
 | 79 | Deposit-free onboarding via bill-history credit assessment | M4 | commercial | high | 1 | ☐ | 35, 38 |
-| 80 | Carbon as a settled asset — I-REC certificates with provenance | M6 | commercial | normal | 1 | ☐ | 21, 50 |
+| 80 | Carbon tracking — lightweight first pass, I-REC provenance deferred | M2 | commercial | normal | 1 | ☐ | 15 |
 | 81 | Multi-channel: WhatsApp, SMS, IVR (DLT-compliant) | M6 | consumer | high | 1,2 | ☐ | 34 |
 | 82 | Verified communication — anti-scam message checker | M6 | consumer | high | 1 | ☐ | 81 |
 | 83 | Real i18n — English, Hindi, Gujarati + low-literacy | M4 | consumer | high | 1,2 | ☐ | 8 |
@@ -111,11 +113,11 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 |---|---|---|---|
 | M0 | Foundations & security baseline | 1–9, 67–69 | 5 logins → 5 shells; RLS tests prove cross-tenant reads return 0 rows |
 | M1 | AMI spine (real telemetry) | 10–18, 70, 72 | Trigger a fault in a terminal, dashboard reacts in <1s |
-| M2 | Billing engine | 19–25, 73, 76, 77, 84 | Invoice where every line traces to two meter register reads |
+| M2 | Billing engine + PS1 core loop | 19–25, 38, 39, 73, 76, 77, 78, 80, 84, 86, 87 | Invoice traces to two register reads; consumer subscribes → gets billed → raises a ticket → gets notified |
 | M3 | DISCOM panel | 26–34, 74 | Officer finds theft on a DT, raises a work order |
-| M4 | Onboarding, OCR, payments | 35–42, 79, 83 | Bill photo → active subscription in under 5 minutes |
+| M4 | Onboarding, OCR, payments | 35–37, 42, 79, 83 | Bill photo → active subscription in under 5 minutes |
 | M5 | Mobile + field technician | 43–49 | Commission a meter on a phone in airplane mode |
-| M6 | Society, ML, copilot | 50–55, 78, 80, 81, 82 | Allocation conservation check; predicted fault |
+| M6 | Society, ML, copilot | 50–55, 81, 82 | Allocation conservation check; predicted fault |
 | M7 | Hardening & demo proof | 56–61, 71, 75, 85 | Real uptime number, k6 results, rehearsed 7-min demo |
 
 ### Labels
@@ -133,9 +135,10 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 ```
 Foundation   1  2  3  4  5  8
 AMI spine   10 11 12 13 14 15 16 17 18
-Billing     19 20 21
+Billing     19 20 21 39
+PS1 loop    77 38 78 86 87
 DISCOM      26 27
-Onboarding  35 36 38 39
+Onboarding  35 36
 Mobile      43 45 47 49
 Design      67 68 69
 Proof       58 59 61
@@ -146,20 +149,20 @@ Guarantee   76
 
 **Tier A spans all eight milestones.** You cannot finish the demo by working M0→M3 in order. Work milestone by milestone, but inside each milestone do the Tier A items first and leave the rest.
 
-**Tier A alone is a winning pitch.** It delivers every beat of the 7-minute demo: bill photo → subscription in under 5 minutes, a technician commissioning offline, live telemetry with a fault injected on stage, the DISCOM finding theft on a DT, an invoice line tracing to two register reads, and a guarantee settling from meter data. Everything below is upside.
+**Tier A alone is a winning pitch.** It delivers every beat of the 7-minute demo: bill photo → subscription in under 5 minutes, a technician commissioning offline, live telemetry with a fault injected on stage, the DISCOM finding theft on a DT, an invoice line tracing to two register reads, a guarantee settling from meter data — and now the PS1 consumer loop itself: choose a plan, subscribe, get billed, raise a ticket, get notified. That loop was previously Tier C; see [PS1-PRIORITY-PLAN.md](PS1-PRIORITY-PLAN.md) for why it moved. Everything below is upside.
 
-### Tier B — ship if on track (26)
+### Tier B — ship if on track (27)
 
-`7 9 22 24 25 28 32 33 34 37 42 44 46 48 50 51 56 57 70 71 72 73 74 83 84 85`
+`7 9 22 24 25 28 32 33 34 37 42 44 46 48 50 51 56 57 70 71 72 73 74 80 83 84 85`
 
 Three of these punch above their tier and should be pulled up if you can:
 - **#33 demand response** — SR Narasimhan ran Grid Controller of India; load management is his domain and he will look for it
 - **#71 no-data drill** — the regression test for 2.0's exact public failure
 - **#85 unit economics + pilot** — no code, and it answers the "what happens Monday?" question that decides commercialization offers
 
-### Tier C — cut first, without guilt (19)
+### Tier C — cut first, without guilt (17)
 
-`6 23 29 30 31 40 41 52 53 54 55 60 75 77 78 79 80 81 82`
+`6 23 29 30 31 40 41 52 53 54 55 60 75 79 81 82`
 
 Good ideas, none demo-critical. **#55 (LLM copilot) is the first to go** — every team will have a chatbot and none of these six judges will be moved by one.
 

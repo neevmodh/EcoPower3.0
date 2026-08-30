@@ -75,9 +75,27 @@ The longest sprint, and the one that separates this from every other entry. **Bu
 #20  real GERC tariff seed          ← telescopic: four lines, not one
 #21  invoice schema with provenance
 #76  guarantee engine               ← the PS1 differentiator
+#39  Razorpay Orders + Checkout + webhook verify
 ```
 
 **Checkpoint:** click an invoice energy line, watch it expand to the two bracketing register reads. 342.400 kWh → 50 @ ₹3.05 · 50 @ ₹3.50 · 150 @ ₹4.15 · 92.400 @ ₹5.20 = ₹1,430.48.
+
+---
+
+## Sprint 3.5 — PS1 core loop
+
+**Pulled forward from Tier C** (see [PS1-PRIORITY-PLAN.md](PS1-PRIORITY-PLAN.md)) — subscription plans, notifications, and support tickets are named explicitly in PS1's requirements and desired outcomes; they were previously sequenced last, behind items PS1 doesn't name at all. This sprint exists to close that mismatch before the DISCOM/OCR sprints, which PS1's own text says can be mocked.
+
+```
+#77  multi-service catalog          #38  plan recommender
+──────────────────────────────────  then:
+#78  subscription lifecycle (trim to upgrade/cancel if short on time)
+#86  notifications primitive        #87  support/fault ticketing
+──────────────────────────────────  then:
+#80  carbon tracking (lightweight — metered CO2 avoided; defer I-REC provenance)
+```
+
+**Checkpoint:** a consumer subscribes to a plan, sees it reflected in billing, raises a support ticket, gets a reply notification in the bell icon — the full PS1 consumer loop, demoable end to end.
 
 ---
 
@@ -98,8 +116,8 @@ Only two issues, and they carry the single strongest moment in the demo.
 
 ```
 #35  bill OCR service
-────────────────────────────────── then, in parallel:
-#36  OCR confirmation UI        #38  plan recommender      #39  Razorpay
+────────────────────────────────── then:
+#36  OCR confirmation UI
 ```
 
 **Checkpoint:** stopwatch on screen. Photograph a real Torrent bill → active subscription in under five minutes.
@@ -129,7 +147,7 @@ Only two issues, and they carry the single strongest moment in the demo.
 
 **Checkpoint:** the full 7-minute run, rehearsed end to end, ten times.
 
-**Tier A is complete here — 35 issues. This is a winning pitch.** Everything below is upside.
+**Tier A is complete here — 39 issues (5 more than before: #77, #38, #78, #86, #87 — the PS1 core loop, pulled up from Tier C). This is a winning pitch.** Everything below is upside.
 
 ---
 
@@ -159,7 +177,7 @@ If you reach this, take them in this order. The first three punch above their ti
 ## Sprint 9 — Tier C, cut without guilt
 
 ```
-#6 #23 #29 #30 #31 #40 #41 #52 #53 #54 #55 #60 #75 #77 #78 #79 #80 #81 #82
+#6 #23 #29 #30 #31 #40 #41 #52 #53 #54 #55 #60 #75 #79 #81 #82
 ```
 
 Good ideas, none demo-critical. **#55 (LLM copilot) goes first** — every team will have a chatbot and none of these six judges will be moved by one.
