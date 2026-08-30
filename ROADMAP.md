@@ -27,7 +27,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 11 | HESAdapter interface + Trilliant stub | M1 | ingest | high | 1 | ☐ | 10 |
 | 12 | AMI simulator with a physical model | M1 | ingest | critical | 1 | ☐ | 10 |
 | 13 | Simulator scenario control API | M1 | demo | critical | — | ☐ | 12 |
-| 14 | MQTT broker on Railway | M1 | infra | critical | — | ☐ | [#62](../../issues/62) |
+| 14 | MQTT broker on Railway | M1 | infra | critical | — | ☑ | [#62](../../issues/62) |
 | 15 | Ingest worker (HMAC, monotonicity, batch COPY) | M1 | ingest | critical | 1 | ☐ | 14, 16 |
 | 16 | Partitioned time-series schema | M1 | db | critical | — | ☐ | 3 |
 | 17 | Continuous aggregates + pg_cron jobs | M1 | db | high | — | ☐ | 16 |

@@ -132,6 +132,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Added zod as `packages/shared`'s first real dependency — legitimate per the issue's own spec and consistent with #1's platform-agnostic (not zero-npm-packages) constraint.
 - 14 new tests (34 total in packages/shared). CI green (run 33302543097). Committed (`3acdd66`), pushed, issue commented and closed.
 
+**18:35–19:20** — **Issue #14** (`MQTT broker on Railway`) resolved and closed.
+- Deployed EMQX 5.8.4 to a new, separate Railway project (`ecopower3-emqx`) via Dockerfile + `railway up`. TCP proxy on `metro.proxy.rlwy.net:45248` → app port 1883.
+- Configured device auth (`password_based`/`built_in_database`, bcrypt) and ACL (`ecopower/v1/${username}/#` via EMQX's placeholder, deny-all default) entirely through the Management API — scripted, not dashboard click-through, matching the pattern #48 will reuse for real commissioning.
+- Temporarily attached a domain to the dashboard port (18083) only long enough to configure auth via the API, then removed it — management surface is not publicly reachable, only MQTT itself.
+- **Verified end-to-end against the live public endpoint**: installed mosquitto CLI, connected with a demo HMAC-derived device credential, published, confirmed real delivery via a subscriber. Two negative cases confirmed **in the broker's own logs** (QoS0 gives no client-side ack either way): wrong password rejected at CONNECT, cross-device publish denied by ACL.
+- Credentials (dashboard admin + demo device secret) saved to `secrets/emqx-ecopower3.md` (gitignored). `infra/emqx/README.md` documents the setup and redeploy steps.
+- Committed (`ed1be4f`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
