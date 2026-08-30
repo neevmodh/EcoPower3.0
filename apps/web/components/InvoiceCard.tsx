@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { formatInrFromPaise } from "@ecopower/shared";
 import { PayButton } from "./PayButton";
+import { BillExplainer } from "./BillExplainer";
 
 type InvoiceLine = {
   id: string;
@@ -94,11 +95,12 @@ export function InvoiceCard({ invoice }: { invoice: Invoice }) {
               ))}
             </tbody>
           </table>
-          {invoice.status !== "paid" && (
-            <div className="mt-3">
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            {invoice.status !== "paid" && (
               <PayButton invoiceId={invoice.id} label={`Pay ${formatInrFromPaise(BigInt(invoice.total_paise))}`} />
-            </div>
-          )}
+            )}
+            <BillExplainer invoiceId={invoice.id} />
+          </div>
         </div>
       )}
     </div>

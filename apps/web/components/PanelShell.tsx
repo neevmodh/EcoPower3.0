@@ -9,6 +9,7 @@
 
 import Link from "next/link";
 import { NotificationBell } from "./NotificationBell";
+import { AIAdvisor } from "./AIAdvisor";
 
 export type PanelKey = "consumer" | "society" | "discom" | "operator" | "field";
 
@@ -148,6 +149,7 @@ export function PanelShell({
         </header>
         <main className={DENSITY[panel]}>{children}</main>
       </div>
+      {panel === "consumer" && <AIAdvisor />}
     </div>
   );
 }
