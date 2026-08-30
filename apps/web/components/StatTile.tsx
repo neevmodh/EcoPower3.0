@@ -4,7 +4,16 @@
 // there is no path that renders a badge without a real comparison behind it.
 
 import type { ReactNode } from "react";
-import { computeDelta, formatInrFromPaise, formatNumber, type TileState, type Comparison } from "@ecopower/shared";
+import {
+  computeDelta,
+  formatInrFromPaise,
+  formatNumber,
+  isStale as computeIsStale,
+  type TileState,
+  type Comparison,
+  type Confidence,
+  type ReadyDataState,
+} from "@ecopower/shared";
 import { Sparkline } from "./Sparkline";
 
 const STATE_COLOR: Record<TileState, string> = {
@@ -14,6 +23,11 @@ const STATE_COLOR: Record<TileState, string> = {
   critical: "var(--color-status-critical)",
 };
 
+const CONFIDENCE_LABEL: Record<Exclude<Confidence, "measured">, string> = {
+  estimated: "estimated",
+  forecast: "forecast",
+};
+
 type BaseProps = {
   icon: ReactNode;
   label: string;
@@ -21,13 +35,25 @@ type BaseProps = {
   sparkline?: number[];
   comparison?: Comparison | null;
   state?: TileState;
+  // Confidence rendering, P3: estimated/forecast values render dashed, with
+  // a visible label — the user should never have to ask which numbers are real.
+  confidence?: Confidence;
+  // Staleness, P2: computed from asOf + expectedIntervalMs, not a flag a
+  // caller can forget to set. Omit either to skip the check.
+  asOf?: Date;
+  expectedIntervalMs?: number;
 };
 
 type NumericProps = BaseProps & { value: number | null | undefined; valuePaise?: never };
 type CurrencyProps = BaseProps & { valuePaise: bigint | null | undefined; value?: never };
 
 export function StatTile(props: NumericProps | CurrencyProps) {
-  const { icon, label, unit, sparkline, comparison, state } = props;
+  const { icon, label, unit, sparkline, comparison, state, confidence = "measured", asOf, expectedIntervalMs } = props;
+
+  const stale =
+    asOf && expectedIntervalMs != null
+      ? computeIsStale({ status: "ready", data: null, confidence, asOf, expectedIntervalMs } as ReadyDataState<null>)
+      : false;
 
   const isCurrency = "valuePaise" in props && props.valuePaise !== undefined;
   const hasData = isCurrency ? (props as CurrencyProps).valuePaise != null : (props as NumericProps).value != null;
@@ -77,7 +103,30 @@ export function StatTile(props: NumericProps | CurrencyProps) {
         {label}
       </div>
 
-      <div className="text-2xl tabular font-semibold mb-2">{displayValue}</div>
+      <div
+        className="text-2xl tabular font-semibold mb-2"
+        style={{
+          color: stale ? "var(--color-text-secondary)" : undefined,
+          borderBottom: confidence !== "measured" && hasData ? "2px dashed currentColor" : undefined,
+          display: "inline-block",
+        }}
+      >
+        {displayValue}
+        {hasData && confidence !== "measured" && (
+          <span
+            className="ml-2 text-xs font-normal align-middle uppercase tracking-wide"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            {CONFIDENCE_LABEL[confidence]}
+          </span>
+        )}
+      </div>
+
+      {hasData && stale && asOf && (
+        <div className="text-xs mb-2" style={{ color: "var(--color-status-warning)" }}>
+          Stale — as of {asOf.toLocaleTimeString()}
+        </div>
+      )}
 
       {hasData && (sparkline?.length || comparison) && (
         <div className="flex items-center gap-2 text-xs tabular" style={{ color: "var(--color-text-secondary)" }}>
