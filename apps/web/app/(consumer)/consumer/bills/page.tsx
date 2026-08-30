@@ -15,7 +15,7 @@ export default async function ConsumerBillsPage() {
   const { data: invoices } = await supabase
     .from("invoices")
     .select(
-      "id, billing_period_start, billing_period_end, units_imported_milli_kwh, total_paise, status, invoice_lines(id, line_type, label, amount_paise, slab_from, slab_to, source_reading_start_ts, source_reading_end_ts)",
+      "id, billing_period_start, billing_period_end, units_imported_milli_kwh, total_paise, status, invoice_lines(id, line_type, label, amount_paise, slab_from, slab_to, source_reading_start_ts, source_reading_end_ts), service_connections(consumer_number)",
     )
     .order("billing_period_start", { ascending: false });
 
@@ -56,7 +56,11 @@ export default async function ConsumerBillsPage() {
       ) : (
         <div className="space-y-3">
           {(invoices ?? []).map((invoice) => (
-            <InvoiceCard key={invoice.id} invoice={invoice} />
+            <InvoiceCard
+              key={invoice.id}
+              invoice={invoice}
+              consumerNumber={(invoice.service_connections as unknown as { consumer_number: string } | null)?.consumer_number ?? "—"}
+            />
           ))}
         </div>
       )}

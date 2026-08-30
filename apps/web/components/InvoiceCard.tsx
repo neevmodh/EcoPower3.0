@@ -8,6 +8,7 @@ import { useState } from "react";
 import { formatInrFromPaise } from "@ecopower/shared";
 import { PayButton } from "./PayButton";
 import { BillExplainer } from "./BillExplainer";
+import { InvoicePdfButton } from "./InvoicePdfButton";
 
 type InvoiceLine = {
   id: string;
@@ -37,7 +38,7 @@ const STATUS_COLOR: Record<string, string> = {
   draft: "var(--color-text-secondary)",
 };
 
-export function InvoiceCard({ invoice }: { invoice: Invoice }) {
+export function InvoiceCard({ invoice, consumerNumber }: { invoice: Invoice; consumerNumber: string }) {
   const [expanded, setExpanded] = useState(false);
   const unitsKwh = invoice.units_imported_milli_kwh / 1000;
 
@@ -100,6 +101,15 @@ export function InvoiceCard({ invoice }: { invoice: Invoice }) {
               <PayButton invoiceId={invoice.id} label={`Pay ${formatInrFromPaise(BigInt(invoice.total_paise))}`} />
             )}
             <BillExplainer invoiceId={invoice.id} />
+            <InvoicePdfButton
+              consumerNumber={consumerNumber}
+              billingPeriodStart={invoice.billing_period_start}
+              billingPeriodEnd={invoice.billing_period_end}
+              unitsKwh={unitsKwh}
+              totalPaise={invoice.total_paise}
+              status={invoice.status}
+              lines={invoice.invoice_lines}
+            />
           </div>
         </div>
       )}

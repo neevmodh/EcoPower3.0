@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { formatInrFromPaise } from "@ecopower/shared";
 import { LiveFlowIllustration } from "@/components/LiveFlowIllustration";
 import { Logo } from "@/components/Logo";
+import { createClient } from "@/lib/supabase/server";
 
 // Marketing page, not an operator surface — DESIGN.md P6 explicitly draws
 // that line ("marketing pages get air; operator surfaces get information")
@@ -25,6 +27,13 @@ const PANELS: Array<{ label: string; accent: string; icon: string; blurb: string
   { label: "Field", accent: "var(--color-categorical-generation)", icon: "📶", blurb: "Offline-first, commissioning" },
 ];
 
+const UNIT_LABEL: Record<string, string> = {
+  kwh: "kWh",
+  availability_hours: "hrs",
+  ton_hours: "ton-hrs",
+  lumen_hours: "lumen-hrs",
+};
+
 const STATS: Array<{ value: string; label: string }> = [
   { value: "3", label: "Real tariff slabs, cited to the GERC order — not estimated" },
   { value: "9", label: "Row-secured roles, default-deny by construction" },
@@ -48,7 +57,17 @@ const FEATURES: Array<{ icon: string; title: string; desc: string }> = [
   { icon: "🛰️", title: "Live means live, honestly", desc: "A connection indicator that reflects the actual socket — connected, reconnecting, or polling — never a decorative dot on a page that fetched once." },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  // Anon-readable, same "published catalog" exception as tariffs (#20) —
+  // real prices from the real plans table, not marketing copy that can
+  // drift from what a subscribing consumer actually sees (#77).
+  const supabase = await createClient();
+  const { data: plans } = await supabase
+    .from("plans")
+    .select("id, name, description, price_paise_per_month, plan_services(included_quantity, service_types(name, unit))")
+    .eq("active", true)
+    .order("price_paise_per_month");
+
   return (
     <div style={{ background: "var(--color-surface)" }}>
       {/* NAV */}
@@ -64,6 +83,7 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>
             <a href="#how-it-works" className="hover:text-current transition-colors duration-state">How it works</a>
             <a href="#features" className="hover:text-current transition-colors duration-state">Features</a>
+            <a href="#pricing" className="hover:text-current transition-colors duration-state">Pricing</a>
             <a href="#panels" className="hover:text-current transition-colors duration-state">Panels</a>
           </div>
           <Link
@@ -209,6 +229,51 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* PRICING */}
+      {plans && plans.length > 0 && (
+        <section id="pricing" style={{ background: "var(--color-surface-card)" }}>
+          <div className="max-w-6xl mx-auto px-6 py-20">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl font-semibold tracking-tight mb-3" style={{ color: "var(--color-text-primary)" }}>
+                Real pricing, fetched live
+              </h2>
+              <p className="text-base max-w-lg mx-auto" style={{ color: "var(--color-text-secondary)" }}>
+                These are the actual rows in the plans table — not marketing copy. Sign in and the numbers match exactly.
+              </p>
+            </div>
+            <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
+              {plans.map((plan) => {
+                const services = (plan.plan_services ?? []) as unknown as Array<{
+                  included_quantity: number;
+                  service_types: { name: string; unit: string };
+                }>;
+                return (
+                  <div key={plan.id} className="rounded-card border p-6" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
+                    <div className="text-lg font-semibold mb-1">{plan.name}</div>
+                    <p className="text-sm mb-4" style={{ color: "var(--color-text-secondary)" }}>
+                      {plan.description}
+                    </p>
+                    <div className="text-3xl font-semibold tracking-tight mb-1 tabular">
+                      {formatInrFromPaise(BigInt(plan.price_paise_per_month))}
+                    </div>
+                    <div className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>
+                      per month
+                    </div>
+                    <ul className="space-y-2 text-sm">
+                      {services.map((s) => (
+                        <li key={s.service_types.name} style={{ color: "var(--color-text-secondary)" }}>
+                          ✓ {s.service_types.name} — {s.included_quantity} {UNIT_LABEL[s.service_types.unit] ?? s.service_types.unit}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* PANELS */}
       <section id="panels" className="max-w-6xl mx-auto px-6 py-20">
