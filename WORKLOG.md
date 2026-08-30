@@ -235,6 +235,17 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - 66 pgTAP assertions, CI green, pushed to remote Supabase. Committed (`32b2254`), both issues commented and closed.
 - **PS1 §0 checklist: Subscription plans row now checked.**
 
+**(later)** — Large "make it the best, 30+ features, AI-enabled" push, scoped down to ~10 real ones per the user's own choice when asked. In order:
+- **Theme/logo**: light green-and-white made the actual default for every visitor (was silently dark for anyone on an OS-dark browser — `prefers-color-scheme` auto-dark removed, dark palette kept in place for a future explicit toggle). New SVG leaf/bolt logo replacing the emoji-in-a-box placeholder on the marketing nav/footer and login brand panel.
+- **Real 120-day dataset** (`scripts/seed_large_dataset.mjs`): physically-modelled backfill (real `pvYieldKw`/`householdLoadKw`, real Ahmedabad seasonal shape) for the demo consumer, not `Math.random()` scatter — 11,521 readings, spot-checked for correct diurnal/seasonal behavior. Found and fixed a real gap while building this: `seed_demo_users.mjs` provisioned PV/inverter assets but never created a `meters` row at all.
+- **Real invoices** (`scripts/generate_demo_invoices.mjs`): 4 real bills composed from the real backfilled history via the actual tariff engine (#19) and real seeded tariff (#20).
+- **`/consumer/bills`, `/consumer/analytics`, `/consumer/support`** — all real, DB-backed, verified live (see #86/#87/#80 above and the Bills/Analytics commit).
+- **Found and fixed a real pre-existing RLS gap**: `meters` only ever had a DISCOM-scoped SELECT policy — a consumer could never read their own meter row. Silently masked by the honest "no data" empty state until analytics needed the meter id explicitly.
+- **Found and fixed a real SSR hydration bug**: an SVG `<title>` with mixed JSX children in `EnergyBarChart` hydrated differently server vs. client.
+- **AI features (Gemini — no Groq key exists, user chose Gemini-only)**: a real energy advisor (grounded in the caller's actual account data, correctly reported "no active subscription" after a real cancellation) and a real bill explainer (narrates real invoice line items, numerically verified correct). **Found and fixed a real model bug live**: `gemini-3.6-flash` silently burns hundreds of "thinking" tokens against the output budget, truncating short answers to nothing — switched to `gemini-3.5-flash-lite`, verified complete correct output.
+- **Unplanned bonus verification**: a stray click during manual testing accidentally drove a real Razorpay test-mode payment through to completion — confirmed live that `/api/payments/verify` correctly marks the order "attempted"/payment "authorized" but never "paid" without the webhook, exactly the intentional design from #39.
+- **PS1 §0 checklist is now fully checked** except Mobile app (deferred, needs the §4 decision) and DISCOM integration (explicitly PS1-mockable, not a blocker). CI green throughout, pushed to remote Supabase and Vercel production env at every step.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.

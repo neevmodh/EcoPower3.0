@@ -53,8 +53,8 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 37 | OCR eval set + measured accuracy | M4 | test | high | 4 | ☐ | 35 |
 | 38 | Deterministic plan recommender | M2 | billing | high | 1 | ☐ | 20, 15 |
 | 39 | Razorpay Orders + Checkout + webhook verify | M2 | payments | critical | 1 | ☑ | [#64](../../issues/64) |
-| 86 | Notifications primitive — in-app bell + notification_deliveries | M2 | web | high | 1 | ☐ | 2, 5 |
-| 87 | Support / fault ticketing module | M2 | web | high | 1 | ☐ | 2, 5, 86 |
+| 86 | Notifications primitive — in-app bell + notification_deliveries | M2 | web | high | 1 | ☑ | 2, 5 |
+| 87 | Support / fault ticketing module | M2 | web | high | 1 | ☑ | 2, 5, 86 |
 | 40 | UPI Autopay mandate (intent/QR flow) | M4 | payments | normal | 1 | ☐ | 39 |
 | 41 | Settlement reconciliation screen | M4 | payments | normal | — | ☐ | 39 |
 | 42 | Sub-5-minute onboarding E2E test | M4 | test | high | 1 | ☐ | 36, 39 |
@@ -90,7 +90,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 77 | Multi-service catalog — solar, backup, cooling, lighting | M2 | commercial | high | 1 | ☑ | 19 |
 | 78 | Subscription lifecycle: transfer, pause, upgrade, buyout | M2 | commercial | high | 1 | ☑ (trimmed — see #78 closing comment) | 19, 77 |
 | 79 | Deposit-free onboarding via bill-history credit assessment | M4 | commercial | high | 1 | ☐ | 35, 38 |
-| 80 | Carbon tracking — lightweight first pass, I-REC provenance deferred | M2 | commercial | normal | 1 | ☐ | 15 |
+| 80 | Carbon tracking — lightweight first pass, I-REC provenance deferred | M2 | commercial | normal | 1 | ☑ | 15 |
 | 81 | Multi-channel: WhatsApp, SMS, IVR (DLT-compliant) | M6 | consumer | high | 1,2 | ☐ | 34 |
 | 82 | Verified communication — anti-scam message checker | M6 | consumer | high | 1 | ☐ | 81 |
 | 83 | Real i18n — English, Hindi, Gujarati + low-literacy | M4 | consumer | high | 1,2 | ☐ | 8 |
