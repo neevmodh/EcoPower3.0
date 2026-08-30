@@ -171,6 +171,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Hit the same vitest-vs-tsc gap as #11, this time via `NodeNext` module resolution requiring `.js` extensions even inside `packages/shared`'s own source. Fixed by inheriting the monorepo's shared `Bundler` resolution.
 - 82 tests total (20 new). CI green (run 33305234781). Committed (`7bbf732`), pushed, issue commented and closed.
 
+**23:00–00:20** — **Issue #15** (`Ingest worker (HMAC, monotonicity, batch COPY)`) resolved and closed.
+- `services/ingest`: MQTT subscriber on a privileged `ecopower_ingest` credential (wildcard subscribe ACL, provisioned like #14's device credentials). Pure logic split out and tested first: `hmac.ts` (signature + one-sided replay window), `monotonicity.ts` (delta/rollover/first-reading, never a negative delta), `batcher.ts` (500 rows/200ms), `copy-writer.ts` (real `COPY` via `pg-copy-streams`, not a disguised multi-row INSERT).
+- New migration `0006_ingest_support.sql`: `quarantine_readings` + `meter_rollover_events`, scope-keyed and RLS'd.
+- **Verified against the full live stack**: ran #12's simulator + this worker together against the live broker and local Supabase — rows landed in the correct partition with correct deltas/scope keys, `meter_live_state` upserted, and Realtime Broadcast was independently received by a real subscriber script.
+- **Two real bugs found live**: `interval_seconds` integer column rejecting fractional tick jitter (fixed by rounding), and a `supabase-js` 2.112.4 bug in `channel.httpSend()`'s response parsing against this stack's 202/empty-body response (worked around by calling the REST broadcast endpoint directly).
+- Also diagnosed (not a bug): a leftover simulator process from earlier testing caused false rollover signals by independently re-accumulating registers for the same demo meters. Killed it, confirmed clean with single instances.
+- 24 new tests. CI green (run 33305914188). Committed (`392af31`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.

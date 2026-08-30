@@ -28,7 +28,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 12 | AMI simulator with a physical model | M1 | ingest | critical | 1 | ☑ | 10 |
 | 13 | Simulator scenario control API | M1 | demo | critical | — | ☐ | 12 |
 | 14 | MQTT broker on Railway | M1 | infra | critical | — | ☑ | [#62](../../issues/62) |
-| 15 | Ingest worker (HMAC, monotonicity, batch COPY) | M1 | ingest | critical | 1 | ☐ | 14, 16 |
+| 15 | Ingest worker (HMAC, monotonicity, batch COPY) | M1 | ingest | critical | 1 | ☑ | 14, 16 |
 | 16 | Partitioned time-series schema | M1 | db | critical | — | ☑ | 3 |
 | 17 | Continuous aggregates + pg_cron jobs | M1 | db | high | — | ☐ | 16 |
 | 18 | Live consumer dashboard on Realtime | M1 | web | high | 2 | ☐ | 15, 8 |
