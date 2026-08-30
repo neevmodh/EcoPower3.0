@@ -148,6 +148,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Hit one real bug of my own: `plan(9)` didn't match the actual 7 test assertions in the file — pg_prove silently truncates rather than erroring clearly, so it took a bisection to find. Fixed to `plan(7)`.
 - 31 tests across 6 pgTAP files pass locally; CI green on GitHub's runner (run 33303364602). Pushed to remote via `supabase db push`. Committed (`57acf59`), pushed, issue commented and closed.
 
+**20:15–20:50** — **Issue #11** (`HESAdapter interface + Trilliant UnitySuite stub`) resolved and closed.
+- `packages/shared/src/ami/hes-adapter.ts`: `HESAdapter` interface, `TrilliantUnitySuiteAdapter` (typed stub, throws `HESNotImplementedError`), `SimulatedHESAdapter` (live — schema-valid generated data, injectable `ReadingGenerator` for #12).
+- `pushSubscribe` doesn't use a platform timer (no Node/DOM globals in `packages/shared` by design) — registers callbacks, `emitReading()` fires one, meant to be driven by #15's ingest worker or tests.
+- **Real gap caught between `pnpm test` and `pnpm build`**: stub methods with no declared params still satisfy `implements HESAdapter` structurally and pass vitest, but fail `tsc` when called with real args through the concrete class type. Fixed by declaring full parameter lists on every stub method — and the lesson (test passing ≠ build passing) is now a standing thing to check both on every feature going forward.
+- Also exported `BlockLoadProfileEntry` as a type from #10's obis.ts (existed as schema only).
+- Noticed a collaborator (Raj Odedra) pushed a direct README.md edit to GitHub mid-session — rebased cleanly on top, flagged the change (looks like it may have introduced a typo) to the user without acting on it.
+- 20 new tests (54 total). CI green (run 33303704359). Committed (`cbf947e`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
