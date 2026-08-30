@@ -1,11 +1,13 @@
 {
   "name": "ecopower3",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "dev": "turbo run dev"
+    "dev": "turbo run dev",
+    "validate:palette": "node scripts/validate_palette.js"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
