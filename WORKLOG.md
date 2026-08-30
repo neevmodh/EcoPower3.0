@@ -83,6 +83,15 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Forward references (society_admin split, field_technician work-order access, DISCOM's no-payments-access, RESCO-org scoping on assets) noted inline — same treatment as #3's meter_readings gap.
 - Committed (`cd9fe66`), pushed, issue commented and closed.
 
+**13:15–14:10** — **Issue #67** (`Design tokens + validated colour system`) resolved and closed.
+- `packages/shared/src/palette.json` as the single source; `tokens.ts` exposes it as CSS custom properties (dark declared under **both** the media query and `:root[data-theme="dark"]`, so the toggle wins in both directions) plus a Tailwind/NativeWind-consumable object so web and mobile can't drift.
+- `scripts/validate_palette.js` actually implements the colour science DESIGN.md §3 claims — hex → linear sRGB → OKLab, ΔE for normal vision *and* simulated protanopia (Machado/Oliveira/Fernandes 2009 linear-RGB matrix), lightness band, chroma floor, WCAG contrast, sequential ramp monotonicity — across light and dark.
+- Wired into a new `.github/workflows/ci.yml` ahead of build/test. **Verified both directions**: passes as committed, and deliberately colliding two categorical slots exits 1 — confirming "a failing palette fails the build". CI run 33295098574 passed green on GitHub's runner, not just locally.
+- **Two calibration decisions, both resolved against DESIGN.md rather than by loosening thresholds until they passed:**
+  - Diverging `zero` midpoint exempted from the lightness band — it's deliberately near-white ("gray at zero reads as nothing exchanged"), so a band written for series colours doesn't apply. (This was my validator being wrong, not the palette.)
+  - Status contrast made **advisory, not build-breaking** — §3.5 explicitly exempts status from the gate because status never ships as colour alone; icon + label is the mandatory relief. Amber warning at 2.17:1 on white is the documented consequence of that design, not a regression to fix by changing the hex. Still hard-fails for the three status colours that do clear 3:1, so a real regression is still caught.
+- `pnpm build` + `pnpm test` green (4 tests). Committed (`394cf67`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.

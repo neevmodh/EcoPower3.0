@@ -75,7 +75,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 59 | Plant findable defects in demo seed | M7 | demo | critical | — | ☐ | 58, 27 |
 | 60 | SPOF diagram + architecture slide | M7 | docs | normal | — | ☐ | — |
 | 61 | Demo runbook + fallback video | M7 | demo | critical | — | ☐ | 59, 49 |
-| 67 | Design tokens + validated colour system | M0 | design | high | — | ☐ | 1 |
+| 67 | Design tokens + validated colour system | M0 | design | high | — | ☑ | 1 |
 | 68 | Stat tile — no badge without a basis | M0 | design | critical | — | ☐ | 67 |
 | 69 | Five states for every data component | M0 | design | critical | — | ☐ | 67 |
 | 70 | Single honest ConnectionState indicator | M1 | design | high | — | ☐ | 18 |
