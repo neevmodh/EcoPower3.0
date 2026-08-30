@@ -109,6 +109,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Verified against the actual live production page (not just unit tests): fetched `/consumer` on `ecopower3.vercel.app` with a real signed-in cookie, confirmed `—` renders for no-data tiles with zero badge markup anywhere.
 - 17/17 tests, CI green (run 33301605646). Committed (`d06e37a`), pushed, deployed, issue commented and closed.
 
+**16:40–17:15** — **Issue #69** (`Five states for every data component`) resolved and closed.
+- `packages/shared/src/data-state.ts`: `DataState<T>` union (loading/empty/error/ready) + `isStale()` computed from `asOf + expectedIntervalMs` — staleness isn't a flag a caller can forget to set.
+- Extended `StatTile` with `confidence` (dashed rendering + label for estimated/forecast, P3) and stale (greyed value + as-of timestamp, derived not flagged).
+- New `StatTileStates.tsx`: skeleton (matches geometry, no spinner), empty (message + widen action, not 2.0's "No data available" box), error (message + retry, never blank).
+- `StatTileWithState.tsx` composes a `DataState` into the right rendering; `/kitchen-sink` is the literal deliverable named in the issue — all 9 state/confidence/badge variants rendered together for review.
+- Verified against the built page: fetched `/kitchen-sink` and confirmed each state's distinguishing markup is actually present (skeleton pulse, empty message, error+retry, stale label, estimated/forecast labels).
+- 20/20 tests, CI green (run 33302005651). Committed (`79344b8`), pushed, deployed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
