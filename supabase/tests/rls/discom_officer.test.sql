@@ -4,7 +4,7 @@
 -- push against a fresh `supabase db reset`.
 
 begin;
-select plan(9);
+select plan(10);
 
 -- Topology: two divisions, each with its own DT and service connection.
 insert into orgs (id, name, type) values ('d0000000-0000-0000-0000-000000000001', 'Test DISCOM', 'discom');
@@ -35,6 +35,17 @@ insert into service_connections (id, consumer_number, dt_id, tariff_category, ph
 insert into meters (id, serial, service_connection_id) values
   ('d0000000-0000-0000-0000-0000000000a5', 'MTR-A-001', 'd0000000-0000-0000-0000-0000000000a4'),
   ('d0000000-0000-0000-0000-0000000000b5', 'MTR-B-001', 'd0000000-0000-0000-0000-0000000000b4');
+
+-- DT-head meters (#26/#76's dt_loss_summary()) — one per division's DT.
+insert into meters (id, serial, dt_id) values
+  ('d0000000-0000-0000-0000-0000000000a6', 'DTM-A', 'd0000000-0000-0000-0000-0000000000a3'),
+  ('d0000000-0000-0000-0000-0000000000b6', 'DTM-B', 'd0000000-0000-0000-0000-0000000000b3');
+
+insert into meter_readings (meter_id, reading_ts, delta_import_kwh) values
+  ('d0000000-0000-0000-0000-0000000000a5', now(), 90),
+  ('d0000000-0000-0000-0000-0000000000a6', now(), 100),
+  ('d0000000-0000-0000-0000-0000000000b5', now(), 80),
+  ('d0000000-0000-0000-0000-0000000000b6', now(), 100);
 
 -- Officer of Division A only.
 set local role authenticated;
@@ -68,6 +79,12 @@ select isnt_empty(
 select is_empty(
   $$ select 1 from distribution_transformers where id = 'd0000000-0000-0000-0000-0000000000b3' $$,
   'officer of Division A sees zero DTs from Division B'
+);
+
+select results_eq(
+  $$ select dt_name, loss_pct from dt_loss_summary() $$,
+  $$ values ('DT A'::text, 10.0::numeric) $$,
+  'dt_loss_summary() returns only Division A''s DT for the Division A officer, with the correct real loss percent (100 delivered, 90 consumed)'
 );
 
 -- Circle head: transitive closure of the division subtree (#4's recursive
