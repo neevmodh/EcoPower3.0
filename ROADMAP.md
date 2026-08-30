@@ -34,7 +34,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 18 | Live consumer dashboard on Realtime | M1 | web | high | 2 | ☑ | 15, 8 |
 | 19 | Pure tariff engine | M2 | billing | critical | 1 | ☑ | 1 |
 | 20 | Real GERC / Torrent tariff seed | M2 | billing | high | 1 | ☑ | 19 |
-| 21 | Invoice schema with provenance | M2 | billing | critical | 1 | ☐ | 16, 19 |
+| 21 | Invoice schema with provenance | M2 | billing | critical | 1 | ☑ | 16, 19 |
 | 22 | Prepaid as a first-class commercial model | M2 | billing | high | 1 | ☐ | 19 |
 | 23 | VEE pipeline | M2 | billing | normal | 1 | ☐ | 16 |
 | 24 | Golden-file billing tests | M2 | test | critical | — | ☐ | 19, 20 |

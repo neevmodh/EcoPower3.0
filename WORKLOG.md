@@ -201,6 +201,15 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - New pgTAP file (3 tests), 34 total. Corrected DATA.md with a visible note (not a silent edit) and reconciled every pitch-line reference (ROADMAP/BUILD-ORDER/README/#19's test) to the real numbers — caught my own arithmetic slip mid-correction (wrong slab boundary) because `pnpm test` failed immediately, fixed before it went further.
 - CI green. Committed (`62edbf0`, `86d8707`), pushed, issue commented and closed.
 
+**03:25–04:15** — **Issue #21** (`Invoice schema with provenance`) resolved and closed.
+- `supabase/migrations/0009_invoice_schema.sql`: `invoices` (bracketing register reads, `units_*_milli_kwh`, `banked_units_*`, `engine_version`, `total_paise`, `computed_hash`, `status`) and `invoice_lines` (13-value `line_type` enum, `source_reading_start/end_*`, `obis_ref`, `tariff_id`/`tariff_slab_id`/`slab_from`/`slab_to`).
+- **Design call**: #16's `meter_readings` deliberately has no surrogate id (PK is `(meter_id, reading_ts)`). Provenance needs a stable single-row reference, so this migration adds a surrogate `id` column to `meter_readings` without touching that PK — and because the table is partitioned, the FK from invoices/invoice_lines is composite `(id, reading_ts)`, not a bare id, since a partitioned table can't enforce id-alone uniqueness globally.
+- **No DISCOM RLS policy on either table**, deliberately — consumer-owner only, per #5's "DISCOM sees your kWh, never your card". Confirmed via `pg_policies` and a pgTAP assertion (division-matching `discom_officer` still sees zero rows).
+- **Verified with a real fixture, not synthetic data**: full org→division→…→meter chain, two real `meter_readings` rows 342.400 kWh apart, one invoice + 4 lines. Two real Supabase Auth users signed in via `supabase-js`: owner's session returns the full invoice (₹1,464.50 across 3 real slab lines + fixed charge) with nested `invoice_lines`; a stranger's session returns zero rows on both tables.
+- New pgTAP file (8 tests), 42 total. **Found and fixed a real regression the new FKs caused** in the existing `meter_readings.test.sql`: its scratch-partition cleanup started failing because Postgres implements FK-to-partitioned-table via each partition's own index, so a plain `DROP TABLE` on a referenced partition now errors even with no rows involved — fixed with `cascade` (safe, the test rolls back anyway).
+- Reconciled the GitHub issue's own stale worked example (old ₹1,430.48/4-slab placeholder) with the real ₹1,464.50/3-slab figure in the closing comment, same discipline as #20.
+- CI green (run 33327354670), pushed to remote Supabase and GitHub. Committed (`d3cc297`), issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.
