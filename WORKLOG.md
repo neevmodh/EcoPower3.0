@@ -125,6 +125,13 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - New CI job `rls-tests`: `supabase start` → fresh `db reset` → `supabase test db`. Green on GitHub's actual runner (run 33302306552), not just locally — can't pass by accumulating state across runs.
 - Committed (`e8f41cf`), pushed, issue commented and closed.
 
+**18:05–18:30** — **Issue #10** (`OBIS constants + IS 15959 Pt2 payload schema`) resolved and closed. **Sprint 2 (AMI spine) started.**
+- `packages/shared/src/ami/obis.ts`: OBIS constants for all six registers/profiles, zod schemas for billing profile, block load profile, instantaneous, and event payloads.
+- Deliberate scope limit honored: DLMS shape, not DLMS stack.
+- Schema encodes real constraints from DATA.md as validation rules: non-negative registers (cumulative, only increase), block load interval as a literal `15 | 30` union.
+- Added zod as `packages/shared`'s first real dependency — legitimate per the issue's own spec and consistent with #1's platform-agnostic (not zero-npm-packages) constraint.
+- 14 new tests (34 total in packages/shared). CI green (run 33302543097). Committed (`3acdd66`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
