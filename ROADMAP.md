@@ -52,7 +52,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 36 | OCR confirmation UI (never auto-commit) | M4 | web | high | 1 | ☐ | 35 |
 | 37 | OCR eval set + measured accuracy | M4 | test | high | 4 | ☐ | 35 |
 | 38 | Deterministic plan recommender | M2 | billing | high | 1 | ☐ | 20, 15 |
-| 39 | Razorpay Orders + Checkout + webhook verify | M2 | payments | critical | 1 | ☐ | [#64](../../issues/64) |
+| 39 | Razorpay Orders + Checkout + webhook verify | M2 | payments | critical | 1 | ☑ | [#64](../../issues/64) |
 | 86 | Notifications primitive — in-app bell + notification_deliveries | M2 | web | high | 1 | ☐ | 2, 5 |
 | 87 | Support / fault ticketing module | M2 | web | high | 1 | ☐ | 2, 5, 86 |
 | 40 | UPI Autopay mandate (intent/QR flow) | M4 | payments | normal | 1 | ☐ | 39 |

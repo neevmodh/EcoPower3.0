@@ -218,6 +218,15 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - No DISCOM policy on either table (same billing-privacy principle as #21), confirmed by pgTAP.
 - 109 shared tests (12 new), 49 pgTAP assertions across 9 files (new `service_guarantees.test.sql`). CI green (run 33327685254), pushed to remote Supabase and GitHub. Committed (`c4f14de`), issue commented and closed.
 
+**(later, 2026-08-31)** — Audited 2.0's full feature set on request ("all features of 2.0 in 3.0, better version"). Found the request conflicted with two decisions already locked in: the PS1-first gate, and DESIGN.md's anti-decorative-data principle (a third of 2.0's "features" — blockchain ledger, EV charging, grid-balancing sim, weather mock, fake DISCOM live-grid data — are `Math.random()`/hardcoded with zero backend). Asked the user rather than guessing; both times they picked the option that kept the existing discipline (finish PS1 gate first, skip the decorative features outright). Recorded the decision in `PS1-PRIORITY-PLAN.md` §6.
+
+**(later still)** — **Issue #39** (`Razorpay Orders + Checkout + webhook verify`) resolved and closed — completing Sprint 3.
+- `payment_orders`/`payments`/`webhook_events` (`0011_payments.sql`), RLS'd consumer-owner-only, no DISCOM policy (same principle as #21/#76).
+- `/api/payments/create-order`, `/api/payments/verify`, and the webhook handler (dispatch + idempotency, completing the signature-only stub from #64).
+- **Verified against the real Razorpay test-mode API**, not mocked: a real order created and independently confirmed via Razorpay's own `GET /v1/orders`; the actual `checkout.razorpay.com` Checkout modal opened in a browser with the correct amount and Razorpay's own "Test Mode" banner; `/api/payments/verify` and the webhook both tested with correctly-signed (real secret) and deliberately-tampered payloads; webhook idempotency proven with a literal duplicate delivery returning `{duplicate:true}`.
+- 57 pgTAP assertions (10 new), CI green, pushed to remote Supabase, `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET`/`SUPABASE_SERVICE_ROLE_KEY` added to Vercel production env and confirmed live.
+- **PS1 §0 checklist: Billing & payments row now checked.** Committed (`d750561`), issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.

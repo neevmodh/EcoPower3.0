@@ -14,7 +14,7 @@ separate pass at the end.
 | Web app | ✅ Done |
 | IoT/smart meter real-time | ✅ Done (Sprint 2) |
 | Scalable architecture (RLS + partitioning) | ✅ Done |
-| Billing & payments | ⬜ Sprint 3 — next |
+| Billing & payments | ✅ Done (Sprint 3 — #19-21, #76, #39) |
 | Subscription plans | ⬜ Sprint 3.5 |
 | Alerts & notifications | ⬜ Sprint 3.5 (#86) |
 | Fault/support tickets | ⬜ Sprint 3.5 (#87) |
