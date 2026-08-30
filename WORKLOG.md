@@ -75,6 +75,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Pushed to remote via `supabase db push` + `supabase config push`. **`config push` synced the entire auth config**, not just the hook — it silently flipped email-confirmation and MFA enroll/verify to `config.toml`'s dev-friendly local defaults on the live project. Caught it, asked the user, reverted those two settings explicitly (re-pushed) so only the hook + JWT expiry changed remotely.
 - Committed (`027c0b5`), pushed, issue commented and closed.
 
+**12:25–13:10** — **Issue #5** (`RLS policies for all five roles`) resolved and closed.
+- Wrote `supabase/migrations/0004_rls_policies.sql`: default-deny RLS (ENABLE, FORCE on PII/scope-bearing tables) across every table that exists so far. Policies: discom_officer/admin division-scoped (service_connections, meters, substations, feeders, distribution_transformers), consumer own-connections + own-assets (new `my_service_connection_ids()` SECURITY DEFINER helper), self-only on profiles/user_roles, org/division membership on orgs/discom_divisions.
+- **Bug 1:** `x = any((select fn()))` without an explicit `::uuid[]` cast parses as row-comparison `ANY(subquery)`, not array `ANY(array)` — errors on a type mismatch (`uuid = uuid[]`). Confirmed via a minimal `select 1 = any((select array[1,2,3]))` repro before fixing every occurrence with `::uuid[]`.
+- **Bug 2 (real interaction bug with #4):** enabling `FORCE ROW LEVEL SECURITY` on `user_roles`/`discom_divisions` silently broke `custom_access_token_hook` — `supabase_auth_admin` isn't the table owner, so it got zero rows back with no error, emptying every JWT claim on login. Fixed by making the hook `SECURITY DEFINER`.
+- **Verified against the real local stack**, not just by inspection: two divisions, two DTs, two service connections, a real officer login scoped to Division A only — PostgREST returned exactly `CN-A-001`, Division B's row genuinely absent (not client-filtered). Same for a consumer scoped to their own connection, and default-deny confirmed for anon and no-claim cases.
+- Forward references (society_admin split, field_technician work-order access, DISCOM's no-payments-access, RESCO-org scoping on assets) noted inline — same treatment as #3's meter_readings gap.
+- Committed (`cd9fe66`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
