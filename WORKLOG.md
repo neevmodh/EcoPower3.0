@@ -67,8 +67,17 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - **Forward-reference gap:** the issue's done-when references `meter_readings`, which doesn't exist until #16 (blocked by this issue). Verified the exact scenario — insert with only `meter_id`, all four scope keys populate — against a throwaway fixture table shaped identically, with the same trigger attached, inside a `ROLLBACK`ed transaction. #16 reuses the trigger as-is.
 - Applied locally (`supabase db reset`) and pushed to remote via `supabase db push`. Committed (`a5fb587`), pushed, issue commented and closed.
 
+**11:45–12:20** — **Issue #4** (`Custom access token hook — scope in the JWT`) resolved and closed.
+- Wrote `supabase/migrations/0003_auth_hook.sql` (renumbered from the issue's suggested `0002` — #3 already took that slot): `custom_access_token_hook` injects `{roles, org_ids, division_ids}` into `app_metadata`; `division_ids` via a recursive CTE (transitive closure). Helpers `auth_roles()`/`auth_orgs()`/`auth_divisions()`/`has_role()` for #5.
+- Hit a real bug: `supabase_auth_admin`'s default `search_path` doesn't include `public`, so the hook errored `relation "user_roles" does not exist` on first login attempt. Fixed with `set search_path = ''` + fully-qualified `public.` references.
+- Set JWT expiry to 15 minutes in `config.toml` per the issue's staleness caveat.
+- **Verified for real**, not just by inspection: created a test user via the admin API, granted `discom_officer` at a Circle only (not the subdivisions), signed in through the actual `/auth/v1/token` endpoint, decoded the JWT — `division_ids` correctly included the Circle plus both descendant divisions.
+- Pushed to remote via `supabase db push` + `supabase config push`. **`config push` synced the entire auth config**, not just the hook — it silently flipped email-confirmation and MFA enroll/verify to `config.toml`'s dev-friendly local defaults on the live project. Caught it, asked the user, reverted those two settings explicitly (re-pushed) so only the hook + JWT expiry changed remotely.
+- Committed (`027c0b5`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
+- [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
 - [ ] Webhook URL is a placeholder (`https://example.com/webhook`) — update once #39's real endpoint is deployed.
 - [ ] **Verify Gemini API keys actually authenticate** before building #35/#47 against them — format doesn't match standard Gemini keys (`AIza...`). If they fail, get a real key at aistudio.google.com/apikey.
 - [ ] Issue #66 (confirm final-round timeline) — not started.
