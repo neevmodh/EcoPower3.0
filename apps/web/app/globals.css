@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Palette values are the validated set from packages/shared/src/palette.json
+   (#67, guarded by scripts/validate_palette.js in CI). Dark is declared under
+   BOTH the media query and :root[data-theme="dark"] so the OS setting and the
+   in-app toggle both work, and the toggle wins in both directions
+   (DESIGN.md §3.6). Neutrals below are surfaces/text, not series colours. */
+
+:root {
+  --color-categorical-generation: #eda100;
+  --color-categorical-consumption: #2a78d6;
+  --color-categorical-third: #1baf7a;
+
+  --color-diverging-export: #1baf7a;
+  --color-diverging-zero: #f0efec;
+  --color-diverging-import: #eb6834;
+
+  --color-status-good: #008300;
+  --color-status-warning: #eda100;
+  --color-status-serious: #eb6834;
+  --color-status-critical: #e34948;
+
+  --color-sequential-0: #cde2fb;
+  --color-sequential-1: #a8c9f5;
+  --color-sequential-2: #86b6ef;
+  --color-sequential-3: #5f96e0;
+  --color-sequential-4: #3a76c9;
+  --color-sequential-5: #1d549e;
+  --color-sequential-6: #0d366b;
+
+  --color-surface: #ffffff;
+  --color-surface-card: #ffffff;
+  --color-border: #e4e2dd;
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: #5c5a54;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-categorical-generation: #c98500;
+    --color-categorical-consumption: #3987e5;
+    --color-categorical-third: #199e70;
+
+    --color-diverging-export: #199e70;
+    --color-diverging-zero: #383835;
+    --color-diverging-import: #d95926;
+
+    --color-status-good: #008300;
+    --color-status-warning: #c98500;
+    --color-status-serious: #d95926;
+    --color-status-critical: #e66767;
+
+    --color-surface: #121212;
+    --color-surface-card: #1c1c1a;
+    --color-border: #34332f;
+    --color-text-primary: #f2f1ee;
+    --color-text-secondary: #a3a099;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-categorical-generation: #c98500;
+  --color-categorical-consumption: #3987e5;
+  --color-categorical-third: #199e70;
+
+  --color-diverging-export: #199e70;
+  --color-diverging-zero: #383835;
+  --color-diverging-import: #d95926;
+
+  --color-status-good: #008300;
+  --color-status-warning: #c98500;
+  --color-status-serious: #d95926;
+  --color-status-critical: #e66767;
+
+  --color-surface: #121212;
+  --color-surface-card: #1c1c1a;
+  --color-border: #34332f;
+  --color-text-primary: #f2f1ee;
+  --color-text-secondary: #a3a099;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+/* Tabular figures are non-negotiable in an operations product — columns of
+   kWh must align (DESIGN.md §5). */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
