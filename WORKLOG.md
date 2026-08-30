@@ -117,6 +117,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Verified against the built page: fetched `/kitchen-sink` and confirmed each state's distinguishing markup is actually present (skeleton pulse, empty message, error+retry, stale label, estimated/forecast labels).
 - 20/20 tests, CI green (run 33302005651). Committed (`79344b8`), pushed, deployed, issue commented and closed.
 
+**17:20–18:00** — **Issue #7** (`pgTAP RLS test suite`) resolved and closed. **Sprint 1 complete.**
+- `supabase/tests/rls/{consumer,discom_officer,society,technician,operator}.test.sql` — 24 tests, positive + negative access per the issue's own example pattern.
+- `discom_officer.test.sql` formalizes the exact Sprint 1 checkpoint hand-verified three times already (#8/#68/#69): Division A officer sees zero rows from Division B. Also covers meters, DTs, Circle-head transitive closure, default deny.
+- `technician.test.sql` / `operator.test.sql` assert the current correct behavior for #5's two known gaps (no work_orders yet, no RESCO-ownership column yet) rather than skipping them — both roles correctly see zero rows now, and the tests will fail loudly (forcing an update) the moment those features land without a matching policy.
+- **Verified the suite has real teeth**: deliberately broke the division-scope policy, confirmed the exact test caught it with the leaked row identified, restored the policy.
+- New CI job `rls-tests`: `supabase start` → fresh `db reset` → `supabase test db`. Green on GitHub's actual runner (run 33302306552), not just locally — can't pass by accumulating state across runs.
+- Committed (`e8f41cf`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.

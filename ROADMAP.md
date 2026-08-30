@@ -20,7 +20,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 4 | Custom access token hook — scope in the JWT | M0 | db | critical | — | ☑ | 2 |
 | 5 | RLS policies for all five roles | M0 | db | critical | — | ☑ | 3, 4 |
 | 6 | Writes via SECURITY DEFINER RPCs | M0 | db | critical | — | ☐ | 5 |
-| 7 | pgTAP RLS test suite | M0 | test | critical | — | ☐ | 5 |
+| 7 | pgTAP RLS test suite | M0 | test | critical | — | ☑ | 5 |
 | 8 | Next.js shell + five panels + Vercel deploy | M0 | web | critical | — | ☑ | 1, 4 |
 | 9 | CI: fail build if secrets reach client bundle | M0 | security | high | — | ☐ | 8 |
 | 10 | OBIS constants + IS 15959 Pt2 payload schema | M1 | ingest | high | 1 | ☐ | 1 |
