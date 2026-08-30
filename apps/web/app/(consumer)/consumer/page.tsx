@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
 import { StatTile } from "@/components/StatTile";
+import { LiveMeterTile } from "@/components/LiveMeterTile";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,7 +14,23 @@ export default async function ConsumerPage() {
   // No owner filter here either — RLS scopes it to this consumer's rows.
   const { data: connections } = await supabase
     .from("service_connections")
-    .select("consumer_number, tariff_category, connection_type, sanctioned_load_kw");
+    .select("id, consumer_number, tariff_category, connection_type, sanctioned_load_kw");
+
+  // The consumer's own meter, if one is commissioned — powers the live tile
+  // below via #15/#18's Realtime pipeline. RLS scopes meters the same way.
+  const connectionIds = (connections ?? []).map((c) => c.id);
+  const { data: meter } =
+    connectionIds.length > 0
+      ? await supabase.from("meters").select("id").in("service_connection_id", connectionIds).limit(1).maybeSingle()
+      : { data: null };
+
+  const { data: liveState } = meter
+    ? await supabase
+        .from("meter_live_state")
+        .select("meter_id, last_reading_ts, kwh_import, kwh_export")
+        .eq("meter_id", meter.id)
+        .maybeSingle()
+    : { data: null };
 
   return (
     <PanelShell
@@ -27,11 +44,25 @@ export default async function ConsumerPage() {
     >
       <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
         <StatTile icon="⚡" label="Connections" value={connections?.length ?? 0} />
-        {/* No comparison basis and no meter_readings yet (#16) — honestly no
-            data, not a fabricated 0.0 with a badge. This is the exact
-            distinction #68 exists to enforce, demonstrated live rather than
-            just asserted in a test. */}
-        <StatTile icon="☀️" label="Solar generated" value={null} unit="kWh" />
+        {meter ? (
+          <LiveMeterTile
+            meterId={meter.id}
+            initial={
+              liveState
+                ? {
+                    meterId: liveState.meter_id,
+                    readingTs: liveState.last_reading_ts,
+                    kwhImport: liveState.kwh_import,
+                    kwhExport: liveState.kwh_export,
+                  }
+                : null
+            }
+          />
+        ) : (
+          // No meter commissioned yet — honestly no data, not a fabricated
+          // 0.0 with a badge. The exact distinction #68 exists to enforce.
+          <StatTile icon="☀️" label="Solar generated" value={null} unit="kWh" />
+        )}
         <StatTile icon="₹" label="Est. savings" valuePaise={null} />
       </div>
 

@@ -126,6 +126,11 @@ async function broadcastLiveReading(meterId: string, row: MeterReadingRow) {
           topic: `meter:${meterId}`,
           event: "reading",
           payload: { meterId, readingTs: row.readingTs, kwhImport: row.kwhImport, kwhExport: row.kwhExport },
+          // Must match the client's { config: { private: true } } subscription
+          // mode (0007's RLS-gated channel) — an unmarked message fans out
+          // over the legacy public path instead and a private subscriber
+          // never sees it, even though their subscription itself succeeds.
+          private: true,
         },
       ],
     }),
