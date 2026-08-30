@@ -1,5 +1,29 @@
 # PS1 re-prioritization plan
 
+**Update (2026-08-30, later same day):** tightened further — PS1 gets
+finished *completely* before anything else starts, not just reordered ahead
+of it. Sprint 4 (DISCOM), Sprint 5 (OCR onboarding — that's PS4, not PS1),
+and Sprint 6 (mobile) do not start until every box in §0 below is checked.
+UI polish happens alongside each PS1 feature as it's built, not as a
+separate pass at the end.
+
+## 0. PS1 completion checklist
+
+| Requirement | Status |
+|---|---|
+| Web app | ✅ Done |
+| IoT/smart meter real-time | ✅ Done (Sprint 2) |
+| Scalable architecture (RLS + partitioning) | ✅ Done |
+| Billing & payments | ⬜ Sprint 3 — next |
+| Subscription plans | ⬜ Sprint 3.5 |
+| Alerts & notifications | ⬜ Sprint 3.5 (#86) |
+| Fault/support tickets | ⬜ Sprint 3.5 (#87) |
+| Carbon/ESG (optional) | ⬜ Sprint 3.5 (#80), lowest priority in this batch |
+| Mobile app | ⬜ Deferred until the above is done — see §4 |
+| DISCOM integration | Deferred — PS1's own text says this can be mocked |
+
+Nothing outside this table gets worked until it's all checked off.
+
 **Why this exists:** the current BUILD-ORDER sequences security/correctness foundations (M0, AMI spine) before the consumer-facing loop PS1 actually grades. Two PS1-named things — subscription plan management (#77, #78) and multi-channel alerts (#81) — are currently in **Sprint 9, "Tier C, cut without guilt"**, the lowest-priority tier in the whole plan. A support/ticketing module, which PS1 explicitly names as a required desired outcome ("Service/support module"), **doesn't exist as an issue at all**. This plan pulls PS1's specific asks forward and adds what's missing, without discarding the work already done.
 
 **What's preserved as-is:** M0 (auth, RLS, design system, web shell — all done) and the Sprint 2 AMI work already in flight (#10, #11, #14, #16 done). This is real, load-bearing, and directly serves PS1's "IoT/smart meter integration" and "scalable architecture" requirements — it stays.

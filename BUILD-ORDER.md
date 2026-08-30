@@ -97,6 +97,8 @@ The longest sprint, and the one that separates this from every other entry. **Bu
 
 **Checkpoint:** a consumer subscribes to a plan, sees it reflected in billing, raises a support ticket, gets a reply notification in the bell icon — the full PS1 consumer loop, demoable end to end.
 
+**Hard gate: do not start Sprint 4 until every row in [PS1-PRIORITY-PLAN.md](PS1-PRIORITY-PLAN.md) §0 is checked.** DISCOM (Sprint 4), OCR onboarding (Sprint 5 — that's PS4, not PS1), and mobile (Sprint 6) all wait. UI polish happens alongside each Sprint 3/3.5 feature as it ships, not deferred to a separate pass.
+
 ---
 
 ## Sprint 4 — DISCOM
