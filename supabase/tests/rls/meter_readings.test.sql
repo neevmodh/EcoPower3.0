@@ -108,8 +108,13 @@ select ok(
   'create_monthly_partition() enables AND forces RLS on the new partition — the trap, closed'
 );
 
-drop table meter_readings_2030_01;
-drop table meter_readings_2030_02;
+-- cascade: #21's invoices/invoice_lines carry FKs to meter_readings(id,
+-- reading_ts), and Postgres implements FK-to-partitioned-table via each
+-- partition's own supporting index, so a plain DROP now fails even though
+-- no row here is actually referenced. Safe — these are throwaway scratch
+-- partitions the whole transaction rolls back anyway.
+drop table meter_readings_2030_01 cascade;
+drop table meter_readings_2030_02 cascade;
 
 select * from finish();
 rollback;
