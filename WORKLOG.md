@@ -156,8 +156,16 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Noticed a collaborator (Raj Odedra) pushed a direct README.md edit to GitHub mid-session — rebased cleanly on top, flagged the change (looks like it may have introduced a typo) to the user without acting on it.
 - 20 new tests (54 total). CI green (run 33303704359). Committed (`cbf947e`), pushed, issue commented and closed.
 
+**21:00–21:40** — **PS1 re-prioritization.** User ran a coverage check against the actual PS1 brief (pasted in full) given real competition in this PS. Found: subscription plans (#77/#78) and alerts (#81) were sequenced in Sprint 9 "Tier C, cut without guilt" — the lowest tier — despite PS1 naming both explicitly. A support/ticketing module (PS1: "Service/support module", required desired outcome) didn't exist as an issue at all. Also cross-checked EcoPower2.0's feature set (the project that got this team into the final round) to make sure nothing that worked there gets dropped in the rebuild.
+- Wrote `PS1-PRIORITY-PLAN.md` — full requirement-by-requirement coverage map, revised sprint order, before touching anything (per established preference: plan reviewed before execution).
+- Filed **#86** (notifications primitive — `notifications`/`notification_deliveries`, this is P9 from #25's property list, referenced today but nothing built it) and **#87** (support/fault ticketing — uses the `support_agent` role that's existed since #2 with no policy on it).
+- New **Sprint 3.5 "PS1 core loop"** in BUILD-ORDER.md, between billing and DISCOM: #77, #38, #78, #86, #87, #80 (lightweight carbon). #39 (Razorpay) moved into Sprint 3. #38's dependency changed from OCR (#35) to the ingest worker (#15) — recommends a plan from live simulated consumption instead of pre-signup bill history, which also fits a live demo better.
+- Tier A grew from 35 to 39 issues. ROADMAP.md tracker, milestone table, Tier A/B/C lists all updated to match. Committed (`691125a`), pushed.
+- **Resuming at #12** (AMI simulator) — Sprint 2 finishes first since the PS1 loop has nothing real to demo against without live meter data underneath it.
+
 ## Open threads / next steps
 
+- [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
 - [ ] Webhook URL is a placeholder (`https://example.com/webhook`) — update once #39's real endpoint is deployed.
 - [ ] **Verify Gemini API keys actually authenticate** before building #35/#47 against them — format doesn't match standard Gemini keys (`AIza...`). If they fail, get a real key at aistudio.google.com/apikey.
