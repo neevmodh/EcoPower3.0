@@ -47,6 +47,8 @@ export const BlockLoadProfileEntrySchema = z.object({
   registers: z.array(RegisterReadingSchema).min(1),
 });
 
+export type BlockLoadProfileEntry = z.infer<typeof BlockLoadProfileEntrySchema>;
+
 export const BlockLoadProfileSchema = z.object({
   meterSerial: z.string().min(1),
   intervalMinutes: z.union([z.literal(15), z.literal(30)]),
