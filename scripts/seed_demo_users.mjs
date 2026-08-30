@@ -18,6 +18,11 @@ const PASSWORD = process.env.SEED_PASSWORD ?? "EcoPower!2026";
 
 const ORG_ID = "30000000-0000-0000-0000-000000000001";
 const SOCIETY_ORG_ID = "30000000-0000-0000-0000-000000000002";
+// RESCO org — "DISCOM owns the meter, the RESCO owns the panels" (0001's
+// own comment). Operator/field roles belong to the RESCO that installed
+// and services the equipment, not the DISCOM that owns the grid meter —
+// a real, separate org, not reusing ORG_ID (which is the DISCOM).
+const RESCO_ORG_ID = "30000000-0000-0000-0000-000000000003";
 const DIVISION_A = "30000000-0000-0000-0000-00000000000a";
 const DIVISION_B = "30000000-0000-0000-0000-00000000000b";
 
@@ -25,8 +30,8 @@ const USERS = [
   { email: "consumer@ecopower.demo", role: "consumer", org: null, division: null },
   { email: "society@ecopower.demo", role: "society_admin", org: SOCIETY_ORG_ID, division: null },
   { email: "discom@ecopower.demo", role: "discom_officer", org: ORG_ID, division: DIVISION_A },
-  { email: "operator@ecopower.demo", role: "resco_ops", org: ORG_ID, division: null },
-  { email: "field@ecopower.demo", role: "field_technician", org: ORG_ID, division: DIVISION_A },
+  { email: "operator@ecopower.demo", role: "resco_ops", org: RESCO_ORG_ID, division: null },
+  { email: "field@ecopower.demo", role: "field_technician", org: RESCO_ORG_ID, division: DIVISION_A },
 ];
 
 async function adminFetch(path, init = {}) {
@@ -85,6 +90,7 @@ async function main() {
     rows: [
       { id: ORG_ID, name: "Torrent Power (demo)", type: "discom" },
       { id: SOCIETY_ORG_ID, name: "Sunrise Residency (demo)", type: "society" },
+      { id: RESCO_ORG_ID, name: "EcoPower RESCO (demo)", type: "resco" },
     ],
   });
 
@@ -165,12 +171,14 @@ async function main() {
         asset_type: "pv_array",
         capacity_kw: 5,
         commissioning_ref: "COM-2026-0001",
+        resco_org_id: RESCO_ORG_ID,
       },
       {
         service_connection_id: "30000000-0000-0000-0000-0000000000a4",
         asset_type: "inverter",
         capacity_kw: 5,
         commissioning_ref: "COM-2026-0001",
+        resco_org_id: RESCO_ORG_ID,
       },
     ],
   });

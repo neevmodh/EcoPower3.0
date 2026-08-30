@@ -146,7 +146,21 @@ async function seedTopologyAndConsumers() {
     })),
   );
 
-  console.log(`Seeded 2 new DTs, ${CONSUMERS.length} consumers+meters, ${DT_HEAD_METERS.length} DT-head meters.`);
+  // RESCO-owned equipment for the PV-enabled consumers — same org used by
+  // seed_demo_users.mjs's operator@ecopower.demo demo login, so the
+  // Operator panel's fleet has real breadth, not just the two assets on
+  // the single original demo consumer.
+  const RESCO_ORG_ID = "30000000-0000-0000-0000-000000000003";
+  const pvConsumers = CONSUMERS.filter((c) => c.hasPv);
+  await upsert(
+    "/rest/v1/assets",
+    pvConsumers.flatMap((c) => [
+      { service_connection_id: c.id, asset_type: "pv_array", capacity_kw: Math.min(c.sanctionedKw, 5), resco_org_id: RESCO_ORG_ID },
+      { service_connection_id: c.id, asset_type: "inverter", capacity_kw: Math.min(c.sanctionedKw, 5), resco_org_id: RESCO_ORG_ID },
+    ]),
+  );
+
+  console.log(`Seeded 2 new DTs, ${CONSUMERS.length} consumers+meters, ${DT_HEAD_METERS.length} DT-head meters, ${pvConsumers.length * 2} RESCO assets.`);
 }
 
 function seasonalAmbientC(month) {
