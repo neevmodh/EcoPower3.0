@@ -140,6 +140,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Credentials (dashboard admin + demo device secret) saved to `secrets/emqx-ecopower3.md` (gitignored). `infra/emqx/README.md` documents the setup and redeploy steps.
 - Committed (`ed1be4f`), pushed, issue commented and closed.
 
+**19:25–20:10** — **Issue #16** (`Partitioned time-series schema`) resolved and closed.
+- `meter_readings` (PARTITION BY RANGE (reading_ts), monthly, PK `(meter_id, reading_ts)`): cumulative OBIS registers, instantaneous per-phase columns, deltas computed at ingest, VEE provenance, #3's scope keys via the exact generic trigger built for this. `meter_live_state`: one row per meter, added to `supabase_realtime` for #18.
+- `create_monthly_partition()` closes the partition trap the issue explicitly warns about (RLS enable/force isn't inherited by child partitions even though policies are).
+- Closed #3's forward reference for real: `meter_id` alone correctly populates all four scope keys on the actual table now.
+- **Demonstrated the partition trap directly**, not just described it: a raw `CREATE TABLE ... PARTITION OF` ships with `relrowsecurity = false`; `create_monthly_partition()` on a different month proves both `relrowsecurity` and `relforcerowsecurity` true. Both are now pgTAP assertions.
+- Hit one real bug of my own: `plan(9)` didn't match the actual 7 test assertions in the file — pg_prove silently truncates rather than erroring clearly, so it took a bisection to find. Fixed to `plan(7)`.
+- 31 tests across 6 pgTAP files pass locally; CI green on GitHub's runner (run 33303364602). Pushed to remote via `supabase db push`. Committed (`57acf59`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
