@@ -246,6 +246,12 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - **Unplanned bonus verification**: a stray click during manual testing accidentally drove a real Razorpay test-mode payment through to completion — confirmed live that `/api/payments/verify` correctly marks the order "attempted"/payment "authorized" but never "paid" without the webhook, exactly the intentional design from #39.
 - **PS1 §0 checklist is now fully checked** except Mobile app (deferred, needs the §4 decision) and DISCOM integration (explicitly PS1-mockable, not a blocker). CI green throughout, pushed to remote Supabase and Vercel production env at every step.
 
+**(later, "make 5-10 pages in each panel")** — Scoped this down with the user: DISCOM first (highest priority per BUILD-ORDER.md's critical path), then Operator.
+- **DISCOM**: extended the demo fleet to 3 DTs / 10 consumers / 3 DT-head meters (`scripts/seed_discom_fleet.mjs`), so `dt_loss_summary()` computes real AT&C-style loss (delivered vs. consumed register reads) instead of having nothing to show. Loss factors grounded in a live-verified citation (Ministry of Power FY25: 16.16% national average). 3 real pages: Overview (fleet stats + worst-DT callout), DT loss map (sorted table), Connections (all 11 real consumers).
+- **Operator**: found and fixed a genuine RESCO-ownership RLS gap — `assets.org_id` already existed (#2) but is a *derived* scope key (the DISCOM's org via topology), not RESCO ownership; reusing it would have silently misscoped RESCO operators to the wrong org. Added a real `resco_org_id` column + a real RESCO org in the seed (previously operator/field wrongly reused the DISCOM's org_id). 2 real pages: Fleet (asset inventory) and Devices (meter health via the new `meters_resco_scope` policy).
+- Both verified live against real demo logins, both add real pgTAP coverage (83 total assertions), both pushed to remote Supabase and Vercel production.
+- Society and Field panels still have only their original stub page — explicitly deferred, not silently skipped.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.
