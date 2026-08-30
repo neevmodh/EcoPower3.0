@@ -102,6 +102,13 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - **Verified against the live deployment**, not just locally: seeded the remote Supabase project, ran the same 8-check verification script against `https://ecopower3.vercel.app` with real signed-in cookies — five logins → five panels, coarse gating, RLS isolation, anon redirect, all passing live. This is the issue's exact done-when criterion.
 - Committed (`f7d0a51`), pushed, issue commented (not yet closed — waiting on CI to confirm before closing).
 
+**16:05–16:35** — **Issue #68** (`Stat tile — no badge without a basis`) resolved and closed.
+- `packages/shared/src/stat-tile.ts`: `computeDelta()` returns `null` (no badge) on missing current, missing comparison, or a zero basis. `formatInrFromPaise()` fixes 2.0's `₹1,063,717.882` bug by construction — bigint paise, integer division, no float step.
+- 13 new tests, including a direct repro of the float bug now producing the correct grouped/2-decimal value, and a test proving a *genuinely measured* zero still gets an honest badge (distinct from no-data, which gets none).
+- `apps/web/components/StatTile.tsx` + `Sparkline.tsx`, wired into the consumer panel with a real mixed-data state (one tile with real data + no badge since no comparison exists, two tiles honestly no-data since #16 doesn't exist yet).
+- Verified against the actual live production page (not just unit tests): fetched `/consumer` on `ecopower3.vercel.app` with a real signed-in cookie, confirmed `—` renders for no-data tiles with zero badge markup anywhere.
+- 17/17 tests, CI green (run 33301605646). Committed (`d06e37a`), pushed, deployed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
