@@ -8,6 +8,7 @@
 // from spacing and tinted fills, never a drop shadow on the chrome.
 
 import Link from "next/link";
+import { NotificationBell } from "./NotificationBell";
 
 export type PanelKey = "consumer" | "society" | "discom" | "operator" | "field";
 
@@ -138,9 +139,12 @@ export function PanelShell({
             <span aria-hidden="true">{ICONS[panel]}</span>
             {LABELS[panel]} panel
           </span>
-          <span className="text-sm tabular" style={{ color: "var(--color-text-secondary)" }}>
-            {email}
-          </span>
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <span className="text-sm tabular" style={{ color: "var(--color-text-secondary)" }}>
+              {email}
+            </span>
+          </div>
         </header>
         <main className={DENSITY[panel]}>{children}</main>
       </div>

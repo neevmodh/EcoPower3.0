@@ -64,6 +64,8 @@ export default async function ConsumerPlanPage() {
         { href: "/consumer", label: "My energy" },
         { href: "/consumer/bills", label: "Bills" },
         { href: "/consumer/plan", label: "Plan", active: true },
+        { href: "/consumer/analytics", label: "Analytics" },
+        { href: "/consumer/support", label: "Support" },
       ]}
     >
       <h1 className="text-2xl font-semibold mb-2">Your plan</h1>

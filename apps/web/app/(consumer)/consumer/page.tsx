@@ -40,6 +40,8 @@ export default async function ConsumerPage() {
         { href: "/consumer", label: "My energy", active: true },
         { href: "/consumer/bills", label: "Bills" },
         { href: "/consumer/plan", label: "Plan" },
+        { href: "/consumer/analytics", label: "Analytics" },
+        { href: "/consumer/support", label: "Support" },
       ]}
     >
       <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>

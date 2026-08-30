@@ -3,7 +3,7 @@
 -- equipment, and must never see anything with no session at all.
 
 begin;
-select plan(7);
+select plan(9);
 
 insert into orgs (id, name, type) values ('c0000000-0000-0000-0000-000000000001', 'Test DISCOM', 'discom');
 insert into discom_divisions (id, discom_org_id, name, level) values
@@ -25,6 +25,12 @@ insert into service_connections (id, consumer_number, dt_id, owner_user_id, tari
 insert into assets (service_connection_id, asset_type, capacity_kw) values
   ('c0000000-0000-0000-0000-0000000000c1', 'pv_array', 5),
   ('c0000000-0000-0000-0000-0000000000c2', 'pv_array', 5);
+
+-- meters (#15 fix): only a DISCOM division-scoped policy existed before
+-- this — a consumer could never read their own meter row at all.
+insert into meters (id, serial, service_connection_id) values
+  ('c0000000-0000-0000-0000-0000000000d1', 'MTR-X-001', 'c0000000-0000-0000-0000-0000000000c1'),
+  ('c0000000-0000-0000-0000-0000000000d2', 'MTR-Y-001', 'c0000000-0000-0000-0000-0000000000c2');
 
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"c0000000-0000-0000-0000-0000000000e1","role":"authenticated","app_metadata":{"roles":["consumer"],"org_ids":[],"division_ids":[]}}';
@@ -53,6 +59,16 @@ select isnt_empty(
 select is_empty(
   $$ select 1 from assets where service_connection_id = 'c0000000-0000-0000-0000-0000000000c2' $$,
   'consumer X does not see consumer Y''s asset'
+);
+
+select isnt_empty(
+  $$ select 1 from meters where id = 'c0000000-0000-0000-0000-0000000000d1' $$,
+  'consumer X sees their own meter — the gap #15 fixed'
+);
+
+select is_empty(
+  $$ select 1 from meters where id = 'c0000000-0000-0000-0000-0000000000d2' $$,
+  'consumer X does not see consumer Y''s meter'
 );
 
 -- A consumer role with no connection at all owns nothing and sees nothing.
