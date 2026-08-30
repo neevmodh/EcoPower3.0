@@ -15,7 +15,7 @@ separate pass at the end.
 | IoT/smart meter real-time | ✅ Done (Sprint 2) |
 | Scalable architecture (RLS + partitioning) | ✅ Done |
 | Billing & payments | ✅ Done (Sprint 3 — #19-21, #76, #39) |
-| Subscription plans | ⬜ Sprint 3.5 |
+| Subscription plans | ✅ Done (Sprint 3.5 — #77, #78 trimmed) |
 | Alerts & notifications | ⬜ Sprint 3.5 (#86) |
 | Fault/support tickets | ⬜ Sprint 3.5 (#87) |
 | Carbon/ESG (optional) | ⬜ Sprint 3.5 (#80), lowest priority in this batch |

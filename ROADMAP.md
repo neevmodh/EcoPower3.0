@@ -87,8 +87,8 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 74 | Calibrate synthetic population to published AT&C losses | M3 | data | critical | — | ☐ | 72, 12 |
 | 75 | Data provenance table + visible synthetic-data disclosure | M7 | data | high | — | ☐ | 74 |
 | 76 | Performance & uptime guarantee engine (meter-verified) | M2 | commercial | critical | 1 | ☑ | 19, 21 |
-| 77 | Multi-service catalog — solar, backup, cooling, lighting | M2 | commercial | high | 1 | ☐ | 19 |
-| 78 | Subscription lifecycle: transfer, pause, upgrade, buyout | M2 | commercial | high | 1 | ☐ | 19, 77 |
+| 77 | Multi-service catalog — solar, backup, cooling, lighting | M2 | commercial | high | 1 | ☑ | 19 |
+| 78 | Subscription lifecycle: transfer, pause, upgrade, buyout | M2 | commercial | high | 1 | ☑ (trimmed — see #78 closing comment) | 19, 77 |
 | 79 | Deposit-free onboarding via bill-history credit assessment | M4 | commercial | high | 1 | ☐ | 35, 38 |
 | 80 | Carbon tracking — lightweight first pass, I-REC provenance deferred | M2 | commercial | normal | 1 | ☐ | 15 |
 | 81 | Multi-channel: WhatsApp, SMS, IVR (DLT-compliant) | M6 | consumer | high | 1,2 | ☐ | 34 |

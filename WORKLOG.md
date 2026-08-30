@@ -227,6 +227,14 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - 57 pgTAP assertions (10 new), CI green, pushed to remote Supabase, `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET`/`SUPABASE_SERVICE_ROLE_KEY` added to Vercel production env and confirmed live.
 - **PS1 §0 checklist: Billing & payments row now checked.** Committed (`d750561`), issue commented and closed.
 
+**(later, 2026-08-31)** — User: best UI, green/white theme, working subscriptions. Continued straight into **#77** (`Multi-service catalog`) and **#78** (`Subscription lifecycle`, trimmed to subscribe/pause/resume/upgrade/cancel per PS1-PRIORITY-PLAN.md's own note — #22/#25 don't exist yet, and #78's transfer/buyout depend on them).
+- `service_types`/`plans`/`plan_services` (`0012_subscriptions.sql`): 4 real service types (solar/backup metered, cooling/lighting unmetered-but-real), 3 seeded plans. `subscriptions`/`subscription_events`: status state machine + full audit chain, a partial unique index standing in for #25's EXCLUDE constraint. Backfilled #76's forward-reference (`service_guarantees.subscription_id` FK) exactly as that migration said this one would.
+- New `/consumer/plan` page: real plan cards, live subscription card, working Pause/Resume/Switch/Cancel — green-forward using the existing `--color-categorical-third` accent, no new colors invented.
+- **Two real bugs found by live verification, not by tests**: `service_guarantees` had no INSERT policy (silent RLS failure on subscribe), and the actions route used the action verb instead of the past-tense audit-log enum value (silent insert failures on every transition after `created`). Both caught by actually clicking through the flow in a browser and cross-checking the database, not by trusting green builds.
+- Full lifecycle proven live against the real demo consumer: subscribe → pause → resume → upgrade → cancel, each step screenshotted, ending in a correctly-ordered `subscription_events` trail.
+- 66 pgTAP assertions, CI green, pushed to remote Supabase. Committed (`32b2254`), both issues commented and closed.
+- **PS1 §0 checklist: Subscription plans row now checked.**
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.
