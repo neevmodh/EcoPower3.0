@@ -31,7 +31,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 15 | Ingest worker (HMAC, monotonicity, batch COPY) | M1 | ingest | critical | 1 | ☑ | 14, 16 |
 | 16 | Partitioned time-series schema | M1 | db | critical | — | ☑ | 3 |
 | 17 | Continuous aggregates + pg_cron jobs | M1 | db | high | — | ☐ | 16 |
-| 18 | Live consumer dashboard on Realtime | M1 | web | high | 2 | ☐ | 15, 8 |
+| 18 | Live consumer dashboard on Realtime | M1 | web | high | 2 | ☑ | 15, 8 |
 | 19 | Pure tariff engine | M2 | billing | critical | 1 | ☐ | 1 |
 | 20 | Real GERC / Torrent tariff seed | M2 | billing | high | 1 | ☐ | 19 |
 | 21 | Invoice schema with provenance | M2 | billing | critical | 1 | ☐ | 16, 19 |

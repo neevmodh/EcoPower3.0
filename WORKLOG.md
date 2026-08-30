@@ -179,6 +179,13 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Also diagnosed (not a bug): a leftover simulator process from earlier testing caused false rollover signals by independently re-accumulating registers for the same demo meters. Killed it, confirmed clean with single instances.
 - 24 new tests. CI green (run 33305914188). Committed (`392af31`), pushed, issue commented and closed.
 
+**00:25–01:15** — **Issue #18** (`Live consumer dashboard on Realtime`) resolved and closed. **Sprint 2 (AMI spine) complete.**
+- `0007_realtime_authorization.sql`: RLS on `realtime.messages` gating `meter:{id}` private Broadcast channels — consumer to their own meter, DISCOM to their division. `meter_readings` correctly excluded from `supabase_realtime`; only low-cardinality `meter_live_state` is in the publication.
+- `useLiveMeter.ts` + `ConnectionIndicator.tsx`: 4Hz render throttle, 5s-poll fallback after an 8s reconnect grace window, an honest connected/reconnecting/polling indicator — deliberate antithesis of 2.0's hardcoded "LIVE" dot.
+- **Verified the actual security boundary**, not just that it compiles: two real signed-in users, one owning the demo meter and one not. Owner subscribed and genuinely received live broadcasts; stranger was rejected outright at the RLS layer (`Unauthorized: You do not have permissions...`), never reaching the socket.
+- **Real bug found by this verification**: ingest worker's broadcast payload wasn't tagged `private: true`, so it silently fanned out over the legacy public path instead of the authorization-gated one — subscription succeeded but zero messages arrived. No unit test would have caught this.
+- CI green, deployed to production (run 33306442121). Committed (`d4aaf92`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — PWA-lite vs. thin native shell vs. keep full Expo app at Sprint 6. Needs a decision before Sprint 4.
