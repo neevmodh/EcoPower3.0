@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getScope, scopeFromToken } from "@/lib/auth";
 import { landingFor } from "@/lib/landing";
 import { createClient } from "@/lib/supabase/server";
+import { Logo } from "@/components/Logo";
 
 const DEMO_PASSWORD = "EcoPower!2026";
 
@@ -50,10 +51,13 @@ export default async function LoginPage({
         className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden"
         style={{
           background:
-            "linear-gradient(135deg, var(--color-categorical-consumption) 0%, var(--color-categorical-third) 100%)",
+            "linear-gradient(135deg, var(--color-categorical-third) 0%, #0f8a5c 100%)",
         }}
       >
-        <div className="text-white text-xl font-semibold tracking-tight">EcoPower</div>
+        <div className="flex items-center gap-2.5 text-white text-xl font-semibold tracking-tight">
+          <Logo size={32} />
+          EcoPower
+        </div>
 
         <div className="text-white">
           <h1 className="text-4xl font-semibold leading-tight mb-4">
@@ -129,7 +133,7 @@ export default async function LoginPage({
             <button
               type="submit"
               className="w-full rounded-control py-2 text-sm font-medium transition-colors duration-state"
-              style={{ background: "var(--color-categorical-consumption)", color: "#fff" }}
+              style={{ background: "var(--color-categorical-third)", color: "#fff" }}
             >
               Sign in
             </button>

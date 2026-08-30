@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LiveFlowIllustration } from "@/components/LiveFlowIllustration";
+import { Logo } from "@/components/Logo";
 
 // Marketing page, not an operator surface — DESIGN.md P6 explicitly draws
 // that line ("marketing pages get air; operator surfaces get information")
@@ -57,13 +58,7 @@ export default function LandingPage() {
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 font-semibold text-lg" style={{ color: "var(--color-text-primary)" }}>
-            <span
-              className="inline-flex items-center justify-center rounded-control text-white"
-              style={{ width: 32, height: 32, background: "var(--color-categorical-consumption)", fontSize: 16 }}
-              aria-hidden="true"
-            >
-              ⚡
-            </span>
+            <Logo size={32} />
             EcoPower
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>
@@ -269,13 +264,7 @@ export default function LandingPage() {
       <footer className="border-t" style={{ borderColor: "var(--color-border)" }}>
         <div className="max-w-6xl mx-auto px-6 py-10 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--color-text-secondary)" }}>
-            <span
-              className="inline-flex items-center justify-center rounded-control text-white"
-              style={{ width: 24, height: 24, background: "var(--color-categorical-consumption)", fontSize: 12 }}
-              aria-hidden="true"
-            >
-              ⚡
-            </span>
+            <Logo size={24} />
             EcoPower 3.0 — INSTINCT 4.0
           </div>
           <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>

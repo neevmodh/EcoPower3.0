@@ -3,10 +3,13 @@
 @tailwind utilities;
 
 /* Palette values are the validated set from packages/shared/src/palette.json
-   (#67, guarded by scripts/validate_palette.js in CI). Dark is declared under
-   BOTH the media query and :root[data-theme="dark"] so the OS setting and the
-   in-app toggle both work, and the toggle wins in both directions
-   (DESIGN.md §3.6). Neutrals below are surfaces/text, not series colours. */
+   (#67, guarded by scripts/validate_palette.js in CI). Neutrals below are
+   surfaces/text, not series colours.
+
+   Light-green-and-white is the deliberate default for every visitor,
+   regardless of OS theme — no auto-dark from prefers-color-scheme. The
+   dark values below stay in place, ready for data-theme="dark", for
+   whenever a theme toggle ships; none exists yet. */
 
 :root {
   --color-categorical-generation: #eda100;
@@ -35,29 +38,6 @@
   --color-border: #e4e2dd;
   --color-text-primary: #1a1a18;
   --color-text-secondary: #5c5a54;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-categorical-generation: #c98500;
-    --color-categorical-consumption: #3987e5;
-    --color-categorical-third: #199e70;
-
-    --color-diverging-export: #199e70;
-    --color-diverging-zero: #383835;
-    --color-diverging-import: #d95926;
-
-    --color-status-good: #008300;
-    --color-status-warning: #c98500;
-    --color-status-serious: #d95926;
-    --color-status-critical: #e66767;
-
-    --color-surface: #121212;
-    --color-surface-card: #1c1c1a;
-    --color-border: #34332f;
-    --color-text-primary: #f2f1ee;
-    --color-text-secondary: #a3a099;
-  }
 }
 
 :root[data-theme="dark"] {
