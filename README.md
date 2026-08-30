@@ -29,7 +29,7 @@ It serves **five distinct users**, each with their own panel:
 
 ### One build, five problem statements
 
-INSTINCT 4.0 published five problem statements. They are one system, so we built one:
+INSTINCT 4.0 published five problem statement. They are one system, so we built one:
 
 | PS | Covered by |
 |---|---|
