@@ -61,6 +61,12 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - Verified: `supabase db reset` applies cleanly locally (10 tables created, CHECK constraint confirmed rejecting a row with two parents set). Pushed the same migration to the remote project via `supabase db push`; `supabase migration list` shows local/remote both at `0001`.
 - Committed (`4c4f692`), pushed, issue commented and closed.
 
+**11:15–11:40** — **Issue #3** (`Denormalized scope keys + maintenance triggers`) resolved and closed.
+- Wrote `supabase/migrations/0002_scope_keys.sql`: added `division_id`/`org_id` (real, indexed) to `service_connections`, `meters`, `assets` (`assets` also gets `dt_id`), populated by `BEFORE INSERT/UPDATE` triggers walking `dt → feeder → substation → division`.
+- Built `resolve_scope_from_meter(meter_id)` + generic trigger `set_scope_keys_from_meter()` — designed for #16 to attach directly to `meter_readings` once that table exists.
+- **Forward-reference gap:** the issue's done-when references `meter_readings`, which doesn't exist until #16 (blocked by this issue). Verified the exact scenario — insert with only `meter_id`, all four scope keys populate — against a throwaway fixture table shaped identically, with the same trigger attached, inside a `ROLLBACK`ed transaction. #16 reuses the trigger as-is.
+- Applied locally (`supabase db reset`) and pushed to remote via `supabase db push`. Committed (`a5fb587`), pushed, issue commented and closed.
+
 ## Open threads / next steps
 
 - [ ] Webhook URL is a placeholder (`https://example.com/webhook`) — update once #39's real endpoint is deployed.
