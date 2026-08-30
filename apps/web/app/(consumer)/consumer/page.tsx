@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
+import { StatTile } from "@/components/StatTile";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,6 +25,16 @@ export default async function ConsumerPage() {
         { href: "/consumer/plan", label: "Plan" },
       ]}
     >
+      <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
+        <StatTile icon="⚡" label="Connections" value={connections?.length ?? 0} />
+        {/* No comparison basis and no meter_readings yet (#16) — honestly no
+            data, not a fabricated 0.0 with a badge. This is the exact
+            distinction #68 exists to enforce, demonstrated live rather than
+            just asserted in a test. */}
+        <StatTile icon="☀️" label="Solar generated" value={null} unit="kWh" />
+        <StatTile icon="₹" label="Est. savings" valuePaise={null} />
+      </div>
+
       <h1 className="text-2xl font-semibold mb-6">My connections</h1>
       {(connections ?? []).length === 0 ? (
         <p style={{ color: "var(--color-text-secondary)" }}>
