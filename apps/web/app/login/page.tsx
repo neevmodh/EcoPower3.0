@@ -12,6 +12,7 @@ const DEMO_ACCOUNTS = [
   { role: "DISCOM officer", email: "discom@ecopower.demo", accent: "var(--color-categorical-consumption)", icon: "⚡" },
   { role: "Operator", email: "operator@ecopower.demo", accent: "#5c6470", icon: "🛠️" },
   { role: "Field technician", email: "field@ecopower.demo", accent: "var(--color-categorical-generation)", icon: "📶" },
+  { role: "Support agent", email: "support@ecopower.demo", accent: "#0d9488", icon: "🎧" },
 ];
 
 export default async function LoginPage({

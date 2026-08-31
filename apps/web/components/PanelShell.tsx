@@ -13,7 +13,7 @@ import Link from "next/link";
 import { NotificationBell } from "./NotificationBell";
 import { AIAdvisor } from "./AIAdvisor";
 
-export type PanelKey = "consumer" | "society" | "discom" | "operator" | "field";
+export type PanelKey = "consumer" | "society" | "discom" | "operator" | "field" | "support";
 
 const ACCENTS: Record<PanelKey, string> = {
   consumer: "var(--color-categorical-third)", // aqua
@@ -21,6 +21,7 @@ const ACCENTS: Record<PanelKey, string> = {
   discom: "var(--color-categorical-consumption)", // blue
   operator: "#5c6470", // slate
   field: "var(--color-categorical-generation)", // amber
+  support: "#0d9488", // teal — distinct from consumer's aqua and operator's slate
 };
 
 const LABELS: Record<PanelKey, string> = {
@@ -29,6 +30,7 @@ const LABELS: Record<PanelKey, string> = {
   discom: "DISCOM",
   operator: "Operator",
   field: "Field",
+  support: "Support",
 };
 
 const ICONS: Record<PanelKey, string> = {
@@ -37,16 +39,19 @@ const ICONS: Record<PanelKey, string> = {
   discom: "⚡",
   operator: "🛠️",
   field: "📶",
+  support: "🎧",
 };
 
-// `dense` panels (DISCOM, operator) are table-forward; consumer/society are
-// comfortable; field gets large touch targets for gloved hands in sunlight.
+// `dense` panels (DISCOM, operator, support) are table-forward;
+// consumer/society are comfortable; field gets large touch targets for
+// gloved hands in sunlight.
 const DENSITY: Record<PanelKey, string> = {
   consumer: "p-6",
   society: "p-6",
   discom: "p-4",
   operator: "p-4",
   field: "p-6",
+  support: "p-4",
 };
 
 function hexToRgba(hex: string, alpha: number): string {

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { formatInrFromPaise } from "@ecopower/shared";
 import { PanelShell } from "@/components/PanelShell";
 import { SubscribeButton, SubscriptionLifecycleActions } from "@/components/SubscriptionActions";
+import { NetMeteringApplyForm } from "@/components/NetMeteringApplyForm";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,7 +20,20 @@ const UNIT_LABEL: Record<string, string> = {
   lumen_hours: "lumen-hrs",
 };
 
-export default async function ConsumerPlanPage() {
+const CYCLE_TABS = [
+  { key: "monthly", label: "Monthly" },
+  { key: "annual", label: "Annual" },
+  { key: "payg", label: "Pay-as-you-go" },
+] as const;
+
+export default async function ConsumerPlanPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cycle?: string }>;
+}) {
+  const { cycle: cycleParam } = await searchParams;
+  const cycle = CYCLE_TABS.some((t) => t.key === cycleParam) ? cycleParam! : "monthly";
+
   const supabase = await createClient();
   const scope = await getScope(supabase);
   if (!scope) redirect("/login");
@@ -42,17 +56,37 @@ export default async function ConsumerPlanPage() {
           .maybeSingle()
       : { data: null };
 
-  const { data: plans } = await supabase
+  const { data: allPlans } = await supabase
     .from("plans")
     .select(
-      "id, code, name, description, price_paise_per_month, plan_services(included_quantity, guarantee_metric, guarantee_contracted_value, service_types(code, name, unit))",
+      "id, code, name, description, price_paise_per_month, price_paise_per_year, billing_cycle, plan_services(included_quantity, guarantee_metric, guarantee_contracted_value, service_types(code, name, unit))",
     )
     .eq("active", true)
     .order("price_paise_per_month");
 
+  const { data: pvAsset } =
+    connectionIds.length > 0
+      ? await supabase.from("assets").select("id, capacity_kw").eq("asset_type", "pv_array").in("service_connection_id", connectionIds).maybeSingle()
+      : { data: null };
+
+  const { data: netmeteringApp } =
+    connectionIds.length > 0
+      ? await supabase
+          .from("netmetering_applications")
+          .select("id, status, capacity_kw, decision_notes")
+          .in("service_connection_id", connectionIds)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : { data: null };
+
+  const plans = (allPlans ?? []).filter((p) =>
+    cycle === "payg" ? p.code === "solar_payg" : p.billing_cycle === cycle && p.code !== "solar_payg",
+  );
+
   const currentPlanId = activeSubscription?.plan_id;
   const currentPlan = activeSubscription?.plans as unknown as { name: string; price_paise_per_month: number } | null;
-  const otherPlans = (plans ?? [])
+  const otherPlans = (allPlans ?? [])
     .filter((p) => p.id !== currentPlanId)
     .map((p) => ({ id: p.id, name: p.name }));
 
@@ -114,8 +148,79 @@ export default async function ConsumerPlanPage() {
         </p>
       )}
 
+      {pvAsset && (
+        <div className="rounded-card border card-shadow p-5 mb-10" style={{ borderColor: "var(--color-border)" }}>
+          <h2 className="text-sm font-semibold mb-1">Net-metering</h2>
+          {netmeteringApp ? (
+            <div>
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium text-white mb-2"
+                style={{
+                  background:
+                    netmeteringApp.status === "approved"
+                      ? "var(--color-status-good)"
+                      : netmeteringApp.status === "rejected"
+                        ? "var(--color-status-critical)"
+                        : "var(--color-status-warning)",
+                }}
+              >
+                {netmeteringApp.status.replace("_", " ")}
+              </span>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                {netmeteringApp.capacity_kw} kW application
+                {netmeteringApp.decision_notes ? ` — ${netmeteringApp.decision_notes}` : ""}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm mb-3" style={{ color: "var(--color-text-secondary)" }}>
+                Your {pvAsset.capacity_kw} kW rooftop array isn&apos;t registered for net-metering yet.
+              </p>
+              <NetMeteringApplyForm
+                serviceConnectionId={connectionIds[0]}
+                assetId={pvAsset.id}
+                defaultCapacityKw={pvAsset.capacity_kw}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="flex gap-2 mb-6">
+        {CYCLE_TABS.map((t) => (
+          <a
+            key={t.key}
+            href={`/consumer/plan?cycle=${t.key}`}
+            className="rounded-control px-4 py-2 text-sm font-semibold transition-colors duration-state"
+            style={
+              cycle === t.key
+                ? { background: "var(--color-categorical-third)", color: "#fff" }
+                : { border: "1px solid var(--color-border)", color: "var(--color-text-secondary)" }
+            }
+          >
+            {t.label}
+          </a>
+        ))}
+      </div>
+
+      {cycle === "annual" && (
+        <p className="text-xs mb-4" style={{ color: "var(--color-text-secondary)" }}>
+          Billed once a year — two months cheaper than paying monthly.
+        </p>
+      )}
+      {cycle === "payg" && (
+        <p className="text-xs mb-4" style={{ color: "var(--color-text-secondary)" }}>
+          No base fee. Every kWh is billed at the overage rate — for low, irregular usage.
+        </p>
+      )}
+
       <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
-        {(plans ?? []).map((plan) => {
+        {plans.length === 0 && (
+          <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            No plans on this cycle yet.
+          </p>
+        )}
+        {plans.map((plan) => {
           const isCurrent = plan.id === currentPlanId;
           const services = (plan.plan_services ?? []) as unknown as Array<{
             included_quantity: number;
@@ -142,10 +247,12 @@ export default async function ConsumerPlanPage() {
               </div>
 
               <div className="text-3xl font-semibold tracking-tight mb-1 tabular">
-                {formatInrFromPaise(BigInt(plan.price_paise_per_month))}
+                {cycle === "annual" && plan.price_paise_per_year != null
+                  ? formatInrFromPaise(BigInt(plan.price_paise_per_year))
+                  : formatInrFromPaise(BigInt(plan.price_paise_per_month))}
               </div>
               <div className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>
-                per month
+                {cycle === "annual" ? "per year" : cycle === "payg" ? "base fee — usage billed separately" : "per month"}
               </div>
 
               <ul className="flex-1 space-y-2.5 mb-6">

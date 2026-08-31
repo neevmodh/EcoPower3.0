@@ -32,6 +32,9 @@ const USERS = [
   { email: "discom@ecopower.demo", role: "discom_officer", org: ORG_ID, division: DIVISION_A },
   { email: "operator@ecopower.demo", role: "resco_ops", org: RESCO_ORG_ID, division: null },
   { email: "field@ecopower.demo", role: "field_technician", org: RESCO_ORG_ID, division: DIVISION_A },
+  // support_agent's RLS policy (0014) is `has_role('support_agent')` with
+  // no org/division clause — the queue is platform-wide, not scoped.
+  { email: "support@ecopower.demo", role: "support_agent", org: null, division: null },
 ];
 
 async function adminFetch(path, init = {}) {
@@ -163,10 +166,13 @@ async function main() {
     ],
   });
 
+  const PV_ASSET_ID = "30000000-0000-0000-0000-0000000000d1";
+
   await sql({
     path: "/rest/v1/assets",
     rows: [
       {
+        id: PV_ASSET_ID,
         service_connection_id: "30000000-0000-0000-0000-0000000000a4",
         asset_type: "pv_array",
         capacity_kw: 5,
@@ -174,6 +180,7 @@ async function main() {
         resco_org_id: RESCO_ORG_ID,
       },
       {
+        id: "30000000-0000-0000-0000-0000000000d2",
         service_connection_id: "30000000-0000-0000-0000-0000000000a4",
         asset_type: "inverter",
         capacity_kw: 5,
@@ -211,7 +218,53 @@ async function main() {
     })),
   });
 
-  console.log("\nSeeded five logins (password: %s):", PASSWORD);
+  // One real work order, assigned to the seeded field technician (#89) —
+  // without this the Field panel is permanently "no open work orders."
+  await sql({
+    path: "/rest/v1/work_orders",
+    rows: [
+      {
+        resco_org_id: RESCO_ORG_ID,
+        service_connection_id: "30000000-0000-0000-0000-0000000000a4",
+        asset_id: PV_ASSET_ID,
+        title: "Inspect inverter fault code E-04",
+        description: "Consumer reported an intermittent inverter fault via the support ticket queue.",
+        priority: "high",
+        assigned_user_id: userIds.field_technician,
+      },
+    ],
+  });
+
+  // One real support ticket, open, so the support-agent demo login (#89)
+  // lands on a real queue instead of an empty one.
+  await sql({
+    path: "/rest/v1/support_tickets",
+    rows: [
+      {
+        service_connection_id: "30000000-0000-0000-0000-0000000000a4",
+        subject: "Inverter fault code E-04",
+        description: "Getting an intermittent fault light on the inverter since yesterday evening.",
+        priority: "high",
+      },
+    ],
+  });
+
+  // One real net-metering application (#89 / issue #28) for the same PV
+  // asset — submitted, not yet decided, so the DISCOM officer demo login
+  // has something real to approve.
+  await sql({
+    path: "/rest/v1/netmetering_applications",
+    rows: [
+      {
+        service_connection_id: "30000000-0000-0000-0000-0000000000a4",
+        asset_id: PV_ASSET_ID,
+        capacity_kw: 5,
+        applicant_notes: "5kW rooftop array, commissioned under COM-2026-0001.",
+      },
+    ],
+  });
+
+  console.log("\nSeeded %d logins (password: %s):", USERS.length, PASSWORD);
   for (const u of USERS) console.log(`  ${u.role.padEnd(18)} ${u.email}`);
 }
 

@@ -5,7 +5,7 @@ const LANDING: Array<{ role: string; path: string }> = [
   { role: "discom_officer", path: "/discom" },
   { role: "resco_admin", path: "/operator" },
   { role: "resco_ops", path: "/operator" },
-  { role: "support_agent", path: "/operator" },
+  { role: "support_agent", path: "/support" },
   { role: "field_technician", path: "/field" },
   { role: "society_admin", path: "/society" },
   { role: "society_member", path: "/society" },

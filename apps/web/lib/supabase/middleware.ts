@@ -13,8 +13,9 @@ const ROLE_GATES: Array<{ prefix: string; roles: string[] }> = [
   { prefix: "/consumer", roles: ["consumer"] },
   { prefix: "/society", roles: ["society_admin", "society_member"] },
   { prefix: "/discom", roles: ["discom_officer", "discom_admin"] },
-  { prefix: "/operator", roles: ["resco_admin", "resco_ops", "support_agent"] },
+  { prefix: "/operator", roles: ["resco_admin", "resco_ops"] },
   { prefix: "/field", roles: ["field_technician"] },
+  { prefix: "/support", roles: ["support_agent"] },
 ];
 
 export async function updateSession(request: NextRequest) {

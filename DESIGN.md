@@ -249,6 +249,39 @@ The field app is a genuinely different design problem: gloved hands, direct sunl
 
 ---
 
+## 8.5 Scalability (#89)
+
+PS1 §4/§6 asks the platform be "designed for scalability so it can later
+expand to multiple services and integrate with DISCOM workflows" and
+support "millions of users and devices." A hackathon PoC cannot *prove*
+millions-of-devices scale — no load test claiming that number here would
+be honest. What the schema actually does, concretely, toward that goal:
+
+- **Partitioned time-series**: `meter_readings` is partitioned by month
+  (`0005_time_series_schema.sql`) specifically so per-partition indexes
+  stay small as device count and history grow — an unpartitioned table
+  at millions-of-meters × 15-minute ticks would degrade query planning
+  long before it degraded storage.
+- **Denormalized scope keys**: every RLS-scoped table carries its own
+  `dt_id`/`division_id`/`org_id` (`0002_scope_keys.sql`) rather than
+  requiring a join up the topology tree on every row-security check —
+  the join cost that would otherwise multiply by every concurrent query
+  is paid once, at write time, via a trigger.
+- **Service-abstraction, not a hardcoded plan**: `service_types`
+  (`0012_subscriptions.sql`) is the mechanism PS1's "later expand to
+  multiple services" asks for — adding a new metered or flat-rate service
+  is a row, not a schema migration touching every billing code path.
+- **Known, named limits, not silence**: the free-tier Supabase Realtime
+  connection cap (~200 concurrent) is the actual ceiling on today's
+  deployment for the live-meter-tile feature specifically — documented
+  here rather than left implicit, so it's a known trade to revisit on a
+  paid tier, not a surprise.
+- **Not done**: connection pooling tuning, read replicas, and an actual
+  load test are real future work, not simulated. Listed here so "designed
+  for scalability" stays a specific, checkable claim rather than a phrase.
+
+---
+
 ## 9. Verification
 
 - **Palette**: `node scripts/validate_palette.js` in CI on both modes. A failing palette fails the build.
