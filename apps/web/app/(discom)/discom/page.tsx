@@ -49,19 +49,19 @@ export default async function DiscomPage() {
       </p>
 
       <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
-        <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Service connections</div>
           <div className="text-2xl font-semibold tabular">{totalConsumers}</div>
         </div>
-        <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Distribution transformers</div>
           <div className="text-2xl font-semibold tabular">{totalDts}</div>
         </div>
-        <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Active meters</div>
           <div className="text-2xl font-semibold tabular">{activeMeters}</div>
         </div>
-        <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Avg. AT&C loss</div>
           <div className="text-2xl font-semibold tabular" style={{ color: avgLossPct != null && avgLossPct > 15 ? "var(--color-status-serious)" : "var(--color-status-good)" }}>
             {avgLossPct != null ? `${avgLossPct.toFixed(1)}%` : "—"}
@@ -71,7 +71,7 @@ export default async function DiscomPage() {
 
       {worstDt && (
         <div
-          className="rounded-card border p-5 mb-2"
+          className="rounded-card border card-shadow p-5 mb-2"
           style={{
             borderColor: worstDt.loss_pct > 15 ? "var(--color-status-serious)" : "var(--color-border)",
             background: worstDt.loss_pct > 15 ? "color-mix(in oklab, var(--color-status-serious) 6%, var(--color-surface-card))" : "var(--color-surface-card)",

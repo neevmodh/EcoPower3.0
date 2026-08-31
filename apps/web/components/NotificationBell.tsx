@@ -69,7 +69,12 @@ export function NotificationBell() {
       {open && (
         <div
           className="absolute right-0 mt-2 rounded-card border z-20"
-          style={{ width: 320, background: "var(--color-surface-card)", borderColor: "var(--color-border)" }}
+          style={{
+            width: 320,
+            background: "var(--color-surface-card)",
+            borderColor: "var(--color-border)",
+            boxShadow: "var(--shadow-card-hover)",
+          }}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
             <span className="text-sm font-semibold">Notifications</span>

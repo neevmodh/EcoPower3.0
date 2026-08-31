@@ -24,7 +24,7 @@ export default async function FieldPage() {
         is readable only while an assigned work order is open on it.
       </p>
       <div
-        className="rounded-card border p-6 text-center"
+        className="rounded-card border card-shadow p-6 text-center"
         style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
       >
         No open work orders. The <code>work_orders</code> table lands with the DISCOM

@@ -27,9 +27,9 @@ const config: Config = {
         "text-secondary": "var(--color-text-secondary)",
       },
       borderRadius: {
-        // DESIGN.md §5 — one set: 6px controls, 10px cards, full pills.
+        // DESIGN.md §5 (#89) — one set: 6px controls, 16px cards, full pills.
         control: "6px",
-        card: "10px",
+        card: "16px",
       },
       fontSize: {
         // DESIGN.md §5 scale. Nothing between steps.

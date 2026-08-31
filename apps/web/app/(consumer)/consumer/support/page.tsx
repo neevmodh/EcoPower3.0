@@ -66,7 +66,7 @@ export default async function ConsumerSupportPage() {
               </p>
             ) : (
               (tickets ?? []).map((t) => (
-                <div key={t.id} className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+                <div key={t.id} className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-medium text-sm">{t.subject}</span>
                     <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>

@@ -43,7 +43,7 @@ export function InvoiceCard({ invoice, consumerNumber }: { invoice: Invoice; con
   const unitsKwh = invoice.units_imported_milli_kwh / 1000;
 
   return (
-    <div className="rounded-card border" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}>
+    <div className="rounded-card border card-lift" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}>
       <button
         onClick={() => setExpanded((e) => !e)}
         className="w-full flex items-center justify-between p-4 text-left"

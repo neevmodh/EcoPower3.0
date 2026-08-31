@@ -28,7 +28,7 @@ export default async function SocietyPage() {
       </p>
       <ul className="space-y-2">
         {(orgs ?? []).map((o) => (
-          <li key={o.id} className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+          <li key={o.id} className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
             <span className="font-medium">{o.name}</span>
             <span className="text-sm ml-2" style={{ color: "var(--color-text-secondary)" }}>{o.type}</span>
           </li>

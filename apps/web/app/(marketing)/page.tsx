@@ -97,59 +97,63 @@ export default async function LandingPage() {
       </nav>
 
       {/* HERO */}
-      <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
-        <div>
-          <div
-            className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold mb-6"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
-          >
-            ✦ Energy-as-a-Service for Indian DISCOMs
-          </div>
-          <h1 className="text-5xl font-semibold tracking-tight leading-[1.05] mb-5" style={{ color: "var(--color-text-primary)" }}>
-            Clean energy,{" "}
-            <span style={{ color: "var(--color-categorical-third)" }}>metered honestly.</span>
-          </h1>
-          <p className="text-lg mb-8 max-w-md" style={{ color: "var(--color-text-secondary)" }}>
-            Subscribe to solar, battery backup, or a performance guarantee. Every
-            number on your bill traces back to a real meter reading — not a
-            badge that outlived its data.
-          </p>
-          <div className="flex flex-wrap gap-3 mb-10">
-            <Link
-              href="/login"
-              className="rounded-control px-6 py-3 text-sm font-semibold text-white transition-colors duration-state"
-              style={{ background: "var(--color-categorical-third)" }}
+      <section className="hero-wash">
+        <div className="max-w-6xl mx-auto px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
+          <div className="animate-fade-up">
+            <div
+              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold mb-6"
+              style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
             >
-              Sign in →
-            </Link>
-            <a
-              href="#how-it-works"
-              className="rounded-control px-6 py-3 text-sm font-semibold border transition-colors duration-state"
-              style={{ borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}
-            >
-              See how it works
-            </a>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {["Default-deny RLS", "Real GERC tariff", "Sub-second live data"].map((b) => (
-              <span
-                key={b}
-                className="rounded-full border px-3 py-1 text-xs font-medium"
-                style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
+              ✦ Energy-as-a-Service for Indian DISCOMs
+            </div>
+            <h1 className="text-5xl font-semibold tracking-tight leading-[1.05] mb-5" style={{ color: "var(--color-text-primary)" }}>
+              Clean energy,{" "}
+              <span style={{ color: "var(--color-categorical-third)" }}>metered honestly.</span>
+            </h1>
+            <p className="text-lg mb-8 max-w-md" style={{ color: "var(--color-text-secondary)" }}>
+              Subscribe to solar, battery backup, or a performance guarantee. Every
+              number on your bill traces back to a real meter reading — not a
+              badge that outlived its data.
+            </p>
+            <div className="flex flex-wrap gap-3 mb-10">
+              <Link
+                href="/login"
+                className="rounded-control px-6 py-3 text-sm font-semibold text-white transition-colors duration-state hover:opacity-90"
+                style={{ background: "var(--color-categorical-third)" }}
               >
-                {b}
-              </span>
-            ))}
+                Sign in →
+              </Link>
+              <a
+                href="#how-it-works"
+                className="rounded-control px-6 py-3 text-sm font-semibold border transition-colors duration-state hover:bg-black/[0.03]"
+                style={{ borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}
+              >
+                See how it works
+              </a>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {["Default-deny RLS", "Real GERC tariff", "Sub-second live data"].map((b) => (
+                <span
+                  key={b}
+                  className="rounded-full border px-3 py-1 text-xs font-medium"
+                  style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
+                >
+                  {b}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="animate-fade-up" style={{ animationDelay: "120ms" }}>
+            <LiveFlowIllustration />
           </div>
         </div>
-        <LiveFlowIllustration />
       </section>
 
       {/* STATS */}
       <section className="border-y" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}>
         <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {STATS.map((s) => (
-            <div key={s.label}>
+          {STATS.map((s, i) => (
+            <div key={s.label} className="animate-fade-up" style={{ animationDelay: `${i * 80}ms` }}>
               <div className="text-4xl font-semibold tracking-tight" style={{ color: "var(--color-categorical-third)" }}>
                 {s.value}
               </div>
@@ -173,7 +177,7 @@ export default async function LandingPage() {
         </div>
         <div className="grid md:grid-cols-4 gap-6">
           {STEPS.map((s) => (
-            <div key={s.n} className="rounded-card border p-6" style={{ borderColor: "var(--color-border)" }}>
+            <div key={s.n} className="rounded-card border p-6 card-lift" style={{ borderColor: "var(--color-border)" }}>
               <div className="flex items-center justify-between mb-4">
                 <div
                   className="rounded-control flex items-center justify-center"
@@ -210,7 +214,7 @@ export default async function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {FEATURES.map((f) => (
-              <div key={f.title} className="rounded-card border p-6" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
+              <div key={f.title} className="rounded-card border p-6 card-lift" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
                 <div
                   className="rounded-control flex items-center justify-center mb-4"
                   style={{ width: 44, height: 44, fontSize: "1.25rem", background: "var(--color-surface-card)", border: "1px solid var(--color-border)" }}
@@ -249,7 +253,7 @@ export default async function LandingPage() {
                   service_types: { name: string; unit: string };
                 }>;
                 return (
-                  <div key={plan.id} className="rounded-card border p-6" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
+                  <div key={plan.id} className="rounded-card border p-6 card-lift" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
                     <div className="text-lg font-semibold mb-1">{plan.name}</div>
                     <p className="text-sm mb-4" style={{ color: "var(--color-text-secondary)" }}>
                       {plan.description}
@@ -287,7 +291,7 @@ export default async function LandingPage() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {PANELS.map((p) => (
-            <div key={p.label} className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+            <div key={p.label} className="rounded-card border p-4 card-lift" style={{ borderColor: "var(--color-border)" }}>
               <span
                 className="inline-flex items-center justify-center rounded-full mb-3"
                 style={{ width: 32, height: 32, background: p.accent, fontSize: 15 }}

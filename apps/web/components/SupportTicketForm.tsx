@@ -36,7 +36,7 @@ export function SupportTicketForm({ serviceConnectionId }: { serviceConnectionId
   }
 
   return (
-    <form onSubmit={submit} className="rounded-card border p-5" style={{ borderColor: "var(--color-border)" }}>
+    <form onSubmit={submit} className="rounded-card border p-5 card-shadow" style={{ borderColor: "var(--color-border)" }}>
       <h2 className="text-base font-semibold mb-4">Raise a ticket</h2>
       <label className="block text-sm mb-1" htmlFor="subject">
         Subject

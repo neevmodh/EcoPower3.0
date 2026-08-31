@@ -45,15 +45,15 @@ export default async function OperatorPage() {
       </p>
 
       <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))" }}>
-        <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Total assets</div>
           <div className="text-2xl font-semibold tabular">{(assets ?? []).length}</div>
         </div>
-        <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Installed capacity</div>
           <div className="text-2xl font-semibold tabular">{totalCapacityKw.toFixed(0)} kW</div>
         </div>
-        <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Active meters visible</div>
           <div className="text-2xl font-semibold tabular">{activeMeters}</div>
         </div>

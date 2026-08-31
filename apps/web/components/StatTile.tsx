@@ -75,7 +75,7 @@ export function StatTile(props: NumericProps | CurrencyProps) {
 
   return (
     <div
-      className="rounded-card border p-4"
+      className="rounded-card border p-4 card-lift"
       style={{
         borderColor: accent ?? "var(--color-border)",
         borderLeftWidth: accent ? "3px" : "1px",

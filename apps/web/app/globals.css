@@ -38,6 +38,12 @@
   --color-border: #e4e2dd;
   --color-text-primary: #1a1a18;
   --color-text-secondary: #5c5a54;
+
+  /* Real shadow tokens (#89) — reserved for genuine overlay-weight surfaces
+     per DESIGN.md §5: marketing cards on hover, never a resting dashboard
+     tile standing in for missing hierarchy. */
+  --shadow-card: 0 1px 2px rgba(20, 20, 18, 0.04), 0 1px 1px rgba(20, 20, 18, 0.03);
+  --shadow-card-hover: 0 16px 40px rgba(20, 20, 18, 0.10);
 }
 
 :root[data-theme="dark"] {
@@ -59,6 +65,9 @@
   --color-border: #34332f;
   --color-text-primary: #f2f1ee;
   --color-text-secondary: #a3a099;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 1px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 16px 40px rgba(0, 0, 0, 0.55);
 }
 
 body {
@@ -70,6 +79,57 @@ body {
    kWh must align (DESIGN.md §5). */
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Marketing-only wash (#89, DESIGN.md §5/§8): the hero's soft tint,
+   derived from the existing validated palette tokens via color-mix rather
+   than a new hardcoded colour, carried forward from 2.0 for the one
+   surface DESIGN.md P6 grants air. Never applied to a dashboard page —
+   the full-page gradient wash across every surface was the actual mistake
+   §5 documents in 2.0, not per-card elevation (2.0's own dashboards sit on
+   a flat #F8FAFC and only shadow individual cards — verified by reading
+   EcoPower2.0/app/globals.css and DashboardLayout.js directly). */
+.hero-wash {
+  background: linear-gradient(
+    150deg,
+    color-mix(in oklab, var(--color-categorical-third) 8%, var(--color-surface)) 0%,
+    var(--color-surface) 45%,
+    color-mix(in oklab, var(--color-categorical-consumption) 7%, var(--color-surface)) 100%
+  );
+}
+
+/* Real hover motion for real cards — nothing here changes on its own; it
+   responds to an actual pointer. Used on marketing cards and, as of #89,
+   dashboard cards too (StatTile, InvoiceCard, the sidebar account card) —
+   every one of them already renders only real, derived data, so lifting
+   them on hover adds no fabricated signal, just depth. */
+.card-lift {
+  box-shadow: var(--shadow-card);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Resting elevation without the hover motion — for cards inside dense
+   tables/lists where a translateY on hover would jitter adjacent rows. */
+.card-shadow {
+  box-shadow: var(--shadow-card);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fade-up 500ms ease both;
 }
 
 @media (prefers-reduced-motion: reduce) {

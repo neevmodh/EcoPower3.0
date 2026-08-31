@@ -78,7 +78,7 @@ export default async function ConsumerPage() {
           {(connections ?? []).map((c) => (
             <div
               key={c.consumer_number}
-              className="rounded-card border p-4"
+              className="rounded-card border card-shadow p-4"
               style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}
             >
               <div className="text-xs uppercase tracking-wide mb-2" style={{ color: "var(--color-text-secondary)" }}>

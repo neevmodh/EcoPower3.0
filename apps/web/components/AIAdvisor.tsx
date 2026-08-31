@@ -44,7 +44,13 @@ export function AIAdvisor() {
       {open && (
         <div
           className="mb-3 rounded-card border flex flex-col"
-          style={{ width: 340, height: 420, background: "var(--color-surface-card)", borderColor: "var(--color-border)" }}
+          style={{
+            width: 340,
+            height: 420,
+            background: "var(--color-surface-card)",
+            borderColor: "var(--color-border)",
+            boxShadow: "var(--shadow-card-hover)",
+          }}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
             <span className="text-sm font-semibold">EcoPower advisor</span>

@@ -75,7 +75,7 @@ export default async function ConsumerPlanPage() {
 
       {activeSubscription && currentPlan ? (
         <div
-          className="rounded-card border p-6 mb-10"
+          className="rounded-card border card-shadow p-6 mb-10"
           style={{
             borderColor: "var(--color-categorical-third)",
             background: "color-mix(in oklab, var(--color-categorical-third) 6%, var(--color-surface-card))",
@@ -127,7 +127,7 @@ export default async function ConsumerPlanPage() {
           return (
             <div
               key={plan.id}
-              className="rounded-card border p-6 flex flex-col"
+              className="rounded-card border card-shadow p-6 flex flex-col"
               style={{
                 borderColor: isCurrent ? "var(--color-categorical-third)" : "var(--color-border)",
                 borderWidth: isCurrent ? 2 : 1,

@@ -65,28 +65,28 @@ export default async function ConsumerAnalyticsPage() {
       ) : (
         <>
           <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
-            <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+            <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
               <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Solar exported</div>
               <div className="text-2xl font-semibold tabular" style={{ color: "var(--color-diverging-export)" }}>{totalExportKwh.toFixed(0)} kWh</div>
             </div>
-            <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+            <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
               <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Grid imported</div>
               <div className="text-2xl font-semibold tabular" style={{ color: "var(--color-diverging-import)" }}>{totalImportKwh.toFixed(0)} kWh</div>
             </div>
-            <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+            <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
               <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>CO₂ avoided</div>
               <div className="text-2xl font-semibold tabular" style={{ color: "var(--color-categorical-third)" }}>{co2Kg.toFixed(0)} kg</div>
               <div className="text-xs mt-0.5" style={{ color: "var(--color-text-secondary)" }}>
                 CEA combined-margin factor, {INDIA_GRID_EMISSION_FACTOR_KG_PER_KWH} kg/kWh
               </div>
             </div>
-            <div className="rounded-card border p-4" style={{ borderColor: "var(--color-border)" }}>
+            <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
               <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Tree-years equivalent</div>
               <div className="text-2xl font-semibold tabular">{trees.toFixed(0)}</div>
             </div>
           </div>
 
-          <div className="rounded-card border p-5 mb-6" style={{ borderColor: "var(--color-border)" }}>
+          <div className="rounded-card border card-shadow p-5 mb-6" style={{ borderColor: "var(--color-border)" }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold">Daily net grid exchange</h2>
               <CsvExportButton filename="ecopower-daily-energy.csv" rows={csvRows} />
@@ -94,7 +94,7 @@ export default async function ConsumerAnalyticsPage() {
             <EnergyBarChart data={rows} />
           </div>
 
-          <details className="rounded-card border p-5" style={{ borderColor: "var(--color-border)" }}>
+          <details className="rounded-card border card-shadow p-5" style={{ borderColor: "var(--color-border)" }}>
             <summary className="text-sm font-semibold cursor-pointer">Table view</summary>
             <div className="overflow-x-auto mt-3">
               <table className="w-full text-sm">

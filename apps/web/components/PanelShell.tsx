@@ -3,9 +3,11 @@
 // and a role chip in the header. The content canvas is identical in all five,
 // so the charts never fight the panel colour.
 //
-// DESIGN.md §5: neutral page, hairline borders, shadow reserved for genuine
-// overlay — 2.0's soft page wash flattened hierarchy, so depth here comes
-// from spacing and tinted fills, never a drop shadow on the chrome.
+// DESIGN.md §5: neutral page, hairline borders. The nav/header chrome itself
+// stays flat — no shadow, no wash; depth there comes from spacing and
+// tinted fills. Individual cards (the account card below, StatTile,
+// InvoiceCard) do carry a real resting shadow (#89) since they're
+// self-contained, real-data surfaces, not the page frame 2.0 washed.
 
 import Link from "next/link";
 import { NotificationBell } from "./NotificationBell";
@@ -104,7 +106,7 @@ export function PanelShell({
           ))}
         </ul>
 
-        <div className="p-3 mx-2 mb-3 rounded-card border" style={{ borderColor: "var(--color-border)" }}>
+        <div className="p-3 mx-2 mb-3 rounded-card border card-shadow" style={{ borderColor: "var(--color-border)" }}>
           <div className="flex items-center gap-2 mb-3">
             <span
               className="inline-flex items-center justify-center rounded-full font-medium text-white shrink-0"

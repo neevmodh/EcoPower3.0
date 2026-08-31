@@ -198,6 +198,12 @@ Scale (rem): `0.75 · 0.875 · 1 · 1.125 · 1.25 · 1.5 · 2 · 2.5 · 3.5`. No
 
 **Surfaces.** Three elevations only — page, card, popover. 2.0 used a soft mint-tinted page wash that made every card float in the same gentle way and flattened all hierarchy. 3.0: neutral page, `1px` hairline borders, shadow reserved for genuine overlay.
 
+**Update (#89):** the flattening was 2.0's wash applying to *every* surface indiscriminately, not the wash or shadow themselves being illegitimate. 3.0 now uses both, scoped by P6's own logic — marketing gets air, operator surfaces get information:
+- `.hero-wash` (a `color-mix()` derivative of the existing categorical tokens, not a new hardcoded colour) is permitted on the landing page hero only, carrying forward 2.0's composition per §8.
+- `--shadow-card` / `--shadow-card-hover` are permitted on marketing cards (`.card-lift`, real hover response to a real pointer) and popovers. Dashboard *chrome* — `PanelShell`'s nav rail, header, and page background — stays flat: hairline borders, no shadow, exactly as this section originally specified.
+
+**Update 2 (#89, second pass, after reading EcoPower2.0's source directly):** 2.0's dashboard *pages* were never washed either — `DashboardLayout.js` sits on a flat `#F8FAFC` and only its individual cards carry `--shadow-sm`/`.hover-lift`. So the boundary was overcorrected: individual dashboard cards (`StatTile`, `InvoiceCard`, the sidebar account card, notification/AI-advisor popovers) now carry `.card-lift` (hover) or `.card-shadow` (resting-only, for cards inside dense lists/tables where a hover translateY would jitter neighbours) — same tokens as marketing. What stays banned is a shadow or wash on the page frame itself (nav, header, `<main>` background) and any shadow standing in for a data value that isn't there (P1). Card radius also moved 10px → 16px in `tailwind.config.ts`, one step closer to 2.0's 16–24px range while staying inside "one set."
+
 **Radius.** `6px` controls, `10px` cards, `full` pills. One set.
 
 **Motion.** 150ms ease-out for state changes, 250ms for entrances. Live values transition their number, not their container. `prefers-reduced-motion` respected — and this matters specifically for the energy-flow animation.
