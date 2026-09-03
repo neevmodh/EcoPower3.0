@@ -38,7 +38,7 @@ const STATS: Array<{ value: string; label: string }> = [
   { value: "3", label: "Real tariff slabs, cited to the GERC order — not estimated" },
   { value: "9", label: "Row-secured roles, default-deny by construction" },
   { value: "<1s", label: "Meter reading to dashboard, over Realtime Broadcast" },
-  { value: "185", label: "Automated unit and RLS tests run in CI on every change" },
+  { value: "290+", label: "Automated unit, property, and RLS tests run in CI on every change" },
 ];
 
 const STEPS: Array<{ n: string; icon: string; title: string; desc: string; tone: string }> = [
@@ -55,6 +55,9 @@ const FEATURES: Array<{ icon: string; title: string; desc: string }> = [
   { icon: "🧾", title: "Provenance on every rupee", desc: "Click an invoice line, see the bracketing meter reads it came from. The billing engine works in bigint paise — no floating-point currency." },
   { icon: "🤝", title: "Performance guarantees, settled", desc: "CUF, performance ratio, and uptime guarantees compared against real meter data, with automatic credit lines when the contract isn't met." },
   { icon: "🛰️", title: "Live means live, honestly", desc: "A connection indicator that reflects the actual socket — connected, reconnecting, or polling — never a decorative dot on a page that fetched once." },
+  { icon: "🔎", title: "Loss, localised to a meter", desc: "The DT loss map drills to the consumers under a high-loss transformer, ranked by real signals — tamper flags, VEE quality, reporting gaps — with an append-only audit trail behind every decision." },
+  { icon: "💳", title: "Prepaid, drawn down daily", desc: "A real prepaid balance settled against metered consumption at a vend rate, with a low-balance state, a recharge flow, and a DISCOM disconnection watch list." },
+  { icon: "🌐", title: "English, हिन्दी, ગુજરાતી", desc: "The consumer surfaces switch language from a cookie, server-rendered — because a low-literacy consumer is who PS1 is actually written for." },
 ];
 
 export default async function LandingPage() {
