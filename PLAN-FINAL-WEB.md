@@ -24,8 +24,8 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 |---|---|---|---|
 | 6 | Simulator scenario control API (issue #13) — `POST /scenario/theft`, `/surge`, `/outage` | The single strongest demo moment: trigger theft, watch the DISCOM loss number move in <1s. Currently no way to drive it live. | `apps/simulator/src/`, new `services` route |
 | 7 | DISCOM: theft / loss localization drill-down (issue #27, deterministic not ML) | From "DT X has 19% loss" → the 3 suspect consumers under it, ranked by unexplained delta. Closes the loop on the loss map. | `app/(discom)/discom/losses/`, new RPC migration |
-| 8 | Golden-file billing tests + 12 correctness properties (issues #24, #25) | "Provable billing" is the headline claim. It needs a test suite that proves it. | `packages/shared/`, `apps/web` test dirs |
-| 9 | Consumer analytics depth — real disaggregation (base vs cooling load), month-over-month, tariff-slab breakdown | Analytics page is 124 lines / thin. This is where a consumer actually lives. | `app/(consumer)/consumer/analytics/page.tsx` |
+| 8 | Golden-file billing tests + 12 correctness properties (issues #24, #25) | ☑ `f278da4` — 12 golden (exact paise, real Torrent RGP tariff) + 15 properties (400 seeded cases each). 62 billing tests total. |
+| 9 | Consumer analytics — month-over-month grid import | ◐ MoM comparison card added (only when both months fully covered — no fake headline). Slab-position + load disaggregation deferred (disaggregation risks synthetic numbers → P1). |
 | 10 | Notifications actually delivered + bell badge live | Bell exists; wire it to the `0019_workflows` triggers so outage/payment/ticket events show up. | `components/NotificationBell.tsx` |
 
 ## Tier 3 — Finished-product completeness

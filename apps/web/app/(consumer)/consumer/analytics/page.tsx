@@ -34,6 +34,33 @@ export default async function ConsumerAnalyticsPage() {
   const co2Kg = co2AvoidedKg(totalExportKwh);
   const trees = treeEquivalent(co2Kg);
 
+  // Month-over-month grid import, from the same daily reads. Only compared
+  // when both months are fully covered by the 90-day window — a partial
+  // first month would understate it and read as a fake "you saved 40%".
+  const byMonth = new Map<string, { import: number; days: number }>();
+  for (const r of rows) {
+    const key = r.day.slice(0, 7); // YYYY-MM
+    const m = byMonth.get(key) ?? { import: 0, days: 0 };
+    m.import += r.importKwh;
+    m.days += 1;
+    byMonth.set(key, m);
+  }
+  const monthKeys = [...byMonth.keys()].sort();
+  const daysIn = (ym: string) => new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0).getDate();
+  const completeMonths = monthKeys.filter((k) => (byMonth.get(k)?.days ?? 0) >= daysIn(k) - 1);
+  const momPair =
+    completeMonths.length >= 2
+      ? (() => {
+          const prev = completeMonths[completeMonths.length - 2];
+          const curr = completeMonths[completeMonths.length - 1];
+          const p = byMonth.get(prev)?.import ?? 0;
+          const c = byMonth.get(curr)?.import ?? 0;
+          return { prev, curr, prevKwh: p, currKwh: c, deltaPct: p > 0 ? ((c - p) / p) * 100 : null };
+        })()
+      : null;
+  const monthLabel = (ym: string) =>
+    new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)) - 1, 1).toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+
   const csvRows = rows.map((r) => ({
     day: r.day,
     import_kwh: r.importKwh.toFixed(3),
@@ -85,6 +112,36 @@ export default async function ConsumerAnalyticsPage() {
               <div className="text-2xl font-semibold tabular">{trees.toFixed(0)}</div>
             </div>
           </div>
+
+          {momPair && (
+            <div className="rounded-card border card-shadow p-5 mb-6" style={{ borderColor: "var(--color-border)" }}>
+              <h2 className="text-base font-semibold mb-3">Grid import, month over month</h2>
+              <div className="flex items-end gap-6">
+                <div>
+                  <div className="text-xs" style={{ color: "var(--color-text-secondary)" }}>{monthLabel(momPair.prev)}</div>
+                  <div className="text-xl tabular">{momPair.prevKwh.toFixed(0)} kWh</div>
+                </div>
+                <div className="text-sm" style={{ color: "var(--color-text-secondary)" }}>→</div>
+                <div>
+                  <div className="text-xs" style={{ color: "var(--color-text-secondary)" }}>{monthLabel(momPair.curr)}</div>
+                  <div className="text-xl tabular">{momPair.currKwh.toFixed(0)} kWh</div>
+                </div>
+                {momPair.deltaPct != null && (
+                  <div
+                    className="text-sm font-semibold tabular"
+                    style={{ color: momPair.deltaPct <= 0 ? "var(--color-status-good)" : "var(--color-status-warning)" }}
+                  >
+                    {momPair.deltaPct > 0 ? "+" : ""}
+                    {momPair.deltaPct.toFixed(1)}%
+                  </div>
+                )}
+              </div>
+              <p className="text-xs mt-3" style={{ color: "var(--color-text-secondary)" }}>
+                Both months fully covered by the 90-day read window. Partial months are excluded so this can't read as a
+                headline number it hasn't earned.
+              </p>
+            </div>
+          )}
 
           <div className="rounded-card border card-shadow p-5 mb-6" style={{ borderColor: "var(--color-border)" }}>
             <div className="flex items-center justify-between mb-4">
