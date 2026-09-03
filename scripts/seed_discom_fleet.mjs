@@ -224,6 +224,31 @@ const COLUMNS = [
   "interval_seconds", "source", "quality", "tamper_flags",
 ].join(", ");
 
+// Give the live tile a real resting value. The AMI simulator (#12) is the
+// live publisher; when it isn't running against this database, the consumer
+// dashboard should still show the last real register read with an honest
+// "as of" timestamp — not an empty dash and a stuck "reconnecting" dot.
+// meter_live_state's before-insert trigger backfills dt/division/org/connection.
+async function upsertLiveState(client, rows) {
+  if (rows.length === 0) return;
+  const last = rows[rows.length - 1];
+  const [meterId, ts, kwhImport, kwhExport, dImp, dExp, intervalS] = last;
+  const activePowerKw = round3((dImp - dExp) / (intervalS / 3600));
+  await client.query(
+    `insert into meter_live_state
+       (meter_id, last_reading_ts, kwh_import, kwh_export, active_power_kw, quality, tamper_flags)
+     values ($1, $2, $3, $4, $5, 'good', 0)
+     on conflict (meter_id) do update set
+       last_reading_ts = excluded.last_reading_ts,
+       kwh_import      = excluded.kwh_import,
+       kwh_export      = excluded.kwh_export,
+       active_power_kw = excluded.active_power_kw,
+       quality         = excluded.quality,
+       tamper_flags    = excluded.tamper_flags`,
+    [meterId, ts, kwhImport, kwhExport, activePowerKw],
+  );
+}
+
 async function backfillConsumers(client, days) {
   const now = new Date();
   const start = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
@@ -287,6 +312,7 @@ async function backfillConsumers(client, days) {
     for (let i = 0; i < rows.length; i += 3000) {
       await copyRows(client, COLUMNS, rows.slice(i, i + 3000));
     }
+    await upsertLiveState(client, rows);
     process.stdout.write(`  ${meter.serial}: ${rows.length} readings\n`);
   }
 
@@ -307,6 +333,7 @@ async function backfillDtHeadMeters(client, dtDailyImport) {
       rows.push([m.id, ts.toISOString(), round3(cumImport), 0, round3(delivered), 0, 86400, "meter", "good", 0]);
     }
     await copyRows(client, COLUMNS, rows);
+    await upsertLiveState(client, rows);
     console.log(`  ${m.serial}: ${rows.length} daily readings, loss factor ${(m.lossFactor * 100).toFixed(0)}%`);
   }
 }

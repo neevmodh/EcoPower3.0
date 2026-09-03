@@ -167,6 +167,27 @@ const COLUMNS = [
   "interval_seconds", "source", "quality", "tamper_flags",
 ].join(", ");
 
+// Resting value for the live tile — mirrors the helper in seed_discom_fleet.mjs.
+async function upsertLiveState(client, rows) {
+  if (rows.length === 0) return;
+  const last = rows[rows.length - 1];
+  const [meterId, ts, kwhImport, kwhExport, dImp, dExp, intervalS] = last;
+  const activePowerKw = round3((dImp - dExp) / (intervalS / 3600));
+  await client.query(
+    `insert into meter_live_state
+       (meter_id, last_reading_ts, kwh_import, kwh_export, active_power_kw, quality, tamper_flags)
+     values ($1, $2, $3, $4, $5, 'good', 0)
+     on conflict (meter_id) do update set
+       last_reading_ts = excluded.last_reading_ts,
+       kwh_import      = excluded.kwh_import,
+       kwh_export      = excluded.kwh_export,
+       active_power_kw = excluded.active_power_kw,
+       quality         = excluded.quality,
+       tamper_flags    = excluded.tamper_flags`,
+    [meterId, ts, kwhImport, kwhExport, activePowerKw],
+  );
+}
+
 async function backfillUnits(client, days) {
   const now = new Date();
   const start = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
@@ -181,7 +202,7 @@ async function backfillUnits(client, days) {
   for (const meter of unitMeters) {
     const rand = mulberry32(meter.meter_id.split("-").reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 17));
     let cumImport = 0;
-    let cumExport = 0;
+    const cumExport = 0;
     const profile = deriveHouseholdProfile(meter.serial, meter.sanctioned_load_kw ?? 3);
     const rows = [];
     let ts = new Date(start);
@@ -218,6 +239,7 @@ async function backfillUnits(client, days) {
     for (let i = 0; i < rows.length; i += 3000) {
       await copyRows(client, COLUMNS, rows.slice(i, i + 3000));
     }
+    await upsertLiveState(client, rows);
     process.stdout.write(`  ${meter.serial}: ${rows.length} readings\n`);
   }
 }
