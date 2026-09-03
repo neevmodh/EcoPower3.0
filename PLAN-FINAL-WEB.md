@@ -14,7 +14,7 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 | 1 | Fix Realtime `Connecting… / Reconnecting…` tile (issue #70) | ☑ | Root cause: `meter_live_state` was never seeded, so SSR initial + poll fallback had no row. Both seeds now upsert it. `963c5fd`. Still needs the prod re-seed (below) to take effect on the live URL. Making it *actually* live = Tier 2 #6. |
 | 2 | `next lint` → working lint for `apps/web` | ☑ | Swapped to Biome (repo's existing linter), added build-output ignores, wired `pnpm lint` into CI. Fixed 20 findings (16× button type, deps, keys, non-null). `134cbe9`. |
 | 3 | Empty / loading / error state pass across all 17 pages | ☐ | |
-| 4 | Marketing page polish | ☐ | Subjective — check with user first. |
+| 4 | Marketing page polish | ◐ `8ea302e` — page was already strong; fixed the stale test count (185→290+) and added feature cards for loss localisation, prepaid, i18n. Copy voice/tone is still the user's call. |
 | 5 | CI guard: fail build if a secret reaches the client bundle (issue #9) | ☑ | `scripts/check_client_bundle.mjs` scans `.next/static` for env-var values + service_role/Razorpay fingerprints. In CI after build. `35f5761`. |
 | — | **Bonus:** pgTAP time-bomb — `main` CI was red | ☑ | `0005` pre-creates only current+next month partition; `invoices`/`payments` fixtures use fixed Aug-2026 dates → 16 subtests failing since the month rolled. Fixed `8fb39c6`. Not caused by this work — surfaced by it. |
 
