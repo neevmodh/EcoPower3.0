@@ -34,7 +34,7 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 |---|---|---|
 | 11 | i18n: en / hi / gu with a real switcher (issue #83) | 2.0 had it; Indian utility product needs it; judges will check. |
 | 12 | Prepaid as a first-class billing mode (issue #22) | Named in PS1. Currently only postpaid + PAYG. |
-| 13 | Append-only audit ledger + UI (issue #34) | Every disconnect / tariff-change / approval action, immutable, viewable. Utilities care about this a lot. |
+| 13 | Append-only audit ledger + UI (issue #34) | ☑ `5384390` — `audit_log` (0023), trigger-written, DB-enforced immutable, division/org RLS, `/discom/audit` page. 7 pgTAP (116 total). Migration needs `supabase db push` for prod. |
 | 14 | Operator + Field + Support panel depth pass | All ~100 lines each — functional but shallow. |
 | 15 | Demo seed: plant findable defects (issue #59) + runbook (#61) | The 7-minute rehearsed run. |
 
