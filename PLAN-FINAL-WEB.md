@@ -16,6 +16,7 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 | 3 | Empty / loading / error state pass across all 17 pages | ☐ | |
 | 4 | Marketing page polish | ☐ | Subjective — check with user first. |
 | 5 | CI guard: fail build if a secret reaches the client bundle (issue #9) | ☑ | `scripts/check_client_bundle.mjs` scans `.next/static` for env-var values + service_role/Razorpay fingerprints. In CI after build. `35f5761`. |
+| — | **Bonus:** pgTAP time-bomb — `main` CI was red | ☑ | `0005` pre-creates only current+next month partition; `invoices`/`payments` fixtures use fixed Aug-2026 dates → 16 subtests failing since the month rolled. Fixed `8fb39c6`. Not caused by this work — surfaced by it. |
 
 ## Tier 2 — Depth the judges will probe (utility execs)
 
