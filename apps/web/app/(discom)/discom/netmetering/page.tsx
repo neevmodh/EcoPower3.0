@@ -38,6 +38,7 @@ export default async function NetMeteringPage() {
         { href: "/discom/connections", label: "Connections" },
         { href: "/discom/losses", label: "AT&C losses" },
         { href: "/discom/netmetering", label: "Net-metering", active: true },
+        { href: "/discom/audit", label: "Audit log" },
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Net-metering applications</h1>

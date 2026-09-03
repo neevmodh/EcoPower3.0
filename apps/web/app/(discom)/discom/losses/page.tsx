@@ -30,6 +30,7 @@ export default async function DiscomLossesPage() {
         { href: "/discom/connections", label: "Connections" },
         { href: "/discom/losses", label: "AT&C losses", active: true },
         { href: "/discom/netmetering", label: "Net-metering" },
+        { href: "/discom/audit", label: "Audit log" },
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">DT loss map</h1>
