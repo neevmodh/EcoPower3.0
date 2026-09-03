@@ -7,6 +7,11 @@
 begin;
 select plan(8);
 
+-- 0005 pre-creates only the current + next month partition; these
+-- fixtures use fixed August 2026 dates, so ensure that partition exists
+-- regardless of when the suite runs (idempotent, rolled back with the txn).
+select create_monthly_partition(date '2026-08-01');
+
 insert into orgs (id, name, type) values ('d0000000-0000-0000-0000-000000000001', 'Test DISCOM', 'discom');
 insert into discom_divisions (id, discom_org_id, name, level) values
   ('d0000000-0000-0000-0000-00000000000a', 'd0000000-0000-0000-0000-000000000001', 'Division A', 'division');
