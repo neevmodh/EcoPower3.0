@@ -243,7 +243,7 @@ async function copyMeterReadingsInline(client, rows) {
   await new Promise((resolve, reject) => {
     copyStream.on("error", reject);
     copyStream.on("finish", resolve);
-    copyStream.end(csv + "\n");
+    copyStream.end(`${csv}\n`);
   });
   await client.query(
     `insert into meter_readings (${columnList}) select ${columnList} from _seed_batch on conflict (meter_id, reading_ts) do nothing`,

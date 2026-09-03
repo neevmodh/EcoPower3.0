@@ -65,7 +65,7 @@ async function createUser(email) {
   if (created.ok) return created.body.id;
 
   // Already exists — find it.
-  const list = await adminFetch(`/auth/v1/admin/users?page=1&per_page=200`);
+  const list = await adminFetch("/auth/v1/admin/users?page=1&per_page=200");
   const found = list.body?.users?.find((u) => u.email === email);
   if (found) return found.id;
 

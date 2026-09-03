@@ -79,7 +79,7 @@ async function main() {
         const dutyPaise = dutyAndTaxes(slabResult.totalPaise, fixedChargePaise, dutyBps);
 
         const invoice = composeInvoice([
-          ...slabResult.lines.map((l) => ({ kind: "energy_slab", label: `Energy`, amountPaise: l.amountPaise })),
+          ...slabResult.lines.map((l) => ({ kind: "energy_slab", label: "Energy", amountPaise: l.amountPaise })),
           { kind: "fixed", label: "Fixed charge", amountPaise: fixedChargePaise },
           { kind: "duty", label: "Electricity duty", amountPaise: dutyPaise },
         ]);

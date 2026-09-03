@@ -106,7 +106,7 @@ export async function copyMeterReadings(pool: Pool, rows: MeterReadingRow[]): Pr
     await new Promise<void>((resolve, reject) => {
       copyStream.on("error", reject);
       copyStream.on("finish", resolve);
-      copyStream.end(csv + "\n");
+      copyStream.end(`${csv}\n`);
     });
 
     await client.query(

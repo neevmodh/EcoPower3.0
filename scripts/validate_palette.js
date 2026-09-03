@@ -232,7 +232,7 @@ for (const theme of ["light", "dark"]) {
 
 sequentialCheck(palette.sequential);
 
-console.log("\n" + "-".repeat(60));
+console.log(`\n${"-".repeat(60)}`);
 if (failures > 0) {
   console.log(`\x1b[31mFAILED — ${failures} check(s) did not pass.\x1b[0m`);
   process.exit(1);
