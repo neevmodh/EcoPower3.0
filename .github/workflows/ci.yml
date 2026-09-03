@@ -30,6 +30,9 @@ jobs:
 
       - run: pnpm build
 
+      # Fail if a server-only secret reached the client bundle (#9).
+      - run: pnpm check:bundle
+
       - run: pnpm test
 
   rls-tests:

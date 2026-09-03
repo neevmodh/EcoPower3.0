@@ -7,7 +7,8 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "dev": "turbo run dev",
-    "validate:palette": "node scripts/validate_palette.js"
+    "validate:palette": "node scripts/validate_palette.js",
+    "check:bundle": "node scripts/check_client_bundle.mjs"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
