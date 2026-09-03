@@ -35,7 +35,8 @@ export default async function DiscomLossesPage() {
       <h1 className="text-2xl font-semibold mb-1">DT loss map</h1>
       <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
         Delivered (DT-head meter) vs. consumed (summed consumer meters), computed from real register reads — not a
-        UI badge. National AT&C average is 16.16% (Ministry of Power, FY25); RDSS targets 12–15%.
+        UI badge. National AT&C average is 16.16% (Ministry of Power, FY25); RDSS targets 12–15%. Open a DT to
+        localize its loss to specific consumers.
       </p>
 
       {rows.length === 0 ? (
@@ -57,7 +58,11 @@ export default async function DiscomLossesPage() {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.dt_id} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
-                  <td className="py-3 pr-4 font-medium">{r.dt_name}</td>
+                  <td className="py-3 pr-4 font-medium">
+                    <a href={`/discom/losses/${r.dt_id}`} className="underline">
+                      {r.dt_name}
+                    </a>
+                  </td>
                   <td className="py-3 pr-4 text-right tabular">{Number(r.delivered_kwh).toLocaleString("en-IN", { maximumFractionDigits: 0 })}</td>
                   <td className="py-3 pr-4 text-right tabular">{Number(r.consumed_kwh).toLocaleString("en-IN", { maximumFractionDigits: 0 })}</td>
                   <td className="py-3 pr-4 text-right tabular font-semibold" style={{ color: lossColor(r.loss_pct) }}>

@@ -84,8 +84,8 @@ export default async function DiscomPage() {
           <div className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
             <strong>{worstDt.dt_name}</strong> — {Number(worstDt.loss_pct).toFixed(1)}% loss over the last 120 days,
             computed from real delivered-vs-consumed meter reads.{" "}
-            <a href="/discom/losses" className="underline">
-              See the full DT loss map →
+            <a href={`/discom/losses/${worstDt.dt_id}`} className="underline">
+              Localize it →
             </a>
           </div>
         </div>

@@ -211,7 +211,7 @@ async function copyRows(client, columnList, rows) {
   await new Promise((resolve, reject) => {
     copyStream.on("error", reject);
     copyStream.on("finish", resolve);
-    copyStream.end(csv + "\n");
+    copyStream.end(`${csv}\n`);
   });
   await client.query(
     `insert into meter_readings (${columnList}) select ${columnList} from _fleet_batch on conflict (meter_id, reading_ts) do nothing`,
@@ -267,6 +267,19 @@ async function backfillConsumers(client, days) {
     dtOfMeter.set(meter.meter_id, meter.dt_id);
     const rand = mulberry32(meter.meter_id.split("-").reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 11));
     const pvCapacityKw = meter.sanctioned_load_kw ? Math.min(meter.sanctioned_load_kw, 5) : 3;
+
+    // One deliberately-planted defect for the theft-localization demo (#27,
+    // #59): AHD-A-300001 on the high-loss DT A-23 runs a partial CT bypass
+    // for the most recent 30 days — ~40% of the energy that physically
+    // flows through the DT to this connection never reaches its register,
+    // and the meter raises tamper bit 0x08 (cover/magnetic) on a slice of
+    // readings in that window. The DT-head meter still sees the full
+    // delivery (dailyMap below gets the TRUE delta), so delivered-minus-
+    // consumed widens and dt_consumer_breakdown() surfaces this exact
+    // consumer. Documented in DATA.md.
+    const TAMPER = meter.serial === "MTR-AHD-A-300001"
+      ? { sinceMs: 30 * 86400000, bypass: 0.4, flagBit: 8, flagRate: 0.18 }
+      : null;
     let cumImport = 0;
     let cumExport = 0;
     const profile = deriveHouseholdProfile(meter.serial, meter.sanctioned_load_kw ?? 4);
@@ -294,17 +307,24 @@ async function backfillConsumers(client, days) {
         ? pvYieldKw({ date: ts, hourUTC: ts.getUTCHours() + ts.getUTCMinutes() / 60, capacityKw: pvCapacityKw, cloudCoverFraction, ambientTempC })
         : 0;
       const netKw = loadKw - pvKw;
-      const deltaImport = Math.max(0, netKw) * (TICK_MINUTES / 60);
+      const trueDeltaImport = Math.max(0, netKw) * (TICK_MINUTES / 60);
       const deltaExport = Math.max(0, -netKw) * (TICK_MINUTES / 60);
+
+      const tampering = TAMPER != null && now.getTime() - ts.getTime() <= TAMPER.sinceMs;
+      const deltaImport = tampering ? trueDeltaImport * (1 - TAMPER.bypass) : trueDeltaImport;
+      const tamperFlags = tampering && rand() < TAMPER.flagRate ? TAMPER.flagBit : 0;
+
       cumImport += deltaImport;
       cumExport += deltaExport;
 
       rows.push([
         meter.meter_id, ts.toISOString(), round3(cumImport), round3(cumExport),
-        round3(deltaImport), round3(deltaExport), TICK_MINUTES * 60, "meter", "good", 0,
+        round3(deltaImport), round3(deltaExport), TICK_MINUTES * 60, "meter", "good", tamperFlags,
       ]);
 
-      dailyMap.set(dayKey, (dailyMap.get(dayKey) ?? 0) + deltaImport);
+      // The DT-head meter sees the energy that physically flowed, not what
+      // the (possibly bypassed) consumer register recorded.
+      dailyMap.set(dayKey, (dailyMap.get(dayKey) ?? 0) + trueDeltaImport);
 
       ts = new Date(ts.getTime() + TICK_MINUTES * 60 * 1000);
     }

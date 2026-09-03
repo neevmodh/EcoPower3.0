@@ -25,14 +25,22 @@ const DAYS = daysArg ? Number(daysArg.split("=")[1]) : 21;
 const TICK_MINUTES = 15;
 
 const SOCIETY_ORG_ID = "30000000-0000-0000-0000-000000000002";
-// Reuses the existing Division A / DT A-21 topology (seed_demo_users.mjs)
-// rather than inventing a second grid position for a demo housing society
-// — Sunrise Residency sits on the same feeder as the primary demo consumer.
-const DT_A21 = "30000000-0000-0000-0000-0000000000a3";
+// Sunrise Residency sits on Feeder A (same feeder as the primary demo
+// consumer) but on its OWN distribution transformer with a society main
+// meter — which is how a housing society is actually fed, and which keeps
+// its consumption out of DT A-21's loss accounting (a shared DT with no
+// head meter for the society's load would show a phantom negative loss).
+const FEEDER_A = "30000000-0000-0000-0000-0000000000a2";
 
 function uuid(seed) {
   return `30000000-0000-0000-0000-0001${seed}`;
 }
+
+const DT_SUN = uuid("00000d01"); // "DT A-24" — Sunrise Residency's own DT
+const DTM_SUN = uuid("0000ed01"); // its society-main / DT-head meter
+// A well-maintained in-society network: small, real distribution loss
+// between the society main and the flat sub-meters.
+const SOCIETY_LOSS_FACTOR = 0.025;
 
 // Six flats, allocation_pct summing to exactly 100 — a real, checkable
 // invariant the Allocation page displays and lets a society_admin edit.
@@ -98,12 +106,19 @@ function round3(n) {
 }
 
 async function seedUnitsAndMeters() {
+  await upsert("/rest/v1/distribution_transformers", [
+    { id: DT_SUN, feeder_id: FEEDER_A, name: "DT A-24", capacity_kva: 100 },
+  ]);
+  await upsert("/rest/v1/meters", [
+    { id: DTM_SUN, serial: "DTM-SUN", status: "active", dt_id: DT_SUN },
+  ]);
+
   await upsert(
     "/rest/v1/service_connections",
     UNITS.map((u) => ({
       id: u.id,
       consumer_number: u.consumerNumber,
-      dt_id: DT_A21,
+      dt_id: DT_SUN,
       owner_user_id: null,
       society_org_id: SOCIETY_ORG_ID,
       allocation_pct: u.allocationPct,
@@ -154,7 +169,7 @@ async function copyRows(client, columnList, rows) {
   await new Promise((resolve, reject) => {
     copyStream.on("error", reject);
     copyStream.on("finish", resolve);
-    copyStream.end(csv + "\n");
+    copyStream.end(`${csv}\n`);
   });
   await client.query(
     `insert into meter_readings (${columnList}) select ${columnList} from _society_batch on conflict (meter_id, reading_ts) do nothing`,
@@ -199,6 +214,9 @@ async function backfillUnits(client, days) {
     [SOCIETY_ORG_ID],
   );
 
+  // day (YYYY-MM-DD) -> summed flat consumption, for the society main meter.
+  const dailyTotal = new Map();
+
   for (const meter of unitMeters) {
     const rand = mulberry32(meter.meter_id.split("-").reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 17));
     let cumImport = 0;
@@ -228,6 +246,9 @@ async function backfillUnits(client, days) {
       const deltaImport = loadKw * (TICK_MINUTES / 60);
       cumImport += deltaImport;
 
+      const dayKey = ts.toISOString().slice(0, 10);
+      dailyTotal.set(dayKey, (dailyTotal.get(dayKey) ?? 0) + deltaImport);
+
       rows.push([
         meter.meter_id, ts.toISOString(), round3(cumImport), round3(cumExport),
         round3(deltaImport), 0, TICK_MINUTES * 60, "meter", "good", 0,
@@ -242,6 +263,24 @@ async function backfillUnits(client, days) {
     await upsertLiveState(client, rows);
     process.stdout.write(`  ${meter.serial}: ${rows.length} readings\n`);
   }
+
+  // Society main meter (DT head): delivered = summed flat consumption plus
+  // the small in-society distribution loss. One daily reading, same shape
+  // as seed_discom_fleet.mjs's DT-head meters, so dt_loss_summary() has a
+  // real delivered-vs-consumed reference for DT A-24.
+  const headRows = [];
+  let cumHead = 0;
+  for (const day of [...dailyTotal.keys()].sort()) {
+    const delivered = dailyTotal.get(day) * (1 + SOCIETY_LOSS_FACTOR);
+    cumHead += delivered;
+    headRows.push([
+      DTM_SUN, new Date(`${day}T12:00:00.000Z`).toISOString(), round3(cumHead), 0,
+      round3(delivered), 0, 86400, "meter", "good", 0,
+    ]);
+  }
+  await copyRows(client, COLUMNS, headRows);
+  await upsertLiveState(client, headRows);
+  process.stdout.write(`  DTM-SUN: ${headRows.length} daily readings (society main, ${(SOCIETY_LOSS_FACTOR * 100).toFixed(1)}% loss)\n`);
 }
 
 async function main() {

@@ -175,6 +175,8 @@ Seeded deliberately, each with a physically plausible signature:
 
 The DT chosen for the theft scenario sits in the division modelled on PGVCL's real loss profile — so the story is internally consistent from national statistic down to individual meter.
 
+**Implemented (`scripts/seed_discom_fleet.mjs`):** consumer `AHD-A-300001` on `DT A-23` (the deliberately ageing, high-loss transformer) runs a partial CT bypass for the most recent 30 days — ~40% of the energy that physically flows to the connection never reaches its register, and the meter raises tamper bit `0x08` (cover/magnetic) on ~18% of readings in that window. The DT-head meter still records the full delivery, so `dt_loss_summary()` shows A-23's loss widen and `dt_consumer_breakdown()` (0022) ranks `AHD-A-300001` first with a tamper-flag reason. This is the one planted defect wired end-to-end today; the rest of the table above is still aspirational.
+
 ### 4.4 Volume
 `generate_series` to **10M+ rows** (#58) with a realistic diurnal and seasonal shape, so on-stage query timings and the loss map are measured on real volume.
 
