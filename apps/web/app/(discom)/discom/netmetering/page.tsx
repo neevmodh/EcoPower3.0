@@ -38,6 +38,7 @@ export default async function NetMeteringPage() {
         { href: "/discom/connections", label: "Connections" },
         { href: "/discom/losses", label: "AT&C losses" },
         { href: "/discom/netmetering", label: "Net-metering", active: true },
+        { href: "/discom/prepaid", label: "Prepaid" },
         { href: "/discom/audit", label: "Audit log" },
       ]}
     >

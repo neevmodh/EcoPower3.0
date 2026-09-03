@@ -26,6 +26,7 @@ export default async function DiscomConnectionsPage() {
         { href: "/discom/connections", label: "Connections", active: true },
         { href: "/discom/losses", label: "AT&C losses" },
         { href: "/discom/netmetering", label: "Net-metering" },
+        { href: "/discom/prepaid", label: "Prepaid" },
         { href: "/discom/audit", label: "Audit log" },
       ]}
     >

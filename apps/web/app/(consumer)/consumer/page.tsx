@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
 import { StatTile } from "@/components/StatTile";
 import { LiveMeterTile } from "@/components/LiveMeterTile";
+import { PrepaidBalanceCard } from "@/components/PrepaidBalanceCard";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,6 +30,16 @@ export default async function ConsumerPage() {
         .from("meter_live_state")
         .select("meter_id, last_reading_ts, kwh_import, kwh_export")
         .eq("meter_id", meter.id)
+        .maybeSingle()
+    : { data: null };
+
+  // Prepaid account for the first prepaid connection, if any (#22).
+  const prepaidConnection = (connections ?? []).find((c) => c.connection_type === "prepaid");
+  const { data: prepaid } = prepaidConnection
+    ? await supabase
+        .from("prepaid_accounts")
+        .select("balance_paise, low_balance_threshold_paise, disconnect_pending")
+        .eq("service_connection_id", prepaidConnection.id)
         .maybeSingle()
     : { data: null };
 
@@ -65,7 +76,16 @@ export default async function ConsumerPage() {
           // 0.0 with a badge. The exact distinction #68 exists to enforce.
           <StatTile icon="☀️" label="Solar generated" value={null} unit="kWh" />
         )}
-        <StatTile icon="₹" label="Est. savings" valuePaise={null} />
+        {prepaid && prepaidConnection ? (
+          <PrepaidBalanceCard
+            connectionId={prepaidConnection.id}
+            balancePaise={Number(prepaid.balance_paise)}
+            thresholdPaise={Number(prepaid.low_balance_threshold_paise)}
+            disconnectPending={prepaid.disconnect_pending}
+          />
+        ) : (
+          <StatTile icon="₹" label="Est. savings" valuePaise={null} />
+        )}
       </div>
 
       <h1 className="text-2xl font-semibold mb-6">My connections</h1>

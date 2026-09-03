@@ -147,7 +147,9 @@ async function main() {
         owner_user_id: userIds.consumer,
         tariff_category: "RGP",
         phase: "single",
-        connection_type: "postpaid",
+        // Prepaid (#22) — the more interesting consumer demo: a live
+        // balance drawn down daily, a recharge flow, a low-balance state.
+        connection_type: "prepaid",
         sanctioned_load_kw: 5,
         connected_load_kw: 4.2,
       },
@@ -261,6 +263,30 @@ async function main() {
         capacity_kw: 5,
         applicant_notes: "5kW rooftop array, commissioned under COM-2026-0001.",
       },
+    ],
+  });
+
+  // Prepaid account for the demo consumer's connection — recharged ₹500 a
+  // few weeks ago, drawn down to ₹80, now under its ₹100 threshold so the
+  // consumer panel shows the low-balance state and the DISCOM panel lists
+  // it in the prepaid oversight queue.
+  await sql({
+    path: "/rest/v1/prepaid_accounts",
+    rows: [
+      {
+        service_connection_id: "30000000-0000-0000-0000-0000000000a4",
+        balance_paise: 8000,
+        vend_rate_paise_per_kwh: 650,
+        low_balance_threshold_paise: 10000,
+        disconnect_pending: true,
+      },
+    ],
+  });
+  await sql({
+    path: "/rest/v1/prepaid_ledger",
+    rows: [
+      { service_connection_id: "30000000-0000-0000-0000-0000000000a4", kind: "recharge", amount_paise: 50000, balance_after_paise: 50000, detail: { source: "app" } },
+      { service_connection_id: "30000000-0000-0000-0000-0000000000a4", kind: "debit", amount_paise: -42000, balance_after_paise: 8000, detail: { note: "cumulative daily settlement" } },
     ],
   });
 
