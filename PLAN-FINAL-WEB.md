@@ -32,7 +32,7 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 
 | # | Task | Why |
 |---|---|---|
-| 11 | i18n: en / hi / gu with a real switcher (issue #83) | 2.0 had it; Indian utility product needs it; judges will check. |
+| 11 | i18n: en / hi / gu with a real switcher (#83) | ☑ `da28988` — dependency-free (cookie + JSON), `messages/{en,hi,gu}.json`, `LocaleSwitcher`, en fallback. Login + consumer panel translated end to end. Scoped to consumer surfaces on purpose (PS1's low-literacy req); key set is the full contract, extending = more keys. |
 | 12 | Prepaid as a first-class billing mode (#22) | ☑ `843d2a5` — `prepaid_accounts` + append-only `prepaid_ledger` (0024), `prepaid_recharge()` RPC, `prepaid_settle_day()` on pg_cron, `PrepaidBalanceCard` on /consumer, `/discom/prepaid` watch list. Demo consumer is now prepaid at ₹80. 9 pgTAP (125 total). Migration needs `supabase db push`. |
 | 13 | Append-only audit ledger + UI (issue #34) | ☑ `5384390` — `audit_log` (0023), trigger-written, DB-enforced immutable, division/org RLS, `/discom/audit` page. 7 pgTAP (116 total). Migration needs `supabase db push` for prod. |
 | 14 | Operator + Field + Support panel depth pass | All ~100 lines each — functional but shallow. |
