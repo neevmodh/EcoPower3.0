@@ -1,0 +1,47 @@
+{
+  "login.tagline.title": "એનર્જી-એઝ-અ-સર્વિસ, પ્રમાણિત બિલિંગ પર આધારિત.",
+  "login.tagline.body": "દરેક રીડિંગ તેના મીટર સુધી ટ્રેસ થાય છે. દરેક ઇનવોઇસ લાઇન બે રજિસ્ટર રીડિંગ સુધી ટ્રેસ થાય છે. દરેક પેનલ રો-લેવલ સુરક્ષાથી મર્યાદિત છે, માત્ર UI તપાસથી નહીં.",
+  "login.heading": "સાઇન ઇન કરો",
+  "login.subheading": "EcoPower માં તમારું ફરી સ્વાગત છે.",
+  "login.email": "ઇમેઇલ",
+  "login.password": "પાસવર્ડ",
+  "login.submit": "સાઇન ઇન કરો",
+  "login.demoAccounts": "ડેમો ખાતાં",
+  "login.demoHint": "એક ક્લિક, કોઈ પાસવર્ડ યાદ રાખવાની જરૂર નથી — દરેક પેનલ તૈયાર છે.",
+  "login.role.consumer": "ગ્રાહક",
+  "login.role.society": "સોસાયટી એડમિન",
+  "login.role.discom": "ડિસ્કોમ અધિકારી",
+  "login.role.operator": "ઓપરેટર",
+  "login.role.field": "ફિલ્ડ ટેકનિશિયન",
+  "login.role.support": "સપોર્ટ એજન્ટ",
+
+  "nav.myEnergy": "મારી ઊર્જા",
+  "nav.bills": "બિલ",
+  "nav.plan": "પ્લાન",
+  "nav.analytics": "વિશ્લેષણ",
+  "nav.support": "સહાય",
+  "nav.signOut": "સાઇન આઉટ",
+
+  "consumer.panelName": "ગ્રાહક પેનલ",
+  "consumer.stat.connections": "કનેક્શન",
+  "consumer.stat.liveImport": "લાઇવ વપરાશ",
+  "consumer.stat.solarGenerated": "સૌર ઉત્પાદન",
+  "consumer.stat.estSavings": "અંદાજિત બચત",
+  "consumer.connections.heading": "મારા કનેક્શન",
+  "consumer.connections.none": "આ ખાતા સાથે હજુ સુધી કોઈ કનેક્શન જોડાયેલું નથી.",
+  "consumer.connections.sanctioned": "{kw} kW મંજૂર ભાર",
+  "consumer.noMeter": "હજુ સુધી કોઈ મીટર ચાલુ થયું નથી.",
+
+  "prepaid.balance": "પ્રીપેડ બેલેન્સ",
+  "prepaid.balance.low": "પ્રીપેડ બેલેન્સ · ઓછું",
+  "prepaid.belowThreshold": "કપાત મર્યાદાથી નીચે — કનેક્શન જાળવવા રિચાર્જ કરો.",
+  "prepaid.recharge": "રિચાર્જ કરો",
+
+  "conn.connecting": "કનેક્ટ થઈ રહ્યું છે…",
+  "conn.live": "લાઇવ",
+  "conn.reconnecting": "ફરી કનેક્ટ થઈ રહ્યું છે…",
+  "conn.polling": "પોલિંગ (5 સેકન્ડ)",
+
+  "common.asOf": "{time} સુધી",
+  "common.loading": "લોડ થઈ રહ્યું છે…"
+}

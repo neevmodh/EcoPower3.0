@@ -70,11 +70,17 @@ export function PanelShell({
   email,
   nav,
   children,
+  panelLabel,
+  signOutLabel = "Sign out",
+  headerExtra,
 }: {
   panel: PanelKey;
   email: string;
   nav: Array<{ href: string; label: string; active?: boolean }>;
   children: React.ReactNode;
+  panelLabel?: string; // translated "<Panel> panel" chip; defaults to English
+  signOutLabel?: string;
+  headerExtra?: React.ReactNode; // e.g. a LocaleSwitcher, rendered in the header
 }) {
   const accent = ACCENTS[panel];
   const initial = email ? email[0]?.toUpperCase() : "?";
@@ -129,7 +135,7 @@ export function PanelShell({
               className="w-full text-xs rounded-control border px-2 py-1.5 transition-colors duration-state hover:opacity-80"
               style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
             >
-              Sign out
+              {signOutLabel}
             </button>
           </form>
         </div>
@@ -145,9 +151,10 @@ export function PanelShell({
             style={{ background: accent, color: "#fff" }}
           >
             <span aria-hidden="true">{ICONS[panel]}</span>
-            {LABELS[panel]} panel
+            {panelLabel ?? `${LABELS[panel]} panel`}
           </span>
           <div className="flex items-center gap-4">
+            {headerExtra}
             <NotificationBell />
             <span className="text-sm tabular" style={{ color: "var(--color-text-secondary)" }}>
               {email}

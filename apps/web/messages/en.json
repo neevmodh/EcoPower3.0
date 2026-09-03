@@ -1,0 +1,47 @@
+{
+  "login.tagline.title": "Energy-as-a-Service, built on provable billing.",
+  "login.tagline.body": "Every reading traced to its meter. Every invoice line traced to two register reads. Every panel scoped by row-level security, not a UI check.",
+  "login.heading": "Sign in",
+  "login.subheading": "Welcome back to EcoPower.",
+  "login.email": "Email",
+  "login.password": "Password",
+  "login.submit": "Sign in",
+  "login.demoAccounts": "Demo accounts",
+  "login.demoHint": "One click, no password to remember — every panel, seeded and ready to explore.",
+  "login.role.consumer": "Consumer",
+  "login.role.society": "Society admin",
+  "login.role.discom": "DISCOM officer",
+  "login.role.operator": "Operator",
+  "login.role.field": "Field technician",
+  "login.role.support": "Support agent",
+
+  "nav.myEnergy": "My energy",
+  "nav.bills": "Bills",
+  "nav.plan": "Plan",
+  "nav.analytics": "Analytics",
+  "nav.support": "Support",
+  "nav.signOut": "Sign out",
+
+  "consumer.panelName": "Consumer panel",
+  "consumer.stat.connections": "Connections",
+  "consumer.stat.liveImport": "Live import",
+  "consumer.stat.solarGenerated": "Solar generated",
+  "consumer.stat.estSavings": "Est. savings",
+  "consumer.connections.heading": "My connections",
+  "consumer.connections.none": "No connection linked to this account yet.",
+  "consumer.connections.sanctioned": "{kw} kW sanctioned",
+  "consumer.noMeter": "No meter commissioned yet.",
+
+  "prepaid.balance": "Prepaid balance",
+  "prepaid.balance.low": "Prepaid balance · low",
+  "prepaid.belowThreshold": "Below the disconnection threshold — recharge to stay connected.",
+  "prepaid.recharge": "Recharge",
+
+  "conn.connecting": "Connecting…",
+  "conn.live": "Live",
+  "conn.reconnecting": "Reconnecting…",
+  "conn.polling": "Polling (5s)",
+
+  "common.asOf": "as of {time}",
+  "common.loading": "Loading…"
+}

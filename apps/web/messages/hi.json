@@ -1,0 +1,47 @@
+{
+  "login.tagline.title": "एनर्जी-ऐज़-अ-सर्विस, प्रमाणिक बिलिंग पर आधारित।",
+  "login.tagline.body": "हर रीडिंग अपने मीटर तक ट्रेस होती है। हर इनवॉइस लाइन दो रजिस्टर रीडिंग तक ट्रेस होती है। हर पैनल रो-लेवल सुरक्षा से सीमित है, केवल UI जाँच से नहीं।",
+  "login.heading": "साइन इन करें",
+  "login.subheading": "EcoPower में आपका फिर से स्वागत है।",
+  "login.email": "ईमेल",
+  "login.password": "पासवर्ड",
+  "login.submit": "साइन इन करें",
+  "login.demoAccounts": "डेमो खाते",
+  "login.demoHint": "एक क्लिक, कोई पासवर्ड याद रखने की ज़रूरत नहीं — हर पैनल तैयार है।",
+  "login.role.consumer": "उपभोक्ता",
+  "login.role.society": "सोसायटी एडमिन",
+  "login.role.discom": "डिस्कॉम अधिकारी",
+  "login.role.operator": "ऑपरेटर",
+  "login.role.field": "फ़ील्ड तकनीशियन",
+  "login.role.support": "सहायता एजेंट",
+
+  "nav.myEnergy": "मेरी ऊर्जा",
+  "nav.bills": "बिल",
+  "nav.plan": "प्लान",
+  "nav.analytics": "विश्लेषण",
+  "nav.support": "सहायता",
+  "nav.signOut": "साइन आउट",
+
+  "consumer.panelName": "उपभोक्ता पैनल",
+  "consumer.stat.connections": "कनेक्शन",
+  "consumer.stat.liveImport": "लाइव खपत",
+  "consumer.stat.solarGenerated": "सौर उत्पादन",
+  "consumer.stat.estSavings": "अनुमानित बचत",
+  "consumer.connections.heading": "मेरे कनेक्शन",
+  "consumer.connections.none": "इस खाते से अभी तक कोई कनेक्शन नहीं जुड़ा है।",
+  "consumer.connections.sanctioned": "{kw} kW स्वीकृत भार",
+  "consumer.noMeter": "अभी तक कोई मीटर चालू नहीं हुआ है।",
+
+  "prepaid.balance": "प्रीपेड बैलेंस",
+  "prepaid.balance.low": "प्रीपेड बैलेंस · कम",
+  "prepaid.belowThreshold": "कटौती सीमा से नीचे — कनेक्शन बनाए रखने के लिए रिचार्ज करें।",
+  "prepaid.recharge": "रिचार्ज करें",
+
+  "conn.connecting": "कनेक्ट हो रहा है…",
+  "conn.live": "लाइव",
+  "conn.reconnecting": "फिर से कनेक्ट हो रहा है…",
+  "conn.polling": "पोलिंग (5 सेकंड)",
+
+  "common.asOf": "{time} तक",
+  "common.loading": "लोड हो रहा है…"
+}

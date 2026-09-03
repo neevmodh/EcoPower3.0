@@ -12,12 +12,19 @@ export function PrepaidBalanceCard({
   balancePaise,
   thresholdPaise,
   disconnectPending,
+  labels,
 }: {
   connectionId: string;
   balancePaise: number;
   thresholdPaise: number;
   disconnectPending: boolean;
+  labels?: { balance: string; balanceLow: string; belowThreshold: string };
 }) {
+  const L = labels ?? {
+    balance: "Prepaid balance",
+    balanceLow: "Prepaid balance · low",
+    belowThreshold: "Below the disconnection threshold — recharge to stay connected.",
+  };
   const router = useRouter();
   const [busy, setBusy] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +58,7 @@ export function PrepaidBalanceCard({
       }}
     >
       <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>
-        Prepaid balance{low ? " · low" : ""}
+        {low ? L.balanceLow : L.balance}
       </div>
       <div
         className="text-2xl font-semibold tabular"
@@ -61,7 +68,7 @@ export function PrepaidBalanceCard({
       </div>
       {disconnectPending && (
         <div className="text-xs mt-1" style={{ color: "var(--color-status-serious)" }}>
-          Below the disconnection threshold — recharge to stay connected.
+          {L.belowThreshold}
         </div>
       )}
       <div className="flex gap-2 mt-3">

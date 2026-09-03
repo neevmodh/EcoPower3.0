@@ -3,7 +3,9 @@ import { PanelShell } from "@/components/PanelShell";
 import { StatTile } from "@/components/StatTile";
 import { LiveMeterTile } from "@/components/LiveMeterTile";
 import { PrepaidBalanceCard } from "@/components/PrepaidBalanceCard";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { getScope } from "@/lib/auth";
+import { getLocale, getT } from "@/lib/i18n.server";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ConsumerPage() {
@@ -11,6 +13,8 @@ export default async function ConsumerPage() {
   const scope = await getScope(supabase);
   if (!scope) redirect("/login");
   const { user } = scope;
+  const t = await getT();
+  const locale = await getLocale();
 
   // No owner filter here either — RLS scopes it to this consumer's rows.
   const { data: connections } = await supabase
@@ -47,16 +51,19 @@ export default async function ConsumerPage() {
     <PanelShell
       panel="consumer"
       email={user.email ?? ""}
+      panelLabel={t("consumer.panelName")}
+      signOutLabel={t("nav.signOut")}
+      headerExtra={<LocaleSwitcher current={locale} />}
       nav={[
-        { href: "/consumer", label: "My energy", active: true },
-        { href: "/consumer/bills", label: "Bills" },
-        { href: "/consumer/plan", label: "Plan" },
-        { href: "/consumer/analytics", label: "Analytics" },
-        { href: "/consumer/support", label: "Support" },
+        { href: "/consumer", label: t("nav.myEnergy"), active: true },
+        { href: "/consumer/bills", label: t("nav.bills") },
+        { href: "/consumer/plan", label: t("nav.plan") },
+        { href: "/consumer/analytics", label: t("nav.analytics") },
+        { href: "/consumer/support", label: t("nav.support") },
       ]}
     >
       <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
-        <StatTile icon="⚡" label="Connections" value={connections?.length ?? 0} />
+        <StatTile icon="⚡" label={t("consumer.stat.connections")} value={connections?.length ?? 0} />
         {meter ? (
           <LiveMeterTile
             meterId={meter.id}
@@ -74,7 +81,7 @@ export default async function ConsumerPage() {
         ) : (
           // No meter commissioned yet — honestly no data, not a fabricated
           // 0.0 with a badge. The exact distinction #68 exists to enforce.
-          <StatTile icon="☀️" label="Solar generated" value={null} unit="kWh" />
+          <StatTile icon="☀️" label={t("consumer.stat.solarGenerated")} value={null} unit="kWh" />
         )}
         {prepaid && prepaidConnection ? (
           <PrepaidBalanceCard
@@ -82,17 +89,20 @@ export default async function ConsumerPage() {
             balancePaise={Number(prepaid.balance_paise)}
             thresholdPaise={Number(prepaid.low_balance_threshold_paise)}
             disconnectPending={prepaid.disconnect_pending}
+            labels={{
+              balance: t("prepaid.balance"),
+              balanceLow: t("prepaid.balance.low"),
+              belowThreshold: t("prepaid.belowThreshold"),
+            }}
           />
         ) : (
-          <StatTile icon="₹" label="Est. savings" valuePaise={null} />
+          <StatTile icon="₹" label={t("consumer.stat.estSavings")} valuePaise={null} />
         )}
       </div>
 
-      <h1 className="text-2xl font-semibold mb-6">My connections</h1>
+      <h1 className="text-2xl font-semibold mb-6">{t("consumer.connections.heading")}</h1>
       {(connections ?? []).length === 0 ? (
-        <p style={{ color: "var(--color-text-secondary)" }}>
-          No connection linked to this account yet.
-        </p>
+        <p style={{ color: "var(--color-text-secondary)" }}>{t("consumer.connections.none")}</p>
       ) : (
         <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
           {(connections ?? []).map((c) => (
@@ -106,7 +116,9 @@ export default async function ConsumerPage() {
               </div>
               <div className="text-xl tabular">{c.consumer_number}</div>
               <div className="text-sm mt-2 tabular" style={{ color: "var(--color-text-secondary)" }}>
-                {c.sanctioned_load_kw != null ? `${c.sanctioned_load_kw} kW sanctioned` : "—"}
+                {c.sanctioned_load_kw != null
+                  ? t("consumer.connections.sanctioned", { kw: c.sanctioned_load_kw })
+                  : "—"}
               </div>
             </div>
           ))}

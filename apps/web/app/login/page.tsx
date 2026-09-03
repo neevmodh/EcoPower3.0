@@ -1,18 +1,20 @@
 import { redirect } from "next/navigation";
 import { getScope, scopeFromToken } from "@/lib/auth";
+import { getLocale, getT } from "@/lib/i18n.server";
 import { landingFor } from "@/lib/landing";
 import { createClient } from "@/lib/supabase/server";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { Logo } from "@/components/Logo";
 
 const DEMO_PASSWORD = "EcoPower!2026";
 
 const DEMO_ACCOUNTS = [
-  { role: "Consumer", email: "consumer@ecopower.demo", accent: "var(--color-categorical-third)", icon: "🏠" },
-  { role: "Society admin", email: "society@ecopower.demo", accent: "#7c5cd6", icon: "🏢" },
-  { role: "DISCOM officer", email: "discom@ecopower.demo", accent: "var(--color-categorical-consumption)", icon: "⚡" },
-  { role: "Operator", email: "operator@ecopower.demo", accent: "#5c6470", icon: "🛠️" },
-  { role: "Field technician", email: "field@ecopower.demo", accent: "var(--color-categorical-generation)", icon: "📶" },
-  { role: "Support agent", email: "support@ecopower.demo", accent: "#0d9488", icon: "🎧" },
+  { key: "login.role.consumer", email: "consumer@ecopower.demo", accent: "var(--color-categorical-third)", icon: "🏠" },
+  { key: "login.role.society", email: "society@ecopower.demo", accent: "#7c5cd6", icon: "🏢" },
+  { key: "login.role.discom", email: "discom@ecopower.demo", accent: "var(--color-categorical-consumption)", icon: "⚡" },
+  { key: "login.role.operator", email: "operator@ecopower.demo", accent: "#5c6470", icon: "🛠️" },
+  { key: "login.role.field", email: "field@ecopower.demo", accent: "var(--color-categorical-generation)", icon: "📶" },
+  { key: "login.role.support", email: "support@ecopower.demo", accent: "#0d9488", icon: "🎧" },
 ];
 
 export default async function LoginPage({
@@ -27,6 +29,9 @@ export default async function LoginPage({
   if (scope) {
     redirect(landingFor(scope.roles));
   }
+
+  const t = await getT();
+  const locale = await getLocale();
 
   async function signIn(formData: FormData) {
     "use server";
@@ -61,15 +66,8 @@ export default async function LoginPage({
         </div>
 
         <div className="text-white">
-          <h1 className="text-4xl font-semibold leading-tight mb-4">
-            Energy-as-a-Service,
-            <br />
-            built on provable billing.
-          </h1>
-          <p className="text-lg opacity-90 max-w-md">
-            Every reading traced to its meter. Every invoice line traced to two register reads.
-            Every panel scoped by row-level security, not a UI check.
-          </p>
+          <h1 className="text-4xl font-semibold leading-tight mb-4">{t("login.tagline.title")}</h1>
+          <p className="text-lg opacity-90 max-w-md">{t("login.tagline.body")}</p>
         </div>
 
         <div className="text-white/70 text-sm">Ahmedabad · INSTINCT 4.0</div>
@@ -90,9 +88,12 @@ export default async function LoginPage({
       {/* Sign-in panel */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
-          <h2 className="text-2xl font-semibold mb-1">Sign in</h2>
+          <div className="flex justify-end mb-4">
+            <LocaleSwitcher current={locale} />
+          </div>
+          <h2 className="text-2xl font-semibold mb-1">{t("login.heading")}</h2>
           <p className="text-sm mb-8" style={{ color: "var(--color-text-secondary)" }}>
-            Welcome back to EcoPower.
+            {t("login.subheading")}
           </p>
 
           {params.error && (
@@ -106,7 +107,7 @@ export default async function LoginPage({
 
           <form action={signIn}>
             <label className="block text-sm mb-1" htmlFor="email">
-              Email
+              {t("login.email")}
             </label>
             <input
               id="email"
@@ -119,7 +120,7 @@ export default async function LoginPage({
             />
 
             <label className="block text-sm mb-1" htmlFor="password">
-              Password
+              {t("login.password")}
             </label>
             <input
               id="password"
@@ -136,20 +137,20 @@ export default async function LoginPage({
               className="w-full rounded-control py-2 text-sm font-medium transition-colors duration-state"
               style={{ background: "var(--color-categorical-third)", color: "#fff" }}
             >
-              Sign in
+              {t("login.submit")}
             </button>
           </form>
 
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px" style={{ background: "var(--color-border)" }} />
             <span className="text-xs uppercase tracking-wide" style={{ color: "var(--color-text-secondary)" }}>
-              Demo accounts
+              {t("login.demoAccounts")}
             </span>
             <div className="flex-1 h-px" style={{ background: "var(--color-border)" }} />
           </div>
 
           <p className="text-xs mb-3" style={{ color: "var(--color-text-secondary)" }}>
-            One click, no password to remember — every panel, seeded and ready to explore.
+            {t("login.demoHint")}
           </p>
 
           <div className="grid grid-cols-1 gap-2">
@@ -169,7 +170,7 @@ export default async function LoginPage({
                     {account.icon}
                   </span>
                   <span className="flex-1">
-                    <span className="block font-medium">{account.role}</span>
+                    <span className="block font-medium">{t(account.key)}</span>
                     <span className="block text-xs tabular" style={{ color: "var(--color-text-secondary)" }}>
                       {account.email}
                     </span>
