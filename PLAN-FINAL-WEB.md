@@ -9,13 +9,13 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 
 ## Tier 1 — Finish & de-embarrass (do first, all low-risk)
 
-| # | Task | Why | Files |
+| # | Task | Status | Notes |
 |---|---|---|---|
-| 1 | Fix Realtime `Connecting… / Reconnecting…` tile — honest ConnectionState (issue #70) | It's the first thing anyone sees on the consumer panel and it never resolves. Either fix the subscription or show a truthful "last reading 4s ago" state. | `components/LiveMeterTile.tsx`, `components/ConnectionIndicator.tsx` |
-| 2 | `next lint` → real ESLint config for `apps/web` | `pnpm lint` currently drops into an interactive prompt and fails. | `apps/web/eslint.config.mjs`, `package.json` |
-| 3 | Empty / loading / error state pass across all 17 pages | Several pages assume data exists. Finished apps degrade gracefully. | all `app/**/page.tsx` |
-| 4 | Marketing page polish — tighten hero, real live pricing already there, add a "how it works" + proof strip | Landing page is the pitch's first 10 seconds. | `app/(marketing)/page.tsx` |
-| 5 | CI guard: fail build if a secret reaches the client bundle (issue #9) | Cheap, and one leaked `SUPABASE_SERVICE_ROLE_KEY` in a client chunk ends the pitch. | `.github/workflows/`, `scripts/` |
+| 1 | Fix Realtime `Connecting… / Reconnecting…` tile (issue #70) | ☑ | Root cause: `meter_live_state` was never seeded, so SSR initial + poll fallback had no row. Both seeds now upsert it. `963c5fd`. Still needs the prod re-seed (below) to take effect on the live URL. Making it *actually* live = Tier 2 #6. |
+| 2 | `next lint` → working lint for `apps/web` | ☑ | Swapped to Biome (repo's existing linter), added build-output ignores, wired `pnpm lint` into CI. Fixed 20 findings (16× button type, deps, keys, non-null). `134cbe9`. |
+| 3 | Empty / loading / error state pass across all 17 pages | ☐ | |
+| 4 | Marketing page polish | ☐ | Subjective — check with user first. |
+| 5 | CI guard: fail build if a secret reaches the client bundle (issue #9) | ☑ | `scripts/check_client_bundle.mjs` scans `.next/static` for env-var values + service_role/Razorpay fingerprints. In CI after build. `35f5761`. |
 
 ## Tier 2 — Depth the judges will probe (utility execs)
 
@@ -40,6 +40,26 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 ## Sequencing
 
 Tier 1 top-to-bottom → Tier 2 → Tier 3. Each task: real data or a real DB trigger, pgTAP where it touches RLS, `pnpm build` + `pnpm test` green, live-verified on the deployed URL, committed with a worklog note. Push to `main` as I go (neevmodh identity).
+
+## Prod re-seed needed (classifier blocks me from running it)
+
+The earlier prod seed wrote topology via PostgREST but the 120-day `meter_readings`
+backfill went to **local** Supabase (DATABASE_URL defaulted to localhost). Prod has
+meters but no readings and no `meter_live_state`. Run, from repo root:
+
+```bash
+cd apps/web && vercel env pull .env.production.local --environment=production --yes
+set -a && source .env.production.local && set +a
+export SUPABASE_URL="https://vdjzhvlwwzxelckrjbuj.supabase.co"
+export SUPABASE_SERVICE_ROLE_KEY="<service_role from secrets/supabase-ecopower3.md>"
+# DATABASE_URL: copy the "Session pooler" URI from the Supabase dashboard
+# (Project → Connect); DB password is in secrets/supabase-ecopower3.md.
+export DATABASE_URL="<session-pooler URI>"
+cd ..
+./services/ingest/node_modules/.bin/tsx scripts/seed_discom_fleet.mjs --days=120
+./services/ingest/node_modules/.bin/tsx scripts/seed_society_units.mjs --days=21
+rm apps/web/.env.production.local
+```
 
 ## Needs you (parallel, not blocking the above)
 
