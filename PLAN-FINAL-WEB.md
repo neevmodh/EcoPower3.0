@@ -23,7 +23,7 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 | # | Task | Why | Files |
 |---|---|---|---|
 | 6 | Simulator scenario control API (issue #13) — `POST /scenario/theft`, `/surge`, `/outage` | The single strongest demo moment: trigger theft, watch the DISCOM loss number move in <1s. Currently no way to drive it live. | `apps/simulator/src/`, new `services` route |
-| 7 | DISCOM: theft / loss localization drill-down (issue #27, deterministic not ML) | From "DT X has 19% loss" → the 3 suspect consumers under it, ranked by unexplained delta. Closes the loop on the loss map. | `app/(discom)/discom/losses/`, new RPC migration |
+| 7 | DISCOM theft / loss localization drill-down (#27) | ☑ `32d4e57` — `dt_consumer_breakdown()` RPC (0022) + `/discom/losses/[dtId]` page + links + 6 pgTAP. Planted defect on AHD-A-300001 (#59 partial). Fixed a phantom -18% loss on DT A-21 by moving the society to its own DT. **Migration deploys to prod on next `supabase db push`.** |
 | 8 | Golden-file billing tests + 12 correctness properties (issues #24, #25) | ☑ `f278da4` — 12 golden (exact paise, real Torrent RGP tariff) + 15 properties (400 seeded cases each). 62 billing tests total. |
 | 9 | Consumer analytics — month-over-month grid import | ◐ MoM comparison card added (only when both months fully covered — no fake headline). Slab-position + load disaggregation deferred (disaggregation risks synthetic numbers → P1). |
 | 10 | Notifications actually delivered + bell badge live | Bell exists; wire it to the `0019_workflows` triggers so outage/payment/ticket events show up. | `components/NotificationBell.tsx` |
