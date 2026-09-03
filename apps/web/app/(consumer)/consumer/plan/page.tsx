@@ -32,7 +32,7 @@ export default async function ConsumerPlanPage({
   searchParams: Promise<{ cycle?: string }>;
 }) {
   const { cycle: cycleParam } = await searchParams;
-  const cycle = CYCLE_TABS.some((t) => t.key === cycleParam) ? cycleParam! : "monthly";
+  const cycle = CYCLE_TABS.find((t) => t.key === cycleParam)?.key ?? "monthly";
 
   const supabase = await createClient();
   const scope = await getScope(supabase);

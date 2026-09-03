@@ -37,6 +37,7 @@ export function NetMeteringApplyForm({
           kW
         </span>
         <button
+          type="button"
           disabled={busy}
           onClick={async () => {
             setBusy(true);

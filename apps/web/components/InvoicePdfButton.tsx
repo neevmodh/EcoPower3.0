@@ -87,6 +87,7 @@ export function InvoicePdfButton({
 
   return (
     <button
+      type="button"
       onClick={download}
       className="rounded-control px-3 py-1.5 text-xs font-semibold border"
       style={{ borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}

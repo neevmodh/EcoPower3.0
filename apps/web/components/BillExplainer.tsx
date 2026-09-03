@@ -43,6 +43,7 @@ export function BillExplainer({ invoiceId }: { invoiceId: string }) {
   return (
     <div>
       <button
+        type="button"
         onClick={explain}
         disabled={busy}
         className="rounded-control px-3 py-1.5 text-xs font-semibold border disabled:opacity-50"

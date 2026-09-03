@@ -80,6 +80,7 @@ export function PayButton({ invoiceId, label = "Pay now" }: { invoiceId: string;
   return (
     <div>
       <button
+        type="button"
         onClick={handlePay}
         disabled={status === "loading"}
         className="rounded-control px-4 py-2 text-sm font-semibold text-white transition-colors duration-state disabled:opacity-50"

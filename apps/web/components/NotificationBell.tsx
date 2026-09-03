@@ -6,7 +6,7 @@
 // Empty inbox renders "No notifications", never a hidden/absent badge that
 // could be mistaken for "definitely nothing new."
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 
 type Notification = {
@@ -23,7 +23,7 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[] | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     const supabase = createClient();
     const { data } = await supabase
       .from("notifications")
@@ -31,13 +31,13 @@ export function NotificationBell() {
       .order("created_at", { ascending: false })
       .limit(20);
     setNotifications(data ?? []);
-  }
+  }, []);
 
   useEffect(() => {
     load();
     const id = setInterval(load, 30_000);
     return () => clearInterval(id);
-  }, []);
+  }, [load]);
 
   const unreadCount = notifications?.filter((n) => !n.read_at).length ?? 0;
 
@@ -50,6 +50,7 @@ export function NotificationBell() {
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setOpen((o) => !o)}
         className="relative inline-flex items-center justify-center rounded-control border transition-colors duration-state"
         style={{ width: 36, height: 36, borderColor: "var(--color-border)" }}
@@ -79,7 +80,7 @@ export function NotificationBell() {
           <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
             <span className="text-sm font-semibold">Notifications</span>
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="text-xs" style={{ color: "var(--color-categorical-third)" }}>
+              <button type="button" onClick={markAllRead} className="text-xs" style={{ color: "var(--color-categorical-third)" }}>
                 Mark all read
               </button>
             )}

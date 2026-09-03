@@ -28,6 +28,7 @@ export function CsvExportButton({
 
   return (
     <button
+      type="button"
       onClick={download}
       className="rounded-control px-3 py-1.5 text-xs font-semibold border transition-colors duration-state"
       style={{ borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}

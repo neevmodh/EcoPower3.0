@@ -26,6 +26,7 @@ export function AllocationEditor({ unitId, initialPct }: { unitId: string; initi
       />
       <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>%</span>
       <button
+        type="button"
         disabled={busy}
         onClick={async () => {
           setBusy(true);

@@ -8,12 +8,14 @@
 
 import { useState } from "react";
 
-type Message = { role: "user" | "assistant"; text: string };
+type Message = { id: string; role: "user" | "assistant"; text: string };
+
+const newId = () => (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 
 export function AIAdvisor() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", text: "Ask me about your usage, bill, or plan — I only answer from your real account data." },
+    { id: "intro", role: "assistant", text: "Ask me about your usage, bill, or plan — I only answer from your real account data." },
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -21,7 +23,7 @@ export function AIAdvisor() {
   async function send() {
     const message = input.trim();
     if (!message || busy) return;
-    setMessages((m) => [...m, { role: "user", text: message }]);
+    setMessages((m) => [...m, { id: newId(), role: "user", text: message }]);
     setInput("");
     setBusy(true);
     try {
@@ -31,9 +33,9 @@ export function AIAdvisor() {
         body: JSON.stringify({ message }),
       });
       const json = await res.json();
-      setMessages((m) => [...m, { role: "assistant", text: res.ok ? json.reply : `(${json.error})` }]);
+      setMessages((m) => [...m, { id: newId(), role: "assistant", text: res.ok ? json.reply : `(${json.error})` }]);
     } catch {
-      setMessages((m) => [...m, { role: "assistant", text: "Something went wrong — try again." }]);
+      setMessages((m) => [...m, { id: newId(), role: "assistant", text: "Something went wrong — try again." }]);
     } finally {
       setBusy(false);
     }
@@ -54,14 +56,14 @@ export function AIAdvisor() {
         >
           <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
             <span className="text-sm font-semibold">EcoPower advisor</span>
-            <button onClick={() => setOpen(false)} aria-label="Close" style={{ color: "var(--color-text-secondary)" }}>
+            <button type="button" onClick={() => setOpen(false)} aria-label="Close" style={{ color: "var(--color-text-secondary)" }}>
               ✕
             </button>
           </div>
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-            {messages.map((m, i) => (
+            {messages.map((m) => (
               <div
-                key={i}
+                key={m.id}
                 className="rounded-control px-3 py-2 text-sm max-w-[85%]"
                 style={{
                   marginLeft: m.role === "user" ? "auto" : 0,
@@ -89,6 +91,7 @@ export function AIAdvisor() {
               style={{ borderColor: "var(--color-border)" }}
             />
             <button
+              type="button"
               onClick={send}
               disabled={busy}
               className="rounded-control px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
@@ -100,6 +103,7 @@ export function AIAdvisor() {
         </div>
       )}
       <button
+        type="button"
         onClick={() => setOpen((o) => !o)}
         className="rounded-full flex items-center justify-center text-white text-2xl transition-colors duration-state"
         style={{ width: 56, height: 56, background: "var(--color-categorical-third)" }}

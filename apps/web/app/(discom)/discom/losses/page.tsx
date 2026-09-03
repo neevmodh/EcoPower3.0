@@ -51,7 +51,7 @@ export default async function DiscomLossesPage() {
                 <th className="py-2 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Delivered (kWh)</th>
                 <th className="py-2 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Consumed (kWh)</th>
                 <th className="py-2 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Loss</th>
-                <th className="py-2 font-medium" style={{ color: "var(--color-text-secondary)" }}></th>
+                <th className="py-2 font-medium" style={{ color: "var(--color-text-secondary)" }} />
               </tr>
             </thead>
             <tbody>

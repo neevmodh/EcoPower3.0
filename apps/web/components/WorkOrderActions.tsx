@@ -23,6 +23,7 @@ function ActionButton({ label, tone, onClick }: { label: string; tone: "primary"
   return (
     <div>
       <button
+        type="button"
         disabled={busy}
         onClick={async () => {
           setBusy(true);

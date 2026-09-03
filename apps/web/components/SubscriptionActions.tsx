@@ -37,6 +37,7 @@ function ActionButton({
   return (
     <div>
       <button
+        type="button"
         disabled={busy}
         onClick={async () => {
           setBusy(true);

@@ -45,6 +45,7 @@ export function InvoiceCard({ invoice, consumerNumber }: { invoice: Invoice; con
   return (
     <div className="rounded-card border card-lift" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}>
       <button
+        type="button"
         onClick={() => setExpanded((e) => !e)}
         className="w-full flex items-center justify-between p-4 text-left"
       >

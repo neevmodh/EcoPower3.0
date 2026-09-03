@@ -25,6 +25,9 @@ jobs:
       # A failing palette fails the build (#67).
       - run: pnpm validate:palette
 
+      # Biome lint — replaces the never-configured `next lint` (#9 groundwork).
+      - run: pnpm lint
+
       - run: pnpm build
 
       - run: pnpm test

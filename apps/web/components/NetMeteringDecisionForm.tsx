@@ -40,6 +40,7 @@ export function NetMeteringDecisionForm({ applicationId }: { applicationId: stri
       />
       <div className="flex items-center gap-2">
         <button
+          type="button"
           disabled={busy}
           onClick={() => decide("approved")}
           className="rounded-control px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
@@ -48,6 +49,7 @@ export function NetMeteringDecisionForm({ applicationId }: { applicationId: stri
           {busy ? "…" : "Approve"}
         </button>
         <button
+          type="button"
           disabled={busy}
           onClick={() => decide("rejected")}
           className="rounded-control px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
