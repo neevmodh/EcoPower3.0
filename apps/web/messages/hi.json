@@ -46,5 +46,6 @@
   "nav.notifications": "सूचनाएँ",
   "nav.settings": "सेटिंग्स",
   "nav.meterRead": "रीडिंग भेजें",
-  "nav.trade": "सौर व्यापार"
+  "nav.trade": "सौर व्यापार",
+  "nav.ev": "ईवी चार्जिंग"
 }

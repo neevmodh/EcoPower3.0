@@ -37,7 +37,7 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 | 1.1 | **Meter self-read (OCR)** — photo → reading → confirm → bill | `meter_readings` (0.2) | ☐ |
 | 1.2 | Multi-step payment wizard on bills | Razorpay + `payments` | ☐ |
 | 1.3 | P2P energy trading — `/consumer/trade`: browse open market, buy (place_order), list surplus, trade history | ☑ `0027` |
-| 1.4 | EV charging — register vehicle, schedule, nearby stations, session log | `ev_*`, `charging_stations` [synthetic] | ☐ |
+| 1.4 | EV charging — `/consumer/ev`: register vehicle, nearby stations (5 seeded), log/schedule sessions with preferred source, history | ☑ `0027` |
 | 1.5 | Sustainability / ESG card | derived (0.6) | ☐ |
 | 1.6 | Site + nearby stations/DT map | `MapView` (0.4) | ☐ |
 | 1.7 | Notification center | 0.5 | ☐ |
