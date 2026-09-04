@@ -78,7 +78,7 @@ export function PanelShell({
   return (
     <div className="min-h-screen flex" style={{ background: "var(--color-surface)" }}>
       <nav
-        className="w-56 shrink-0 border-r flex flex-col px-3 py-4"
+        className="w-56 shrink-0 border-r hidden md:flex flex-col px-3 py-4"
         style={{ borderColor: "var(--color-border)", background: "var(--color-surface-raised)" }}
       >
         <div className="flex items-center gap-2.5 px-2 pb-5">
@@ -155,25 +155,61 @@ export function PanelShell({
 
       <div className="flex-1 flex flex-col min-w-0">
         <header
-          className="flex items-center justify-between px-6 h-14 border-b shrink-0"
+          className="flex items-center justify-between px-4 md:px-6 h-14 border-b shrink-0"
           style={{ borderColor: "var(--color-border)", background: "var(--color-surface-raised)" }}
         >
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-3 h-7 text-xs font-display font-semibold"
-            style={{ background: accent, color: "#04140b" }}
-          >
-            <PanelIcon name={ICONS[panel]} size={13} />
-            {panelLabel ?? `${LABELS[panel]} panel`}
+          <span className="flex items-center gap-2 min-w-0">
+            <span className="md:hidden inline-flex items-center gap-1.5">
+              <PanelIcon name="bolt" size={17} style={{ color: accent }} />
+              <span className="font-display font-extrabold text-xs tracking-tight">ECOPOWER</span>
+            </span>
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-3 h-7 text-xs font-display font-semibold shrink-0"
+              style={{ background: accent, color: "#04140b" }}
+            >
+              <PanelIcon name={ICONS[panel]} size={13} />
+              {panelLabel ?? `${LABELS[panel]} panel`}
+            </span>
           </span>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
             {headerExtra}
             <NotificationBell />
-            <span className="mono text-[11px]" style={{ color: "var(--color-text-tertiary)" }}>
+            <span className="mono text-[11px] hidden sm:inline" style={{ color: "var(--color-text-tertiary)" }}>
               {email}
             </span>
           </div>
         </header>
-        <main className={DENSITY[panel]}>{children}</main>
+
+        {/* Mobile nav — the rail is hidden below md; these pills replace it. */}
+        <nav
+          className="md:hidden flex gap-1.5 overflow-x-auto px-4 py-2 border-b shrink-0"
+          style={{ borderColor: "var(--color-border)", background: "var(--color-surface-raised)" }}
+        >
+          {nav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="shrink-0 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap"
+              style={{
+                background: item.active ? accent : "var(--color-surface-sunken)",
+                color: item.active ? "#04140b" : "var(--color-text-secondary)",
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <form action="/auth/signout" method="post" className="shrink-0">
+            <button
+              type="submit"
+              className="rounded-full px-3 py-1.5 text-xs border"
+              style={{ borderColor: "var(--color-border)", color: "var(--color-text-tertiary)" }}
+            >
+              {signOutLabel}
+            </button>
+          </form>
+        </nav>
+
+        <main className={`${DENSITY[panel]} max-md:p-4`}>{children}</main>
       </div>
       {panel === "consumer" && <AIAdvisor />}
     </div>

@@ -135,7 +135,7 @@ export default async function SocietyCommonPage() {
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-base font-semibold">Notice board</h2>
       </div>
-      <div className="grid gap-6" style={{ gridTemplateColumns: isAdmin ? "1fr 320px" : "1fr" }}>
+      <div className="grid gap-6" style={{ gridTemplateColumns: isAdmin ? "repeat(auto-fit, minmax(280px, 1fr))" : "1fr" }}>
         <div className="space-y-3">
           {(notices ?? []).length === 0 ? (
             <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
