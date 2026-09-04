@@ -68,6 +68,15 @@ const ROLES: Array<Omit<DemoRole, "label"> & { labelKey: string }> = [
     summary: "Every open ticket, with the consumer's real bill and meter history attached.",
     claims: 'roles        ["support_agent"]\nscope        all tickets\nbilling      read-only',
   },
+  {
+    id: "admin",
+    email: "admin@ecopower.demo",
+    accent: "#e0533a",
+    icon: "shield",
+    labelKey: "login.role.admin",
+    summary: "The platform operator. Every tenant, every meter, every rupee — the one session RLS does not confine.",
+    claims: 'roles        ["platform_admin"]\ndivision_ids —\norg_ids      —  (full cross-tenant)',
+  },
 ];
 
 export default async function LoginPage({

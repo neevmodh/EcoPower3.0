@@ -10,6 +10,7 @@ type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
 // Route prefix -> roles allowed to see it at all.
 const ROLE_GATES: Array<{ prefix: string; roles: string[] }> = [
+  { prefix: "/admin", roles: ["platform_admin"] },
   { prefix: "/consumer", roles: ["consumer"] },
   { prefix: "/society", roles: ["society_admin", "society_member"] },
   { prefix: "/discom", roles: ["discom_officer", "discom_admin"] },

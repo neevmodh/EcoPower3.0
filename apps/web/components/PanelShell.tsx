@@ -12,7 +12,7 @@ import { NotificationBell } from "./NotificationBell";
 import { AIAdvisor } from "./AIAdvisor";
 import { PanelIcon, type IconName } from "./Icon";
 
-export type PanelKey = "consumer" | "society" | "discom" | "operator" | "field" | "support";
+export type PanelKey = "consumer" | "society" | "discom" | "operator" | "field" | "support" | "admin";
 
 const ACCENTS: Record<PanelKey, string> = {
   consumer: "var(--color-categorical-third)", // lime
@@ -21,6 +21,7 @@ const ACCENTS: Record<PanelKey, string> = {
   operator: "#8fa0b4", // slate
   field: "var(--color-categorical-generation)", // amber
   support: "#4fd6c4", // teal — distinct from consumer lime and operator slate
+  admin: "#e0533a", // vermilion — the one panel that is not scoped
 };
 
 const LABELS: Record<PanelKey, string> = {
@@ -30,6 +31,7 @@ const LABELS: Record<PanelKey, string> = {
   operator: "Operator",
   field: "Field",
   support: "Support",
+  admin: "Platform admin",
 };
 
 const ICONS: Record<PanelKey, IconName> = {
@@ -39,6 +41,7 @@ const ICONS: Record<PanelKey, IconName> = {
   operator: "gauge",
   field: "pin",
   support: "chat",
+  admin: "shield",
 };
 
 // `dense` panels (DISCOM, operator, support) are table-forward;
@@ -51,6 +54,7 @@ const DENSITY: Record<PanelKey, string> = {
   operator: "p-5",
   field: "p-6",
   support: "p-5",
+  admin: "p-5",
 };
 
 export function PanelShell({

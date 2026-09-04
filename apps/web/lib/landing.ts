@@ -1,6 +1,7 @@
 // Where each role lands after sign-in. First match wins, so a user with
 // several roles gets the most operational panel.
 const LANDING: Array<{ role: string; path: string }> = [
+  { role: "platform_admin", path: "/admin" },
   { role: "discom_admin", path: "/discom" },
   { role: "discom_officer", path: "/discom" },
   { role: "resco_admin", path: "/operator" },

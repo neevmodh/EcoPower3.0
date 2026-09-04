@@ -25,6 +25,19 @@ export function consumerNav(active: string, t?: T): NavItem[] {
   return items.map(([href, key]) => ({ href, label: tr(key), active: href === active }));
 }
 
+export function adminNav(active: string): NavItem[] {
+  const items: Array<[string, string]> = [
+    ["/admin", "Overview"],
+    ["/admin/consumers", "Consumers"],
+    ["/admin/tenants", "Tenants"],
+    ["/admin/users", "Users & roles"],
+    ["/admin/billing", "Billing"],
+    ["/admin/analytics", "Analytics"],
+    ["/admin/tickets", "Tickets"],
+  ];
+  return items.map(([href, label]) => ({ href, label, active: href === active }));
+}
+
 const DEFAULT: Record<string, string> = {
   "nav.myEnergy": "My energy",
   "nav.bills": "Bills",

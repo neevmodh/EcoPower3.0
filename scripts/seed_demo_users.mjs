@@ -35,6 +35,9 @@ const USERS = [
   // support_agent's RLS policy (0014) is `has_role('support_agent')` with
   // no org/division clause — the queue is platform-wide, not scoped.
   { email: "support@ecopower.demo", role: "support_agent", org: null, division: null },
+  // platform_admin (0038): scoped to nothing — full cross-tenant visibility
+  // and CRUD, minus the immutable ledgers.
+  { email: "admin@ecopower.demo", role: "platform_admin", org: null, division: null },
 ];
 
 async function adminFetch(path, init = {}) {
