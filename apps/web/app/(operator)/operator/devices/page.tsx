@@ -47,6 +47,7 @@ export default async function OperatorDevicesPage() {
         { href: "/operator", label: "Fleet" },
         { href: "/operator/devices", label: "Devices", active: true },
         { href: "/operator/guarantee", label: "Guarantees" },
+        { href: "/operator/esg", label: "ESG report" },
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Device health</h1>

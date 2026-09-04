@@ -160,7 +160,7 @@ Wikipedia: [DGVCL](https://en.wikipedia.org/wiki/Dakshin_Gujarat_Vij_Company), [
 | Five-states demo | `/kitchen-sink` addition or `StatTile` state gallery | ☐ |
 | Society depth | overview + `/society/common` — common-area/DG cost split by allocation share + notice board (migration 0034) | ☑ |
 | DISCOM depth | load curve (0031) + `/discom/outages` console — log/update/restore, timeline, predicted risk (migration 0035) | ☑ |
-| Operator depth | `/operator/guarantee` + fleet generation curve on the overview (migration 0032) | ☑ (guarantee + generation done; sites-detail/ESG pending) |
+| Operator depth | `/operator/guarantee` + fleet generation (0032) + `/operator/esg` report (coverage-stated, metered-only) | ☑ (sites-detail still shallow) |
 | Field depth | work-order queue: KPI strip, priority sort, active/done split | ☑ (queue done; route/inspection/OCR pending) |
 | Support depth | queue, consumer 360, knowledge base | ◐ |
 | Payment wizard | multi-step `PaymentWizard` on `/consumer/bills` | ☐ |
