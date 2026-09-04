@@ -7,3 +7,5 @@ allowBuilds:
   '@biomejs/biome': false
   core-js: false
   esbuild: false
+  # browser-only, loaded via dynamic import; no install-time build needed
+  tesseract.js: false

@@ -18,14 +18,50 @@ type Props = {
   prev: { kwh: number; ts: string } | null;
 };
 
+// Run tesseract.js over the meter photo, entirely client-side, and pull out
+// the longest digit run — usually the cumulative register. Returns the raw
+// digits and a 0-1 confidence. Any failure resolves to null so the flow
+// falls back to manual entry.
+async function ocrMeter(file: File): Promise<{ digits: string; confidence: number } | null> {
+  try {
+    const { createWorker } = await import("tesseract.js");
+    const worker = await createWorker("eng");
+    await worker.setParameters({ tessedit_char_whitelist: "0123456789" });
+    const { data } = await worker.recognize(file);
+    await worker.terminate();
+    const runs = (data.text.match(/\d{3,}/g) ?? []).sort((a, b) => b.length - a.length);
+    const best = runs[0];
+    if (!best) return null;
+    return { digits: best, confidence: Math.max(0, Math.min(1, (data.confidence ?? 0) / 100)) };
+  } catch {
+    return null;
+  }
+}
+
 export function SelfReadForm({ meterId, serviceConnectionId, userId, prev }: Props) {
   const [reading, setReading] = useState("");
   const [photoName, setPhotoName] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [ocr, setOcr] = useState<{ raw: string; confidence: number } | null>(null);
+  const [ocrRunning, setOcrRunning] = useState(false);
 
   const value = Number(reading);
   const valid = reading !== "" && Number.isFinite(value) && value >= 0;
+  const corrected = ocr != null && ocr.raw !== reading.replace(/\D/g, "");
+
+  async function handlePhoto(file: File | undefined) {
+    setPhotoName(file?.name ?? null);
+    setOcr(null);
+    if (!file) return;
+    setOcrRunning(true);
+    const result = await ocrMeter(file);
+    setOcrRunning(false);
+    if (result) {
+      setOcr({ raw: result.digits, confidence: result.confidence });
+      if (reading === "") setReading(result.digits);
+    }
+  }
 
   const check = useMemo(() => {
     if (!valid || !prev) return null;
@@ -47,9 +83,9 @@ export function SelfReadForm({ meterId, serviceConnectionId, userId, prev }: Pro
       meter_id: meterId,
       submitted_by: userId,
       reading_kwh: value,
-      ocr_raw: null,
-      min_digit_confidence: null,
-      corrected: false,
+      ocr_raw: ocr?.raw ?? null,
+      min_digit_confidence: ocr?.confidence ?? null,
+      corrected,
       photo_path: photoName,
       prev_reading_kwh: prev?.kwh ?? null,
       prev_reading_ts: prev?.ts ?? null,
@@ -101,12 +137,28 @@ export function SelfReadForm({ meterId, serviceConnectionId, userId, prev }: Pro
           accept="image/*"
           capture="environment"
           className="hidden"
-          onChange={(e) => setPhotoName(e.target.files?.[0]?.name ?? null)}
+          onChange={(e) => handlePhoto(e.target.files?.[0])}
         />
       </label>
 
+      {ocrRunning && (
+        <p className="text-xs mb-3" style={{ color: "var(--color-text-tertiary)" }}>
+          Reading the digits from your photo…
+        </p>
+      )}
+      {ocr && !ocrRunning && (
+        <p
+          className="text-xs mb-3"
+          style={{ color: ocr.confidence < 0.75 ? "var(--color-status-warning)" : "var(--color-text-tertiary)" }}
+        >
+          Detected <span className="mono">{ocr.raw}</span> ({Math.round(ocr.confidence * 100)}% confident)
+          {ocr.confidence < 0.75 && " — check it against your meter before submitting"}
+          {corrected && " · you changed it"}
+        </p>
+      )}
+
       <label className="block text-sm mb-1.5" htmlFor="self-read-value">
-        Reading shown on the meter (kWh)
+        Reading shown on the meter (kWh){ocr ? " — correct any wrong digit" : ""}
       </label>
       <input
         id="self-read-value"
