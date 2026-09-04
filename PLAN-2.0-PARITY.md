@@ -18,8 +18,8 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 
 | # | Item | Notes | Status |
 |---|------|-------|--------|
-| 0.1 | `MeterOcr` component + `/api/ocr/meter-read` route | tesseract.js in a web worker, client-side. Crop box → digit read → per-digit confidence → below-threshold digits outlined & editable (P3) → submit to `meter_readings` as `source='self_read'`, `confidence` column. | ☐ |
-| 0.2 | Migration `0026_self_reads.sql` | `meter_readings.source` + `.confidence` + `.photo_path`; `self_read_submissions` review queue; RLS (consumer inserts own, field/support review). | ☐ |
+| 0.1 | Meter self-read UI (`SelfReadForm` + `/consumer/meter-read`) | ◐ `0026` — photo + manual digit entry + live plausibility check vs last reading → `self_read_submissions` review queue → `accept_self_read()` writes an `source='ocr'` reading. **tesseract.js OCR-assist is the remaining enhancement.** |
+| 0.2 | Migration `0026_self_reads.sql` | ☑ — `meter_readings.confidence`/`.photo_path`, `self_read_submissions` + RLS (consumer own / field+support platform-wide / DISCOM by division), `accept_self_read()` RPC, pgTAP. Applied local; needs `supabase db push` for prod. |
 | 0.3 | `PaymentWizard` component | Port 2.0 `PaymentFlow.js`: method → details (Luhn / UPI regex) → OTP (30s resend) → processing → receipt. Wraps existing Razorpay `/api/payments/*`; mock rail for demo. | ☐ |
 | 0.4 | `MapView` component | Port 2.0 `AhmedabadMap.js` (Leaflet, SSR-safe dynamic import). Generic: takes markers + popup renderer. Add `leaflet` + `react-leaflet` deps. | ☐ |
 | 0.5 | `NotificationCenter` full page + `/notifications` route | Beyond the bell: list, filter by type, mark read/all, delete. Backed by `0014` / `0019` notification rows. | ☐ |

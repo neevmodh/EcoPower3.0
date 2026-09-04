@@ -44,5 +44,6 @@
   "login.rls": "These claims ride in the access token. Row-Level Security reads them inside the database — the UI never decides what you can see.",
   "nav.carbon": "Carbon & solar",
   "nav.notifications": "Notifications",
-  "nav.settings": "Settings"
+  "nav.settings": "Settings",
+  "nav.meterRead": "Submit reading"
 }
