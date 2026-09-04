@@ -160,7 +160,7 @@ Wikipedia: [DGVCL](https://en.wikipedia.org/wiki/Dakshin_Gujarat_Vij_Company), [
 | Five-states demo | `/kitchen-sink` addition or `StatTile` state gallery | ☐ |
 | Society depth | overview: per-unit consumption ranked bar + table + avg/flag KPIs | ☑ (overview done; common-area split + notice board pending) |
 | DISCOM depth | connections, prepaid watch, outages, command-centre buildout | ◐ (routes exist, shallow) |
-| Operator depth | sites & devices, ESG report, maintenance | ◐ (devices exists, shallow) |
+| Operator depth | `/operator/guarantee` — contracted terms + settlements + credit KPIs (migration 0029 grants RESCO read on guarantees/settlements/readings) | ☑ (guarantee done; sites/ESG pending) |
 | Field depth | work-order queue: KPI strip, priority sort, active/done split | ☑ (queue done; route/inspection/OCR pending) |
 | Support depth | queue, consumer 360, knowledge base | ◐ |
 | Payment wizard | multi-step `PaymentWizard` on `/consumer/bills` | ☐ |

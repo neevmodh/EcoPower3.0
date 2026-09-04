@@ -60,6 +60,7 @@ export default async function OperatorPage() {
       nav={[
         { href: "/operator", label: "Fleet", active: true },
         { href: "/operator/devices", label: "Devices" },
+        { href: "/operator/guarantee", label: "Guarantees" },
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Asset fleet</h1>
