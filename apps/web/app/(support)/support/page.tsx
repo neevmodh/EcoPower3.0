@@ -48,7 +48,10 @@ export default async function SupportQueuePage() {
     <PanelShell
       panel="support"
       email={user.email ?? ""}
-      nav={[{ href: "/support", label: "Queue", active: true }]}
+      nav={[
+        { href: "/support", label: "Queue", active: true },
+        { href: "/support/lookup", label: "Consumer 360" },
+      ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Support queue</h1>
       <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
