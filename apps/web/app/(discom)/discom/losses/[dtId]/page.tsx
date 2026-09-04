@@ -53,6 +53,7 @@ export default async function DtLossDrilldownPage({ params }: { params: Promise<
     { href: "/discom/losses", label: "AT&C losses", active: true },
     { href: "/discom/netmetering", label: "Net-metering" },
     { href: "/discom/prepaid", label: "Prepaid" },
+        { href: "/discom/outages", label: "Outages" },
     { href: "/discom/audit", label: "Audit log" },
   ];
 

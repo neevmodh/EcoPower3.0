@@ -92,6 +92,7 @@ export default async function DiscomPage() {
         { href: "/discom/losses", label: "AT&C losses" },
         { href: "/discom/netmetering", label: "Net-metering" },
         { href: "/discom/prepaid", label: "Prepaid" },
+        { href: "/discom/outages", label: "Outages" },
         { href: "/discom/audit", label: "Audit log" },
       ]}
     >
