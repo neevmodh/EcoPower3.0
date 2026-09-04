@@ -11,37 +11,37 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <style>
     :root{
-      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
-      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
-      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
-      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30); --violet:oklch(0.74 0.16 295);
+      --bg:#ffffff; --bg1:#f7f9fb; --pnl:#ffffff; --ln:#dfe5ea; --ln2:#c5cfd8;
+      --tx:#12202e; --tx2:#4a5a68; --tx3:#7a8894;
+      --lime:oklch(0.60 0.135 160); --cyan:oklch(0.55 0.15 253);
+      --amber:oklch(0.62 0.13 74); --coral:oklch(0.58 0.17 33); --violet:oklch(0.55 0.16 290);
       --dsp:"Archivo",system-ui,sans-serif; --bdy:"IBM Plex Sans",system-ui,sans-serif; --mno:"IBM Plex Mono",ui-monospace,monospace;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.55;-webkit-font-smoothing:antialiased}
     h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.03em;line-height:1.06;font-weight:700}
     p{margin:0}
-    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#0a1620}
     .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
     .eyebrow{font-family:var(--mno);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3)}
     .ic{width:17px;height:17px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
     .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:6px}
-    .fld{width:100%;height:44px;padding:0 14px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;color:var(--tx);font-family:var(--bdy);font-size:14px;outline:none;transition:border-color .16s ease,box-shadow .16s ease}
-    .fld:focus{border-color:var(--lime);box-shadow:0 0 0 3px oklch(0.84 0.19 145/.16)}
+    .fld{width:100%;height:44px;padding:0 14px;background:#f1f4f7;border:1px solid var(--ln);border-radius:5px;color:var(--tx);font-family:var(--bdy);font-size:14px;outline:none;transition:border-color .16s ease,box-shadow .16s ease}
+    .fld:focus{border-color:var(--lime);box-shadow:0 0 0 3px oklch(0.60 0.135 160/.16)}
     .cta{height:44px;padding:0 22px;border:0;border-radius:5px;background:var(--lime);color:#04140b;font-family:var(--bdy);font-weight:600;font-size:13.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .18s cubic-bezier(.2,.7,.2,1)}
     .cta:hover{box-shadow:0 14px 40px -14px var(--lime);transform:translateY(-1px)}
     .ghost{height:44px;padding:0 20px;border:1px solid var(--ln2);border-radius:5px;background:transparent;color:var(--tx2);font-family:var(--bdy);font-weight:600;font-size:13.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .16s ease}
     .ghost:hover{color:var(--tx);border-color:var(--tx3)}
     .rail{display:flex;align-items:flex-start;gap:14px;padding:14px;border-radius:6px;cursor:pointer;border:1px solid transparent;transition:all .2s ease;width:100%;text-align:left;background:transparent;font-family:var(--bdy)}
-    .rail:hover{background:rgba(255,255,255,.02)}
+    .rail:hover{background:rgba(18,32,46,.045)}
     .rail.on{background:var(--pnl);border-color:var(--ln2)}
     .dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;font-family:var(--mno);font-size:11px;font-weight:600;border:1px solid var(--ln2);color:var(--tx3);transition:all .2s ease}
     .dot.on{background:var(--lime);border-color:var(--lime);color:#04140b}
     .dot.done{background:transparent;border-color:var(--lime);color:var(--lime)}
-    .plan{padding:18px;border:1px solid var(--ln);border-radius:6px;background:#0c1219;cursor:pointer;text-align:left;font-family:var(--bdy);transition:all .2s cubic-bezier(.2,.7,.2,1);width:100%;position:relative}
+    .plan{padding:18px;border:1px solid var(--ln);border-radius:6px;background:#f1f4f7;cursor:pointer;text-align:left;font-family:var(--bdy);transition:all .2s cubic-bezier(.2,.7,.2,1);width:100%;position:relative}
     .plan:hover{border-color:var(--ln2);transform:translateY(-2px)}
-    .plan.on{border-color:var(--lime);background:oklch(0.84 0.19 145/.07);box-shadow:0 0 0 1px var(--lime),0 16px 40px -22px var(--lime)}
-    .seg{display:flex;padding:3px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;gap:3px}
+    .plan.on{border-color:var(--lime);background:oklch(0.60 0.135 160/.07);box-shadow:0 0 0 1px var(--lime),0 16px 40px -22px var(--lime)}
+    .seg{display:flex;padding:3px;background:#f1f4f7;border:1px solid var(--ln);border-radius:5px;gap:3px}
     .seg button{height:30px;padding:0 14px;border:0;border-radius:3px;background:transparent;color:var(--tx3);font-family:var(--bdy);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .16s ease}
     .seg button.on{background:var(--pnl);color:var(--tx)}
     .fade{animation:fade .34s cubic-bezier(.2,.8,.2,1)}
@@ -131,7 +131,7 @@
 
           <sc-if value="{{isScan}}" hint-placeholder-val="{{true}}">
             <div class="fade" style="margin-top:20px;max-width:480px">
-              <div class="pnl" style="position:relative;overflow:hidden;padding:34px;text-align:center;border-style:dashed;background:#0c1219">
+              <div class="pnl" style="position:relative;overflow:hidden;padding:34px;text-align:center;border-style:dashed;background:#f1f4f7">
                 <div class="scanline"></div>
                 <div style="width:44px;height:44px;margin:0 auto;border-radius:8px;border:1px solid var(--ln2);display:grid;place-items:center;color:var(--lime)">
                   <svg class="ic" style="width:21px;height:21px" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/></svg>
@@ -139,7 +139,7 @@
                 <div style="font-size:14px;font-weight:600;margin-top:12px">Photograph your bill</div>
                 <p style="font-size:12.5px;color:var(--tx2);margin-top:6px">Torrent, MGVCL, PGVCL and UGVCL formats recognised.</p>
               </div>
-              <div class="pnl" style="margin-top:12px;padding:14px;background:#0c1219">
+              <div class="pnl" style="margin-top:12px;padding:14px;background:#f1f4f7">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                   <span class="eyebrow">Extracted</span>
                   <span class="mn" style="font-size:10.5px;color:var(--amber)">confirm before saving</span>

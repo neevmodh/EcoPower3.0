@@ -226,6 +226,19 @@ The light theme was the shipped default through #89. It is now the *alternate*: 
 
 Why: this is an operations product read in a control room and on a phone in sunlight, and the palette's luminous accents (`#6fea77` lime, `#00d3ff` cyan, `#ffbd34` amber, `#ff6c58` coral) only separate properly against a near-black ground. `scripts/validate_palette.js` passes on both themes with the same thresholds; the tightest pair is generation-vs-third at protan ΔE 8.5 against a floor of 5.
 
+### 5.2 Update 4 — light by default again (blue / green / white)
+
+Reverted to **light as the shipped default**, this time as a deliberate blue/green/white
+identity: `:root` now carries the light variant (white surfaces on a faint cool neutral,
+blue `#2a78d6` consumption and the blue sequential ramp, green `#1baf7a` for export/primary
+action), and the dark "control room" variant lives under `:root[data-theme="dark"]`,
+intact and still validated. `html { color-scheme: light }` with a `[data-theme="dark"]`
+override. Rationale: the primary audience is utility and regulatory staff reviewing this on
+office displays and in print, where the light ground is the honest default. Data-series
+hues are unchanged (generation stays amber = solar — three hues are needed for CVD
+separation); the blue/green/white reads through the chrome. `viewport.themeColor` is now
+media-split (`#ffffff` light / `#07090c` dark). `validate_palette.js` unchanged and green.
+
 **The faces are now named**, replacing "2.0's tight geometric sans":
 - **Archivo** — headings. Tight, slightly wide, industrial.
 - **IBM Plex Sans** — body. Engineered rather than neutral; it belongs to a utility product.

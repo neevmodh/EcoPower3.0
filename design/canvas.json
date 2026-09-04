@@ -1,27 +1,68 @@
 {
   "pages": [
-    { "id": "page-1", "name": "Entry — landing, login, activation" },
-    { "id": "page-2", "name": "Consumer app" },
-    { "id": "page-3", "name": "Operator — DISCOM" }
+    { "id": "page-1", "name": "Entry — landing, sign in, activation" },
+    { "id": "page-2", "name": "Consumer app — web" },
+    { "id": "page-3", "name": "Consumer — mobile, payment & states" },
+    { "id": "page-4", "name": "Society & DISCOM" },
+    { "id": "page-5", "name": "Operator, field & support" },
+    { "id": "page-6", "name": "Marketing & platform admin" }
   ],
   "artboards": [
     { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 4900, "title": "1 · Landing", "page": "page-1" },
     { "file": "Login.dc.html", "x": 1580, "y": 0, "w": 1440, "h": 880, "title": "2 · Sign in", "page": "page-1" },
     { "file": "Onboarding.dc.html", "x": 1580, "y": 1000, "w": 1440, "h": 960, "title": "3 · Activation", "page": "page-1" },
 
-    { "file": "Consumer.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1040, "title": "4 · My energy", "page": "page-2" },
-    { "file": "Bills.dc.html", "x": 1580, "y": 0, "w": 1440, "h": 960, "title": "5 · Bills and provenance", "page": "page-2" },
-    { "file": "Analytics.dc.html", "x": 3160, "y": 0, "w": 1440, "h": 1040, "title": "6 · Analytics and filters", "page": "page-2" },
+    { "file": "Consumer.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1080, "title": "4 · My energy", "page": "page-2" },
+    { "file": "Bills.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 1000, "title": "5 · Bills & provenance", "page": "page-2" },
+    { "file": "Analytics.dc.html", "x": 3120, "y": 0, "w": 1440, "h": 1080, "title": "6 · Analytics & filters", "page": "page-2" },
+    { "file": "Plan.dc.html", "x": 4680, "y": 0, "w": 1440, "h": 1080, "title": "7 · Plans & subscribe", "page": "page-2" },
+    { "file": "Support.dc.html", "x": 0, "y": 1280, "w": 1440, "h": 960, "title": "8 · Support & tickets", "page": "page-2" },
+    { "file": "Settings.dc.html", "x": 1560, "y": 1280, "w": 1440, "h": 1040, "title": "9 · Account settings", "page": "page-2" },
+    { "file": "Notifications.dc.html", "x": 3120, "y": 1280, "w": 1440, "h": 960, "title": "10 · Notification centre", "page": "page-2" },
+    { "file": "Carbon.dc.html", "x": 4680, "y": 1280, "w": 1440, "h": 980, "title": "11 · Carbon & solar impact", "page": "page-2" },
 
-    { "file": "Discom.dc.html", "x": 0, "y": 0, "w": 1560, "h": 960, "title": "7 · Loss localisation", "page": "page-3" }
+    { "file": "MobileHome.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "12 · Mobile — home", "page": "page-3" },
+    { "file": "MobileBill.dc.html", "x": 460, "y": 0, "w": 390, "h": 844, "title": "13 · Mobile — bill", "page": "page-3" },
+    { "file": "MobileSubscribe.dc.html", "x": 920, "y": 0, "w": 390, "h": 844, "title": "14 · Mobile — subscribe", "page": "page-3" },
+    { "file": "MobileRead.dc.html", "x": 1380, "y": 0, "w": 390, "h": 844, "title": "15 · Mobile — meter self-read", "page": "page-3" },
+    { "file": "PayWizard.dc.html", "x": 1900, "y": 0, "w": 1120, "h": 760, "title": "16 · Payment wizard", "page": "page-3" },
+    { "file": "States.dc.html", "x": 1900, "y": 840, "w": 1120, "h": 900, "title": "17 · Five component states", "page": "page-3" },
+
+    { "file": "Society.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1000, "title": "18 · Society overview", "page": "page-4" },
+    { "file": "Units.dc.html", "x": 1560, "y": 0, "w": 1560, "h": 960, "title": "19 · Units & allocation", "page": "page-4" },
+    { "file": "Command.dc.html", "x": 3240, "y": 0, "w": 1560, "h": 1020, "title": "20 · DISCOM command centre", "page": "page-4" },
+    { "file": "Discom.dc.html", "x": 0, "y": 1160, "w": 1560, "h": 960, "title": "21 · Loss localisation", "page": "page-4" },
+    { "file": "NetMeter.dc.html", "x": 1680, "y": 1160, "w": 1560, "h": 920, "title": "22 · Net-metering queue", "page": "page-4" },
+    { "file": "Connections.dc.html", "x": 3360, "y": 1160, "w": 1560, "h": 900, "title": "23 · New connections", "page": "page-4" },
+    { "file": "PrepaidWatch.dc.html", "x": 0, "y": 2260, "w": 1560, "h": 900, "title": "24 · Prepaid watch", "page": "page-4" },
+    { "file": "Outages.dc.html", "x": 1680, "y": 2260, "w": 1560, "h": 960, "title": "25 · Outage management", "page": "page-4" },
+    { "file": "Audit.dc.html", "x": 3360, "y": 2260, "w": 1560, "h": 900, "title": "26 · Audit ledger", "page": "page-4" },
+
+    { "file": "Fleet.dc.html", "x": 0, "y": 0, "w": 1560, "h": 980, "title": "27 · Operator fleet", "page": "page-5" },
+    { "file": "OpSites.dc.html", "x": 1680, "y": 0, "w": 1560, "h": 960, "title": "28 · Sites & devices", "page": "page-5" },
+    { "file": "OpEsg.dc.html", "x": 3360, "y": 0, "w": 1560, "h": 940, "title": "29 · ESG report", "page": "page-5" },
+    { "file": "Field.dc.html", "x": 0, "y": 1160, "w": 1520, "h": 1020, "title": "30 · Field — meter OCR", "page": "page-5" },
+    { "file": "FieldRoute.dc.html", "x": 1680, "y": 1160, "w": 1560, "h": 1000, "title": "31 · Field — route & inspection", "page": "page-5" },
+    { "file": "Alerts.dc.html", "x": 0, "y": 2320, "w": 1560, "h": 920, "title": "32 · Support queue", "page": "page-5" },
+    { "file": "Knowledge.dc.html", "x": 1680, "y": 2320, "w": 1560, "h": 880, "title": "33 · Knowledge base", "page": "page-5" },
+
+    { "file": "Pricing.dc.html", "x": 0, "y": 0, "w": 1440, "h": 2040, "title": "34 · Pricing", "page": "page-6" },
+    { "file": "HowItWorks.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 2120, "title": "35 · How it works", "page": "page-6" },
+    { "file": "Admin.dc.html", "x": 3120, "y": 0, "w": 1560, "h": 1000, "title": "36 · Platform admin", "page": "page-6" }
   ],
   "annotations": [
-    { "id": "note-entry", "x": 1580, "y": -190, "w": 460, "page": "page-1",
-      "text": "ENTRY FLOW — dark grid-control-room direction.\nArchivo + IBM Plex Sans/Mono, oklch accents on near-black.\n\nLanding: filter the 34 capabilities by domain and persona, search them, click the proof chain, switch the pricing cycle.\nSign in: three auth methods, six roles, and a live preview of what each role's session can actually see.\nActivation: three steps, manual entry or bill scan, real plan prices." },
-    { "id": "note-consumer", "x": 0, "y": -160, "w": 440, "page": "page-2",
-      "text": "CONSUMER APP — everything here responds.\nLive register ticks, the range toggle redraws the chart, top-ups move the prepaid ring, language switches the whole shell.\nBills: click any charge line to trace it back to the two register reads behind it.\nAnalytics: the filter rail is real — meters, read quality, direction, a minimum-kWh slider, saved views, sortable columns." },
-    { "id": "note-discom", "x": 0, "y": -160, "w": 440, "page": "page-3",
-      "text": "OPERATOR — denser, cyan-keyed, its own filter model.\nLoss threshold slider, feeder and signal facets, three sort orders. Pick any transformer to drill into its consumers; the audit stream on the right is the append-only ledger." }
+    { "id": "note-entry", "x": 1580, "y": -210, "w": 460, "page": "page-1",
+      "text": "ENTRY FLOW — light blue / green / white identity.\nArchivo + IBM Plex Sans/Mono on white; blue consumption, green solar.\n\nLanding: filter the capabilities by domain and persona, follow a proof chain, switch the pricing cycle.\nSign in: three auth methods, six roles, and a live preview of what each role's session can see.\nActivation: three steps, manual entry or bill scan, real GERC plan prices." },
+    { "id": "note-consumer", "x": 0, "y": -200, "w": 470, "page": "page-2",
+      "text": "CONSUMER APP (web) — under 5 minutes to subscribe, then everything is derived.\nMy energy, Bills (each line opens to the two register reads behind it), Analytics with a real filter rail, Plans, Support, Account settings, Notification centre, Carbon & solar impact." },
+    { "id": "note-mobile", "x": 0, "y": -190, "w": 470, "page": "page-3",
+      "text": "MOBILE + PAYMENT + STATES.\nPhone (390px): home, bill + pay, subscribe wizard, and meter self-read — photograph the meter, OCR reads the digits, low-confidence digits are outlined for the user to fix before submit (Torrent-style).\nPayment wizard: method -> details -> OTP -> receipt, bank-hosted.\nFive states: the same stat tile in loading / empty / partial / stale / error, because no component may outlive its data (DESIGN.md P2)." },
+    { "id": "note-discom", "x": 0, "y": -220, "w": 490, "page": "page-4",
+      "text": "SOCIETY & DISCOM — modelled on the real Gujarat sector (UGVCL / MGVCL / DGVCL / PGVCL + Torrent + Adani).\nSociety: overview + units register + allocation editor (solar split pro-rata, sum always equals metered generation).\nDISCOM: command centre, loss drill-down, net-metering queue vs the GERC 15-day SOP, new-connection approvals with the DT-capacity check, prepaid watch with the mandated 3-day grace, outage management, and the append-only hash-chained audit ledger." },
+    { "id": "note-ops", "x": 0, "y": -210, "w": 470, "page": "page-5",
+      "text": "OPERATOR · FIELD · SUPPORT.\nOperator (RESCO): fleet portfolio, sites & devices with staged OTA + auto-rollback, generation vs the 95% guarantee, and an ESG report that states its coverage rather than presenting estimates as fact.\nField: work-order queue, meter-photo OCR with confidence gating, and an optimised route with the site-inspection checklist.\nSupport: SLA-aware queue, consumer 360, and a knowledge base whose canned responses auto-fill from the real record." },
+    { "id": "note-market", "x": 0, "y": -190, "w": 460, "page": "page-6",
+      "text": "MARKETING & PLATFORM ADMIN.\nPricing: three tiers, cycle toggle, a full what's-included table, and the objections people actually raise.\nHow it works: four steps from 'check my roof' to live, and the system diagram of where EcoPower sits between the roof and the DISCOM grid.\nPlatform admin: tenants (the Gujarat utilities reference set), billing runs, device fleet and system health." }
   ],
-  "launch": { "view": "canvas", "page": "page-1" }
+  "launch": { "view": "canvas", "page": "page-3" }
 }

@@ -10,32 +10,38 @@
    status colours and surfaces below are palette-derived; the neutral ladder
    is chrome, not a data series.
 
-   DARK IS NOW THE DEFAULT for every visitor. An operations product is read
-   in a control room and on a phone in sunlight; the dark ground is what
-   makes a luminous data series legible, and it is what the whole palette's
-   dark variant was validated for. The light theme is kept intact under
-   :root[data-theme="light"] — nothing was deleted, the default flipped.
+   LIGHT IS THE DEFAULT for every visitor — a blue / green / white identity:
+   consumption and the sequential ramp are blue, generation/export read
+   green, surfaces are white with a warm-neutral sunken well. Utilities and
+   regulators read this product on office displays and in daylight; the
+   light ground is the honest default for that. The dark "control room"
+   variant is kept intact under :root[data-theme="dark"] — nothing was
+   deleted, the default flipped. Both variants are validated by
+   scripts/validate_palette.js.
    =========================================================================== */
 
 :root {
-  /* Categorical — identity. Generation is amber, consumption cyan, third lime. */
-  --color-categorical-generation: #ffbd34;
-  --color-categorical-consumption: #00d3ff;
-  --color-categorical-third: #6fea77;
+  /* Categorical — identity (palette.json light). Generation amber = solar,
+     consumption blue, third green. Three hues so the series stay separable
+     for colour-vision deficiency; the blue/green/white identity is carried
+     by the chrome (white surfaces, green primary action, blue links). */
+  --color-categorical-generation: #eda100;
+  --color-categorical-consumption: #2a78d6;
+  --color-categorical-third: #1baf7a;
 
   /* Diverging — polarity around a neutral zero. */
-  --color-diverging-export: #6fea77;
-  --color-diverging-zero: #232b35;
-  --color-diverging-import: #ff6c58;
+  --color-diverging-export: #1baf7a;
+  --color-diverging-zero: #f0efec;
+  --color-diverging-import: #eb6834;
 
   /* Status — state only, never a series colour. Always paired with an icon
      and a label (DESIGN.md §3.5) — that pairing, not contrast, is the relief. */
-  --color-status-good: #65db7c;
-  --color-status-warning: #ffbd34;
-  --color-status-serious: #ff6c58;
-  --color-status-critical: #f8495f;
+  --color-status-good: #008300;
+  --color-status-warning: #eda100;
+  --color-status-serious: #eb6834;
+  --color-status-critical: #e34948;
 
-  /* Sequential — magnitude. One ramp, theme-independent. */
+  /* Sequential — magnitude. One blue ramp, theme-independent. */
   --color-sequential-0: #cde2fb;
   --color-sequential-1: #a8c9f5;
   --color-sequential-2: #86b6ef;
@@ -46,6 +52,37 @@
 
   /* Neutral ladder. Four surfaces, not two: the page, the raised chrome
      (nav rail, header), the card, and the sunken well an input sits in. */
+  --color-surface: #ffffff;
+  --color-surface-raised: #f7f9fb;
+  --color-surface-card: #ffffff;
+  --color-surface-sunken: #f1f4f7;
+  --color-border: #dfe5ea;
+  --color-border-strong: #c5cfd8;
+  --color-text-primary: #12202e;
+  --color-text-secondary: #4a5a68;
+  --color-text-tertiary: #7a8894;
+
+  --shadow-card: 0 1px 2px rgba(18, 32, 46, 0.05), 0 1px 1px rgba(18, 32, 46, 0.03);
+  --shadow-card-hover: 0 16px 40px rgba(18, 32, 46, 0.12);
+
+  --duration-state: 150ms;
+  --duration-entrance: 250ms;
+}
+
+:root[data-theme="dark"] {
+  --color-categorical-generation: #ffbd34;
+  --color-categorical-consumption: #00d3ff;
+  --color-categorical-third: #6fea77;
+
+  --color-diverging-export: #6fea77;
+  --color-diverging-zero: #232b35;
+  --color-diverging-import: #ff6c58;
+
+  --color-status-good: #65db7c;
+  --color-status-warning: #ffbd34;
+  --color-status-serious: #ff6c58;
+  --color-status-critical: #f8495f;
+
   --color-surface: #07090c;
   --color-surface-raised: #0b0f14;
   --color-surface-card: #101720;
@@ -56,48 +93,15 @@
   --color-text-secondary: #8fa0b4;
   --color-text-tertiary: #5b6b7d;
 
-  /* On a dark ground, elevation reads as a darker cast plus a hairline
-     highlight — a light-theme drop shadow is invisible here. */
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-card-hover: 0 18px 50px -22px rgba(0, 0, 0, 0.9);
-
-  --duration-state: 150ms;
-  --duration-entrance: 250ms;
-}
-
-:root[data-theme="light"] {
-  --color-categorical-generation: #eda100;
-  --color-categorical-consumption: #2a78d6;
-  --color-categorical-third: #1baf7a;
-
-  --color-diverging-export: #1baf7a;
-  --color-diverging-zero: #f0efec;
-  --color-diverging-import: #eb6834;
-
-  --color-status-good: #008300;
-  --color-status-warning: #eda100;
-  --color-status-serious: #eb6834;
-  --color-status-critical: #e34948;
-
-  --color-surface: #ffffff;
-  --color-surface-raised: #ffffff;
-  --color-surface-card: #ffffff;
-  --color-surface-sunken: #faf9f6;
-  --color-border: #e4e2dd;
-  --color-border-strong: #d3d0c8;
-  --color-text-primary: #1a1a18;
-  --color-text-secondary: #5c5a54;
-  --color-text-tertiary: #86837b;
-
-  --shadow-card: 0 1px 2px rgba(20, 20, 18, 0.04), 0 1px 1px rgba(20, 20, 18, 0.03);
-  --shadow-card-hover: 0 16px 40px rgba(20, 20, 18, 0.1);
 }
 
 html {
-  color-scheme: dark;
-}
-html[data-theme="light"] {
   color-scheme: light;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {

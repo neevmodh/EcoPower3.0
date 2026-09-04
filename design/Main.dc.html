@@ -11,12 +11,12 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <style>
     :root{
-      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --pnl2:#151d28;
-      --ln:#1e2833; --ln2:#2b3846;
-      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
-      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
-      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30);
-      --violet:oklch(0.74 0.16 295);
+      --bg:#ffffff; --bg1:#f7f9fb; --pnl:#ffffff; --pnl2:#f1f4f7;
+      --ln:#dfe5ea; --ln2:#c5cfd8;
+      --tx:#12202e; --tx2:#4a5a68; --tx3:#7a8894;
+      --lime:oklch(0.60 0.135 160); --cyan:oklch(0.55 0.15 253);
+      --amber:oklch(0.62 0.13 74); --coral:oklch(0.58 0.17 33);
+      --violet:oklch(0.55 0.16 290);
       --dsp:"Archivo",system-ui,sans-serif;
       --bdy:"IBM Plex Sans",system-ui,sans-serif;
       --mno:"IBM Plex Mono",ui-monospace,monospace;
@@ -25,7 +25,7 @@
     body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.55;-webkit-font-smoothing:antialiased}
     h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.03em;line-height:1.04;font-weight:700}
     p{margin:0}
-    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#0a1620}
     .wrap{max-width:1200px;margin:0 auto;padding:0 40px}
     .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
     .eyebrow{font-family:var(--mno);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3)}
@@ -36,14 +36,14 @@
     .btn-g:hover{border-color:var(--tx3);background:var(--pnl);transform:translateY(-2px)}
     .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:6px}
     .glow{transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease}
-    .glow:hover{border-color:var(--ln2);transform:translateY(-3px);box-shadow:0 18px 50px -22px #000}
+    .glow:hover{border-color:var(--ln2);transform:translateY(-3px);box-shadow:0 18px 50px -22px rgba(18,32,46,.18)}
     .ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-    .gridbg{position:absolute;inset:0;background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:64px 64px;opacity:.5;
+    .gridbg{position:absolute;inset:0;background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:64px 64px;opacity:.7;
       -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 75%)}
-    .aurora{position:absolute;inset:-30% -10% auto -10%;height:820px;filter:blur(90px);opacity:.42;pointer-events:none;
-      background:radial-gradient(32% 40% at 20% 30%,oklch(0.84 0.19 145/.55),transparent 70%),
-                 radial-gradient(30% 36% at 78% 24%,oklch(0.80 0.15 220/.5),transparent 70%),
-                 radial-gradient(26% 32% at 55% 70%,oklch(0.74 0.16 295/.35),transparent 70%);
+    .aurora{position:absolute;inset:-30% -10% auto -10%;height:820px;filter:blur(90px);opacity:.3;pointer-events:none;
+      background:radial-gradient(32% 40% at 20% 30%,oklch(0.60 0.135 160/.55),transparent 70%),
+                 radial-gradient(30% 36% at 78% 24%,oklch(0.55 0.15 253/.5),transparent 70%),
+                 radial-gradient(26% 32% at 55% 70%,oklch(0.55 0.16 290/.35),transparent 70%);
       animation:drift 26s ease-in-out infinite alternate}
     @keyframes drift{from{transform:translate3d(-3%,-2%,0) scale(1)}to{transform:translate3d(5%,3%,0) scale(1.12)}}
     .rv{opacity:0;transform:translateY(18px);animation:rv .8s cubic-bezier(.16,.84,.28,1) forwards}
@@ -54,7 +54,7 @@
     @keyframes nd{0%,100%{opacity:.4}50%{opacity:.08}}
     .chip{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:3px;border:1px solid var(--ln);background:var(--pnl);font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;font-family:var(--bdy);transition:all .15s ease;white-space:nowrap}
     .chip:hover{border-color:var(--ln2);color:var(--tx)}
-    .chip.on{background:oklch(0.84 0.19 145/.13);border-color:oklch(0.84 0.19 145/.5);color:var(--lime)}
+    .chip.on{background:oklch(0.60 0.135 160/.13);border-color:oklch(0.60 0.135 160/.5);color:var(--lime)}
     .marq{display:flex;gap:56px;animation:marq 40s linear infinite;width:max-content}
     @keyframes marq{to{transform:translateX(-50%)}}
     .step{cursor:pointer;border-left:2px solid var(--ln);padding:15px 0 15px 22px;transition:border-color .2s ease}
@@ -121,7 +121,7 @@
           <svg viewBox="0 0 420 250" style="width:100%;height:auto;display:block">
             <defs>
               <linearGradient id="lg" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="oklch(0.80 0.15 220)"/><stop offset="100%" stop-color="oklch(0.84 0.19 145)"/>
+                <stop offset="0%" stop-color="oklch(0.55 0.15 253)"/><stop offset="100%" stop-color="oklch(0.60 0.135 160)"/>
               </linearGradient>
             </defs>
             <path d="M40 42 H210 V96 H360" stroke="var(--ln2)" stroke-width="1.5" fill="none"/>
@@ -129,8 +129,8 @@
             <path d="M210 150 V206 H360" stroke="var(--ln2)" stroke-width="1.5" fill="none"/>
             <path class="flow" d="M40 42 H210 V96 H360" stroke="url(#lg)" stroke-width="2" fill="none"/>
             <path class="flow" d="M210 42 V150 H70" stroke="url(#lg)" stroke-width="2" fill="none" style="animation-delay:.4s"/>
-            <path class="flow" d="M210 150 V206 H360" stroke="oklch(0.72 0.19 30)" stroke-width="2" fill="none" style="animation-delay:.8s"/>
-            <circle class="nd" cx="40" cy="42" r="18" fill="oklch(0.80 0.15 220/.22)"/>
+            <path class="flow" d="M210 150 V206 H360" stroke="oklch(0.58 0.17 33)" stroke-width="2" fill="none" style="animation-delay:.8s"/>
+            <circle class="nd" cx="40" cy="42" r="18" fill="oklch(0.55 0.15 253/.22)"/>
             <circle cx="40" cy="42" r="7" fill="var(--cyan)"/>
             <text x="40" y="20" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#5b6b7d">SS-A</text>
             <sc-for list="{{nodes}}" as="n" hint-placeholder-count="3">
@@ -269,7 +269,7 @@
             <span class="mn" style="width:48px;text-align:right;font-size:12.5px;font-weight:600;color:{{l.c}}">{{l.pct}}%</span>
           </div>
         </sc-for>
-        <div style="margin-top:16px;padding:13px;border-radius:4px;background:oklch(0.72 0.19 30/.1);border:1px solid oklch(0.72 0.19 30/.32)">
+        <div style="margin-top:16px;padding:13px;border-radius:4px;background:oklch(0.58 0.17 33/.1);border:1px solid oklch(0.58 0.17 33/.32)">
           <div style="font-size:12.5px;color:var(--coral);font-weight:600">AHD-A-300001 · priority 40</div>
           <div class="mn" style="font-size:11px;color:var(--tx2);margin-top:4px">tamper flags on 492 readings · 30-day window</div>
         </div>

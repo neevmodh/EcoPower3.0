@@ -11,29 +11,29 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <style>
     :root{
-      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
-      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
-      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
-      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30); --violet:oklch(0.74 0.16 295);
+      --bg:#ffffff; --bg1:#f7f9fb; --pnl:#ffffff; --ln:#dfe5ea; --ln2:#c5cfd8;
+      --tx:#12202e; --tx2:#4a5a68; --tx3:#7a8894;
+      --lime:oklch(0.60 0.135 160); --cyan:oklch(0.55 0.15 253);
+      --amber:oklch(0.62 0.13 74); --coral:oklch(0.58 0.17 33); --violet:oklch(0.55 0.16 290);
       --dsp:"Archivo",system-ui,sans-serif; --bdy:"IBM Plex Sans",system-ui,sans-serif; --mno:"IBM Plex Mono",ui-monospace,monospace;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.5;-webkit-font-smoothing:antialiased}
     h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.025em;line-height:1.1;font-weight:700}
     p{margin:0}
-    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#0a1620}
     .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
     .eyebrow{font-family:var(--mno);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3)}
     .ic{width:17px;height:17px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
     .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:8px}
     .lift{transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease}
-    .lift:hover{border-color:var(--ln2);transform:translateY(-2px);box-shadow:0 16px 40px -22px #000}
+    .lift:hover{border-color:var(--ln2);transform:translateY(-2px);box-shadow:0 16px 40px -22px rgba(18,32,46,.18)}
     .navi{display:flex;align-items:center;gap:11px;padding:8px 11px;border-radius:6px;font-size:13px;font-weight:500;color:var(--tx3);cursor:pointer;transition:all .16s ease;position:relative}
-    .navi:hover{color:var(--tx2);background:rgba(255,255,255,.03)}
-    .navi.on{color:var(--tx);background:rgba(255,255,255,.055);font-weight:600}
+    .navi:hover{color:var(--tx2);background:rgba(18,32,46,.045)}
+    .navi.on{color:var(--tx);background:rgba(18,32,46,.045);font-weight:600}
     .navi.on::before{content:"";position:absolute;left:-11px;top:9px;bottom:9px;width:2px;border-radius:2px;background:var(--lime);box-shadow:0 0 10px var(--lime)}
     .kbd{font-family:var(--mno);font-size:10px;border:1px solid var(--ln2);border-radius:3px;padding:1px 5px;color:var(--tx3)}
-    .seg{display:flex;padding:2px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;gap:2px}
+    .seg{display:flex;padding:2px;background:#f1f4f7;border:1px solid var(--ln);border-radius:5px;gap:2px}
     .seg button{height:26px;padding:0 11px;border:0;border-radius:3px;background:transparent;color:var(--tx3);font-family:var(--mno);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s ease}
     .seg button.on{background:var(--pnl);color:var(--tx)}
     .pulse{position:relative;width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)}
@@ -44,9 +44,9 @@
     .ringp{transition:stroke-dashoffset .7s cubic-bezier(.2,.7,.2,1)}
     .feed{animation:slide .4s cubic-bezier(.2,.8,.2,1)}
     @keyframes slide{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
-    .qa{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--ln);border-radius:6px;background:#0c1219;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .16s ease}
+    .qa{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--ln);border-radius:6px;background:#f1f4f7;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .16s ease}
     .qa:hover{border-color:var(--ln2);color:var(--tx);transform:translateY(-1px)}
-    .slab{position:relative;height:26px;border-radius:4px;overflow:hidden;background:#0c1219;border:1px solid var(--ln);display:flex}
+    .slab{position:relative;height:26px;border-radius:4px;overflow:hidden;background:#f1f4f7;border:1px solid var(--ln);display:flex}
     @media (prefers-reduced-motion:reduce){.pulse::after,.draw,.feed{animation:none}.draw{stroke-dashoffset:0}}
   </style>
 </helmet>
@@ -70,7 +70,7 @@
       </sc-for>
     </div>
     <div style="flex:1"></div>
-    <div class="pnl" style="padding:11px;background:#0c1219">
+    <div class="pnl" style="padding:11px;background:#f1f4f7">
       <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
         <span style="width:26px;height:26px;border-radius:6px;background:var(--lime);color:#04140b;display:grid;place-items:center;font-family:var(--dsp);font-weight:700;font-size:12px">A</span>
         <span style="min-width:0">
@@ -88,13 +88,13 @@
 
   <!-- MAIN -->
   <div style="display:flex;flex-direction:column;min-width:0">
-    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--ln);background:rgba(11,15,20,.8);backdrop-filter:blur(12px)">
+    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--ln);background:rgba(255,255,255,.82);backdrop-filter:blur(12px)">
       <div style="display:flex;align-items:center;gap:14px">
         <span style="font-family:var(--dsp);font-weight:600;font-size:15px">{{t_title}}</span>
         <span class="mn" style="font-size:11px;color:var(--tx3);border-left:1px solid var(--ln);padding-left:14px">{{t_conn}}</span>
       </div>
       <div style="display:flex;align-items:center;gap:14px">
-        <div style="display:flex;align-items:center;gap:8px;height:30px;padding:0 11px;border:1px solid var(--ln);border-radius:5px;background:#0c1219;color:var(--tx3);font-size:12px">
+        <div style="display:flex;align-items:center;gap:8px;height:30px;padding:0 11px;border:1px solid var(--ln);border-radius:5px;background:#f1f4f7;color:var(--tx3);font-size:12px">
           <svg class="ic" style="width:14px;height:14px" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
           {{t_search}}<span class="kbd" style="margin-left:14px">⌘K</span>
         </div>
@@ -116,7 +116,7 @@
               <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px">
                 <span class="mn" style="font-size:38px;font-weight:600;letter-spacing:-.02em">{{kwh}}</span>
                 <span style="font-size:14px;color:var(--tx3)">kWh</span>
-                <span class="mn" style="font-size:12px;color:var(--lime);border:1px solid oklch(0.84 0.19 145/.35);border-radius:3px;padding:2px 8px;background:oklch(0.84 0.19 145/.1)">{{kw}} kW now</span>
+                <span class="mn" style="font-size:12px;color:var(--lime);border:1px solid oklch(0.60 0.135 160/.35);border-radius:3px;padding:2px 8px;background:oklch(0.60 0.135 160/.1)">{{kw}} kW now</span>
               </div>
               <div class="mn" style="font-size:11px;color:var(--tx3);margin-top:6px">{{t_updated}} {{ago}}s · quality good · {{t_via}}</div>
             </div>
@@ -133,11 +133,11 @@
           <svg viewBox="0 0 700 160" preserveAspectRatio="none" style="width:100%;height:160px;margin-top:16px;display:block">
             <defs>
               <linearGradient id="ar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="oklch(0.84 0.19 145/.42)"/><stop offset="100%" stop-color="oklch(0.84 0.19 145/0)"/>
+                <stop offset="0%" stop-color="oklch(0.60 0.135 160/.42)"/><stop offset="100%" stop-color="oklch(0.60 0.135 160/0)"/>
               </linearGradient>
             </defs>
             <sc-for list="{{gridLines}}" as="g" hint-placeholder-count="4">
-              <line x1="0" y1="{{g}}" x2="700" y2="{{g}}" stroke="#1e2833" stroke-width="1"/>
+              <line x1="0" y1="{{g}}" x2="700" y2="{{g}}" stroke="var(--ln)" stroke-width="1"/>
             </sc-for>
             <path d="{{areaPath}}" fill="url(#ar)"/>
             <path class="draw" d="{{linePath}}" fill="none" stroke="var(--lime)" stroke-width="2" stroke-linejoin="round"/>
@@ -153,7 +153,7 @@
           <span class="eyebrow">{{t_prepaid}}</span>
           <div style="display:flex;align-items:center;gap:18px;margin-top:12px">
             <svg width="98" height="98" viewBox="0 0 100 100" style="flex:none;transform:rotate(-90deg)">
-              <circle cx="50" cy="50" r="42" fill="none" stroke="#1e2833" stroke-width="8"/>
+              <circle cx="50" cy="50" r="42" fill="none" stroke="var(--ln)" stroke-width="8"/>
               <circle class="ringp" cx="50" cy="50" r="42" fill="none" stroke="{{ppColor}}" stroke-width="8" stroke-linecap="round"
                       stroke-dasharray="264" stroke-dashoffset="{{ppDash}}" style="filter:drop-shadow(0 0 6px {{ppColor}})"/>
             </svg>
@@ -165,7 +165,7 @@
           </div>
           <div style="display:flex;gap:6px;margin-top:16px">
             <sc-for list="{{topups}}" as="t" hint-placeholder-count="3">
-              <button onClick="{{t.pick}}" style="flex:1;height:32px;border:1px solid var(--ln2);border-radius:5px;background:#0c1219;color:var(--tx);font-family:var(--mno);font-size:11.5px;cursor:pointer">{{t.label}}</button>
+              <button onClick="{{t.pick}}" style="flex:1;height:32px;border:1px solid var(--ln2);border-radius:5px;background:#f1f4f7;color:var(--tx);font-family:var(--mno);font-size:11.5px;cursor:pointer">{{t.label}}</button>
             </sc-for>
           </div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--ln)">
@@ -231,7 +231,7 @@
           </div>
           <sc-for list="{{events}}" as="e" hint-placeholder-count="5">
             <div class="feed" style="display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--ln)">
-              <span style="width:24px;height:24px;border-radius:5px;display:grid;place-items:center;flex:none;color:{{e.c}};background:rgba(255,255,255,.04)" dangerouslySetInnerHTML="{{e.icon}}"></span>
+              <span style="width:24px;height:24px;border-radius:5px;display:grid;place-items:center;flex:none;color:{{e.c}};background:rgba(18,32,46,.045)" dangerouslySetInnerHTML="{{e.icon}}"></span>
               <span style="flex:1;min-width:0">
                 <span style="display:block;font-size:12.5px;color:var(--tx)">{{e.title}}</span>
                 <span style="display:block;font-size:11px;color:var(--tx3);margin-top:1px">{{e.body}}</span>
@@ -248,7 +248,7 @@
               <div class="qa"><span style="display:flex;color:{{q.c}}" dangerouslySetInnerHTML="{{q.icon}}"></span>{{q.label}}</div>
             </sc-for>
           </div>
-          <div style="margin-top:16px;padding:14px;border-radius:6px;background:#0c1219;border:1px solid var(--ln)">
+          <div style="margin-top:16px;padding:14px;border-radius:6px;background:#f1f4f7;border:1px solid var(--ln)">
             <div style="display:flex;align-items:center;gap:9px">
               <span style="width:24px;height:24px;border-radius:5px;background:var(--lime);color:#04140b;display:grid;place-items:center">
                 <svg class="ic" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8"/></svg>
@@ -354,7 +354,7 @@ class Component extends DCLogic {
     const pct=Math.max(0,Math.min(1,bal/cap));
 
     const fcR=this.mul(19);
-    const fc=Array.from({length:12},(_,i)=>({ h:(28+fcR()*68).toFixed(0)+"%", c:i<5?"var(--lime)":"#1e2833" }));
+    const fc=Array.from({length:12},(_,i)=>({ h:(28+fcR()*68).toFixed(0)+"%", c:i<5?"var(--lime)":"var(--ln)" }));
 
     const EV=[
       ["alert",A,"Prepaid balance crossed ₹300","Autopay mandate will trigger below ₹100","2 h"],
@@ -372,7 +372,7 @@ class Component extends DCLogic {
       accent:this.props.accent ?? "#7bf1a8",
       nav,
       langs:[["en","EN"],["hi","हि"],["gu","ગુ"]].map(l=>({ label:l[1], pick:this.set("lang",l[0]),
-        bg:this.state.lang===l[0]?"rgba(255,255,255,.07)":"transparent",
+        bg:this.state.lang===l[0]?"rgba(18,32,46,.045)":"transparent",
         c:this.state.lang===l[0]?"var(--tx)":"var(--tx3)" })),
       ranges:[["7d","7D"],["30d","30D"],["90d","90D"]].map(r=>({ label:r[1], cls:this.state.range===r[0]?"on":"", pick:this.set("range",r[0]) })),
       kwh:this.state.kwh.toLocaleString("en-IN",{minimumFractionDigits:1,maximumFractionDigits:1}),
@@ -381,13 +381,13 @@ class Component extends DCLogic {
       rangeStart:rangeLabels[0], rangeMid:rangeLabels[1],
       ppBal:bal.toFixed(2), ppDays:"6",
       ppColor:bal<100?"var(--coral)":(bal<300?"var(--amber)":"var(--lime)"),
-      ppBorder:bal<100?"oklch(0.72 0.19 30/.5)":"var(--ln)",
+      ppBorder:bal<100?"oklch(0.58 0.17 33/.5)":"var(--ln)",
       ppDash:(264-264*pct).toFixed(0),
       topups:[100,200,500].map(v=>({ label:"+ ₹"+v, pick:()=>this.setState(s=>({bal:Math.min(500,s.bal+v)})) })),
       slabs:[
-        { w:"17%", bg:"oklch(0.84 0.19 145/.28)", rate:"₹3.20", tc:"var(--lime)" },
-        { w:"52%", bg:"oklch(0.84 0.16 80/.28)", rate:"₹3.95", tc:"var(--amber)" },
-        { w:"31%", bg:"oklch(0.72 0.19 30/.32)", rate:"₹5.00", tc:"var(--coral)" }
+        { w:"17%", bg:"oklch(0.60 0.135 160/.28)", rate:"₹3.20", tc:"var(--lime)" },
+        { w:"52%", bg:"oklch(0.64 0.13 74/.28)", rate:"₹3.95", tc:"var(--amber)" },
+        { w:"31%", bg:"oklch(0.58 0.17 33/.32)", rate:"₹5.00", tc:"var(--coral)" }
       ],
       fc, events:EV, quick,
       t_title:tr.title, t_conn:tr.conn, t_search:tr.search, t_live:tr.live, t_updated:tr.updated,

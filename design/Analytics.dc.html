@@ -11,17 +11,17 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <style>
     :root{
-      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
-      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
-      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
-      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30); --violet:oklch(0.74 0.16 295);
+      --bg:#ffffff; --bg1:#f7f9fb; --pnl:#ffffff; --ln:#dfe5ea; --ln2:#c5cfd8;
+      --tx:#12202e; --tx2:#4a5a68; --tx3:#7a8894;
+      --lime:oklch(0.60 0.135 160); --cyan:oklch(0.55 0.15 253);
+      --amber:oklch(0.62 0.13 74); --coral:oklch(0.58 0.17 33); --violet:oklch(0.55 0.16 290);
       --dsp:"Archivo",system-ui,sans-serif; --bdy:"IBM Plex Sans",system-ui,sans-serif; --mno:"IBM Plex Mono",ui-monospace,monospace;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.5;-webkit-font-smoothing:antialiased}
     h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.025em;line-height:1.1;font-weight:700}
     p{margin:0}
-    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#0a1620}
     .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
     .eyebrow{font-family:var(--mno);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3)}
     .ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -29,25 +29,25 @@
     .fgroup{border-top:1px solid var(--ln);padding:15px 0}
     .fgroup:first-of-type{border-top:0;padding-top:0}
     .opt{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:5px;cursor:pointer;font-size:12.5px;color:var(--tx2);transition:all .14s ease;width:100%;text-align:left;background:transparent;border:0;font-family:var(--bdy)}
-    .opt:hover{background:rgba(255,255,255,.03);color:var(--tx)}
+    .opt:hover{background:rgba(18,32,46,.045);color:var(--tx)}
     .opt.on{color:var(--tx)}
     .box{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--ln2);flex:none;display:grid;place-items:center;transition:all .16s ease}
     .opt.on .box{background:var(--lime);border-color:var(--lime);color:#04140b}
-    .seg{display:flex;padding:2px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;gap:2px}
+    .seg{display:flex;padding:2px;background:#f1f4f7;border:1px solid var(--ln);border-radius:5px;gap:2px}
     .seg button{flex:1;height:26px;border:0;border-radius:3px;background:transparent;color:var(--tx3);font-family:var(--mno);font-size:11px;cursor:pointer;transition:all .15s ease}
     .seg button.on{background:var(--pnl);color:var(--tx)}
-    .fchip{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 6px 0 10px;border-radius:4px;background:oklch(0.84 0.19 145/.12);border:1px solid oklch(0.84 0.19 145/.4);color:var(--lime);font-size:11.5px;font-family:var(--bdy);font-weight:500}
+    .fchip{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 6px 0 10px;border-radius:4px;background:oklch(0.60 0.135 160/.12);border:1px solid oklch(0.60 0.135 160/.4);color:var(--lime);font-size:11.5px;font-family:var(--bdy);font-weight:500}
     .fchip button{border:0;background:none;color:inherit;cursor:pointer;display:flex;padding:0;opacity:.7}
     .fchip button:hover{opacity:1}
     input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--ln2);border-radius:2px;outline:none}
-    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--lime);cursor:pointer;box-shadow:0 0 10px oklch(0.84 0.19 145/.6)}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--lime);cursor:pointer;box-shadow:0 0 10px oklch(0.60 0.135 160/.6)}
     input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:var(--lime);cursor:pointer}
     table{width:100%;border-collapse:collapse}
     th{font-family:var(--mno);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);font-weight:500;text-align:left;padding:9px 12px;cursor:pointer;user-select:none;white-space:nowrap}
     th:hover{color:var(--tx2)}
     td{padding:9px 12px;font-size:12.5px;border-top:1px solid var(--ln)}
     tbody tr{transition:background .13s ease}
-    tbody tr:hover{background:rgba(255,255,255,.025)}
+    tbody tr:hover{background:rgba(18,32,46,.045)}
     .bar{transition:height .45s cubic-bezier(.2,.7,.2,1)}
     .ghost{height:32px;padding:0 13px;border:1px solid var(--ln2);border-radius:5px;background:transparent;color:var(--tx2);font-family:var(--bdy);font-weight:600;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .16s ease}
     .ghost:hover{color:var(--tx);border-color:var(--tx3)}
@@ -143,7 +143,7 @@
 
   <!-- MAIN -->
   <div style="display:flex;flex-direction:column;min-width:0">
-    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--ln);background:rgba(11,15,20,.8);backdrop-filter:blur(12px)">
+    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--ln);background:rgba(255,255,255,.82);backdrop-filter:blur(12px)">
       <div style="display:flex;align-items:center;gap:14px">
         <span style="font-family:var(--dsp);font-weight:600;font-size:15px">Analytics</span>
         <span class="mn" style="font-size:11px;color:var(--tx3);border-left:1px solid var(--ln);padding-left:14px">
@@ -204,7 +204,7 @@
       <div class="pnl" style="overflow:hidden">
         <table>
           <thead>
-            <tr style="background:#0c1219">
+            <tr style="background:#f1f4f7">
               <sc-for list="{{cols}}" as="c" hint-placeholder-count="6">
                 <th onClick="{{c.sort}}" style="text-align:{{c.align}};color:{{c.c}}">{{c.label}}{{c.arrow}}</th>
               </sc-for>
@@ -229,7 +229,7 @@
           </tbody>
         </table>
         <sc-if value="{{more}}" hint-placeholder-val="{{true}}">
-          <div class="mn" style="padding:11px 12px;font-size:11px;color:var(--tx3);border-top:1px solid var(--ln);background:#0c1219">
+          <div class="mn" style="padding:11px 12px;font-size:11px;color:var(--tx3);border-top:1px solid var(--ln);background:#f1f4f7">
             Showing first 12 of {{rows}} matching intervals
           </div>
         </sc-if>

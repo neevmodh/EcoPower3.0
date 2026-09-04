@@ -11,30 +11,30 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <style>
     :root{
-      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
-      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
-      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
-      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30);
+      --bg:#ffffff; --bg1:#f7f9fb; --pnl:#ffffff; --ln:#dfe5ea; --ln2:#c5cfd8;
+      --tx:#12202e; --tx2:#4a5a68; --tx3:#7a8894;
+      --lime:oklch(0.60 0.135 160); --cyan:oklch(0.55 0.15 253);
+      --amber:oklch(0.62 0.13 74); --coral:oklch(0.58 0.17 33);
       --dsp:"Archivo",system-ui,sans-serif; --bdy:"IBM Plex Sans",system-ui,sans-serif; --mno:"IBM Plex Mono",ui-monospace,monospace;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.5;-webkit-font-smoothing:antialiased}
     h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.025em;line-height:1.1;font-weight:700}
     p{margin:0}
-    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#0a1620}
     .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
     .eyebrow{font-family:var(--mno);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3)}
     .ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
     .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:8px}
-    .inv{padding:14px;border:1px solid var(--ln);border-radius:7px;background:#0c1219;cursor:pointer;transition:all .18s cubic-bezier(.2,.7,.2,1);width:100%;text-align:left;font-family:var(--bdy)}
+    .inv{padding:14px;border:1px solid var(--ln);border-radius:7px;background:#f1f4f7;cursor:pointer;transition:all .18s cubic-bezier(.2,.7,.2,1);width:100%;text-align:left;font-family:var(--bdy)}
     .inv:hover{border-color:var(--ln2);transform:translateX(2px)}
-    .inv.on{border-color:var(--lime);background:oklch(0.84 0.19 145/.07);box-shadow:0 0 0 1px var(--lime)}
+    .inv.on{border-color:var(--lime);background:oklch(0.60 0.135 160/.07);box-shadow:0 0 0 1px var(--lime)}
     .st{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 8px;border-radius:3px;font-family:var(--mno);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
-    .chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:4px;border:1px solid var(--ln);background:#0c1219;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;font-family:var(--bdy);transition:all .15s ease}
+    .chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:4px;border:1px solid var(--ln);background:#f1f4f7;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;font-family:var(--bdy);transition:all .15s ease}
     .chip:hover{border-color:var(--ln2);color:var(--tx)}
-    .chip.on{background:oklch(0.84 0.19 145/.13);border-color:oklch(0.84 0.19 145/.5);color:var(--lime)}
+    .chip.on{background:oklch(0.60 0.135 160/.13);border-color:oklch(0.60 0.135 160/.5);color:var(--lime)}
     .line{cursor:pointer;transition:background .15s ease;border-radius:5px}
-    .line:hover{background:rgba(255,255,255,.025)}
+    .line:hover{background:rgba(18,32,46,.045)}
     .prov{overflow:hidden;transition:max-height .4s cubic-bezier(.2,.7,.2,1),opacity .3s ease}
     .fade{animation:fade .3s cubic-bezier(.2,.8,.2,1)}
     @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -64,7 +64,7 @@
       </sc-for>
     </div>
     <div style="flex:1"></div>
-    <div class="pnl" style="padding:12px;background:#0c1219">
+    <div class="pnl" style="padding:12px;background:#f1f4f7">
       <span class="eyebrow">Year to date</span>
       <div class="mn" style="font-size:19px;font-weight:600;margin-top:6px">₹8,102.64</div>
       <div class="mn" style="font-size:10.5px;color:var(--tx3);margin-top:2px">4 invoices · 1,651 kWh</div>
@@ -72,7 +72,7 @@
   </aside>
 
   <div style="display:flex;flex-direction:column;min-width:0">
-    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--ln);background:rgba(11,15,20,.8);backdrop-filter:blur(12px)">
+    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--ln);background:rgba(255,255,255,.82);backdrop-filter:blur(12px)">
       <div style="display:flex;align-items:center;gap:14px">
         <span style="font-family:var(--dsp);font-weight:600;font-size:15px">Bills</span>
         <span class="mn" style="font-size:11px;color:var(--tx3);border-left:1px solid var(--ln);padding-left:14px">AHD-A-100001</span>
@@ -214,12 +214,12 @@ class Component extends DCLogic {
 
   renderVals(){
     const L="var(--lime)", C="var(--cyan)", A="var(--amber)", R="var(--coral)";
-    const paid={ c:L, b:"oklch(0.84 0.19 145/.14)" }, issued={ c:A, b:"oklch(0.84 0.16 80/.14)" };
+    const paid={ c:L, b:"oklch(0.60 0.135 160/.14)" }, issued={ c:A, b:"oklch(0.64 0.13 74/.14)" };
 
     const NAV=[["My energy","bolt",0],["Bills","receipt",1],["Plan & prepaid","wallet",0],["Analytics","trend",0],
                ["Solar","sun",0],["Carbon","leaf",0],["Support","chat",0],["Settings","gear",0]];
     const nav=NAV.map(n=>({ label:n[0], icon:this.ic(n[1]),
-      c:n[2]?"var(--tx)":"var(--tx3)", bg:n[2]?"rgba(255,255,255,.055)":"transparent", w:n[2]?"600":"500" }));
+      c:n[2]?"var(--tx)":"var(--tx3)", bg:n[2]?"rgba(18,32,46,.045)":"transparent", w:n[2]?"600":"500" }));
 
     const INV=[
       { period:"31 Jul – 30 Aug 2026", id:"INV-2026-08-0041", issued:"31 Aug", amt:"₹1,339.02", kwh:"288.0", days:"30",

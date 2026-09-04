@@ -11,38 +11,38 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <style>
     :root{
-      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
-      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
-      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
-      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30); --violet:oklch(0.74 0.16 295);
+      --bg:#ffffff; --bg1:#f7f9fb; --pnl:#ffffff; --ln:#dfe5ea; --ln2:#c5cfd8;
+      --tx:#12202e; --tx2:#4a5a68; --tx3:#7a8894;
+      --lime:oklch(0.60 0.135 160); --cyan:oklch(0.55 0.15 253);
+      --amber:oklch(0.62 0.13 74); --coral:oklch(0.58 0.17 33); --violet:oklch(0.55 0.16 290);
       --dsp:"Archivo",system-ui,sans-serif; --bdy:"IBM Plex Sans",system-ui,sans-serif; --mno:"IBM Plex Mono",ui-monospace,monospace;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.45;-webkit-font-smoothing:antialiased}
     h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.025em;line-height:1.1;font-weight:700}
     p{margin:0}
-    a{color:var(--cyan);text-decoration:none} a:hover{color:#fff}
+    a{color:var(--cyan);text-decoration:none} a:hover{color:#0a1620}
     .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
     .eyebrow{font-family:var(--mno);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3)}
     .ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
     .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:7px}
     .navi{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;font-size:12.5px;color:var(--tx3);cursor:pointer;transition:all .15s ease;position:relative}
-    .navi:hover{color:var(--tx2);background:rgba(255,255,255,.03)}
-    .navi.on{color:var(--tx);background:rgba(255,255,255,.055);font-weight:600}
+    .navi:hover{color:var(--tx2);background:rgba(18,32,46,.045)}
+    .navi.on{color:var(--tx);background:rgba(18,32,46,.045);font-weight:600}
     .navi.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:2px;border-radius:2px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
-    .seg{display:flex;padding:2px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;gap:2px}
+    .seg{display:flex;padding:2px;background:#f1f4f7;border:1px solid var(--ln);border-radius:5px;gap:2px}
     .seg button{flex:1;height:25px;border:0;border-radius:3px;background:transparent;color:var(--tx3);font-family:var(--mno);font-size:10.5px;cursor:pointer;transition:all .15s ease}
     .seg button.on{background:var(--pnl);color:var(--tx)}
     .opt{display:flex;align-items:center;gap:9px;padding:5px 7px;border-radius:4px;cursor:pointer;font-size:12px;color:var(--tx2);transition:all .14s ease;width:100%;text-align:left;background:transparent;border:0;font-family:var(--bdy)}
-    .opt:hover{background:rgba(255,255,255,.03);color:var(--tx)}
+    .opt:hover{background:rgba(18,32,46,.045);color:var(--tx)}
     .box{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--ln2);flex:none;display:grid;place-items:center;transition:all .15s ease}
     .opt.on .box{background:var(--cyan);border-color:var(--cyan);color:#04140b}
     input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--ln2);border-radius:2px;outline:none}
-    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 10px oklch(0.80 0.15 220/.6)}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 10px oklch(0.55 0.15 253/.6)}
     input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;background:var(--cyan);cursor:pointer}
     .dtrow{display:grid;grid-template-columns:76px 1fr 62px 58px 34px;align-items:center;gap:11px;padding:11px 12px;cursor:pointer;border-top:1px solid var(--ln);transition:background .14s ease}
-    .dtrow:hover{background:rgba(255,255,255,.03)}
-    .dtrow.on{background:oklch(0.80 0.15 220/.09);box-shadow:inset 2px 0 0 var(--cyan)}
+    .dtrow:hover{background:rgba(18,32,46,.045)}
+    .dtrow.on{background:oklch(0.55 0.15 253/.09);box-shadow:inset 2px 0 0 var(--cyan)}
     .prio{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:21px;padding:0 8px;border-radius:3px;font-family:var(--mno);font-size:11.5px;font-weight:600}
     .fade{animation:fade .3s cubic-bezier(.2,.8,.2,1)}
     @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -74,7 +74,7 @@
       </sc-for>
     </div>
     <div style="flex:1"></div>
-    <div class="pnl" style="padding:11px;background:#0c1219">
+    <div class="pnl" style="padding:11px;background:#f1f4f7">
       <span class="eyebrow">Session scope</span>
       <div class="mn" style="font-size:10.5px;color:var(--tx2);margin-top:7px;line-height:1.8">division_ids<br><span style="color:var(--cyan)">[Division A]</span></div>
       <p style="font-size:9.5px;color:var(--tx3);margin-top:8px;text-wrap:pretty">RLS confines every query below to this claim.</p>
@@ -82,7 +82,7 @@
   </aside>
 
   <div style="display:flex;flex-direction:column;min-width:0">
-    <header style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--ln);background:rgba(11,15,20,.82);backdrop-filter:blur(12px)">
+    <header style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--ln);background:rgba(255,255,255,.82);backdrop-filter:blur(12px)">
       <div style="display:flex;align-items:center;gap:13px">
         <span style="font-family:var(--dsp);font-weight:600;font-size:14px">Loss localisation</span>
         <span class="mn" style="font-size:10.5px;color:var(--tx3);border-left:1px solid var(--ln);padding-left:13px">Division A · Torrent Ahmedabad</span>
@@ -181,7 +181,7 @@
               <sc-for list="{{dts}}" as="d" hint-placeholder-count="4">
                 <div class="dtrow {{d.cls}}" onClick="{{d.pick}}">
                   <span class="mn" style="font-size:12px;font-weight:600">{{d.name}}</span>
-                  <div style="height:6px;background:#0c1219;border-radius:2px;overflow:hidden">
+                  <div style="height:6px;background:#f1f4f7;border-radius:2px;overflow:hidden">
                     <div style="width:{{d.w}};height:100%;background:{{d.c}};box-shadow:0 0 10px {{d.c}}"></div>
                   </div>
                   <span class="mn" style="font-size:12px;font-weight:600;color:{{d.c}};text-align:right">{{d.pct}}%</span>
@@ -219,7 +219,7 @@
             </div>
 
             <div class="pnl" style="margin-top:12px;overflow:hidden">
-              <div style="display:grid;grid-template-columns:1.5fr 76px 1fr 52px;gap:11px;padding:9px 12px;background:#0c1219" class="eyebrow">
+              <div style="display:grid;grid-template-columns:1.5fr 76px 1fr 52px;gap:11px;padding:9px 12px;background:#f1f4f7" class="eyebrow">
                 <span>Consumer</span><span style="text-align:right">Metered</span><span>Signals</span><span style="text-align:right">Priority</span>
               </div>
               <sc-for list="{{suspects}}" as="s" hint-placeholder-count="3">
@@ -259,7 +259,7 @@
             </sc-if>
           </div>
         </sc-for>
-        <div class="pnl" style="margin-top:14px;padding:12px;background:#0c1219">
+        <div class="pnl" style="margin-top:14px;padding:12px;background:#f1f4f7">
           <div style="display:flex;gap:8px">
             <svg class="ic" style="stroke:var(--lime);width:14px;height:14px;margin-top:1px" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
             <p style="font-size:10.5px;color:var(--tx3);text-wrap:pretty">Written by a database trigger. UPDATE and DELETE raise for every role, including the owner.</p>
@@ -334,33 +334,33 @@ class Component extends DCLogic {
     const SUS={
       "A-23":[
         ["AHD-A-300001","MTR-AHD-A-300001","active","998","tamper flags on 492 readings",R,40,"#fff",R],
-        ["AHD-A-300003","MTR-AHD-A-300003","active","817","consumption per kW in bottom quartile",A,20,A,"oklch(0.84 0.16 80/.16)"],
-        ["AHD-A-300002","MTR-AHD-A-300002","active","1,155","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+        ["AHD-A-300003","MTR-AHD-A-300003","active","817","consumption per kW in bottom quartile",A,20,A,"oklch(0.64 0.13 74/.16)"],
+        ["AHD-A-300002","MTR-AHD-A-300002","active","1,155","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"]
       ],
       "A-21":[
-        ["AHD-A-100003","MTR-AHD-A-100003","active","1,225","silent for 4 days",A,15,A,"oklch(0.84 0.16 80/.16)"],
-        ["AHD-A-100001","MTR-AHD-A-100001","active","1,617","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
-        ["AHD-A-100005","MTR-AHD-A-100005","active","1,212","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+        ["AHD-A-100003","MTR-AHD-A-100003","active","1,225","silent for 4 days",A,15,A,"oklch(0.64 0.13 74/.16)"],
+        ["AHD-A-100001","MTR-AHD-A-100001","active","1,617","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"],
+        ["AHD-A-100005","MTR-AHD-A-100005","active","1,212","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"]
       ],
       "A-22":[
-        ["AHD-A-200001","MTR-AHD-A-200001","active","1,040","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
-        ["AHD-A-200002","MTR-AHD-A-200002","active","988","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
-        ["AHD-A-200003","MTR-AHD-A-200003","active","897","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+        ["AHD-A-200001","MTR-AHD-A-200001","active","1,040","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"],
+        ["AHD-A-200002","MTR-AHD-A-200002","active","988","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"],
+        ["AHD-A-200003","MTR-AHD-A-200003","active","897","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"]
       ],
       "A-24":[
-        ["SUN-101","MTR-SUN-101","active","273","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
-        ["SUN-103","MTR-SUN-103","active","299","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
-        ["SUN-105","MTR-SUN-105","active","289","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+        ["SUN-101","MTR-SUN-101","active","273","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"],
+        ["SUN-103","MTR-SUN-103","active","299","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"],
+        ["SUN-105","MTR-SUN-105","active","289","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"]
       ],
       "B-11":[
         ["AHD-B-110004","MTR-AHD-B-110004","faulty","0","meter faulty on a live connection",R,25,"#fff",R],
-        ["AHD-B-110002","MTR-AHD-B-110002","active","742","31 suspect or missing reads",A,15,A,"oklch(0.84 0.16 80/.16)"],
-        ["AHD-B-110001","MTR-AHD-B-110001","active","1,088","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+        ["AHD-B-110002","MTR-AHD-B-110002","active","742","31 suspect or missing reads",A,15,A,"oklch(0.64 0.13 74/.16)"],
+        ["AHD-B-110001","MTR-AHD-B-110001","active","1,088","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"]
       ],
       "B-12":[
-        ["AHD-B-120003","MTR-AHD-B-120003","active","655","12 estimated reads",A,15,A,"oklch(0.84 0.16 80/.16)"],
-        ["AHD-B-120001","MTR-AHD-B-120001","active","912","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
-        ["AHD-B-120002","MTR-AHD-B-120002","active","880","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+        ["AHD-B-120003","MTR-AHD-B-120003","active","655","12 estimated reads",A,15,A,"oklch(0.64 0.13 74/.16)"],
+        ["AHD-B-120001","MTR-AHD-B-120001","active","912","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"],
+        ["AHD-B-120002","MTR-AHD-B-120002","active","880","—","var(--tx3)",0,L,"oklch(0.60 0.135 160/.13)"]
       ]
     };
     const rows=(SUS[S.dt]||[]).map(s=>({ id:s[0], meter:s[1], status:s[2], kwh:s[3], signal:s[4], sigc:s[5],
