@@ -92,10 +92,10 @@ export default async function LandingPage() {
             </span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            <Link href="/how-it-works" style={{ color: "inherit" }}>How it works</Link>
             <a href="#proof" style={{ color: "inherit" }}>Proof</a>
-            <a href="#platform" style={{ color: "inherit" }}>Platform</a>
             <a href="#discom" style={{ color: "inherit" }}>For DISCOMs</a>
-            <a href="#pricing" style={{ color: "inherit" }}>Pricing</a>
+            <Link href="/pricing" style={{ color: "inherit" }}>Pricing</Link>
           </div>
           <Link href="/login" className="btn btn-primary h-9 px-4 text-[13px]">
             Open live demo

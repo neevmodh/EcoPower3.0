@@ -155,7 +155,7 @@ Wikipedia: [DGVCL](https://en.wikipedia.org/wiki/Dakshin_Gujarat_Vij_Company), [
 | Slice | Screens | Status |
 |---|---|---|
 | Consumer read-only | `/consumer/notifications`, `/consumer/carbon`, `/consumer/settings` + `lib/panelNav.ts` | ☑ `ca9ab7a` — build + lint green |
-| Marketing | `/pricing`, `/how-it-works` + shared marketing nav | ☐ |
+| Marketing | `/pricing`, `/how-it-works` + `MarketingNav` | ☑ `next` — build + lint green |
 | Consumer mobile / PWA responsive | consumer panel @ 390px, meter self-read (needs 0026 + tesseract) | ☐ |
 | Five-states demo | `/kitchen-sink` addition or `StatTile` state gallery | ☐ |
 | Society depth | units register + allocation editor pages | ◐ (units/allocation pages exist, shallow) |
