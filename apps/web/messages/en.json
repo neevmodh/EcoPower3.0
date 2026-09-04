@@ -45,5 +45,6 @@
   "nav.carbon": "Carbon & solar",
   "nav.notifications": "Notifications",
   "nav.settings": "Settings",
-  "nav.meterRead": "Submit reading"
+  "nav.meterRead": "Submit reading",
+  "nav.trade": "Solar trading"
 }

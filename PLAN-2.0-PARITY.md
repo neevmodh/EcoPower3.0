@@ -24,7 +24,7 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 | 0.4 | `MapView` component | Port 2.0 `AhmedabadMap.js` (Leaflet, SSR-safe dynamic import). Generic: takes markers + popup renderer. Add `leaflet` + `react-leaflet` deps. | ☐ |
 | 0.5 | `NotificationCenter` full page + `/notifications` route | Beyond the bell: list, filter by type, mark read/all, delete. Backed by `0014` / `0019` notification rows. | ☐ |
 | 0.6 | `EsgCard` component | CO2 offset, forest-equiv, ESG score (renewable mix 0–100), monthly trend. Uses `@ecopower/shared` carbon helpers + meter rows. | ☐ |
-| 0.7 | Migration `0027_p2p_ev.sql` | `p2p_listings`, `p2p_trades`, `ev_vehicles`, `ev_sessions`, `charging_stations`, `outages`, `announcements`, `call_logs`, `maintenance_orders`, `site_inspections`. RLS per role. Seed stations + a few listings. | ☐ |
+| 0.7 | Migration `0027_p2p_ev.sql` | ◐ — `p2p_listings`/`p2p_trades` + `p2p_place_order()` RPC, `ev_vehicles`/`ev_sessions`/`charging_stations` (5 seeded), RLS per role, pgTAP. outages/announcements/call_logs deferred to a later migration. Applied local; needs `supabase db push`. |
 | 0.8 | Migration `0028_gujarat_utilities.sql` + `scripts/seed_gujarat_sector.mjs` | Model the **real Gujarat power sector** instead of one generic DISCOM (see Appendix A). `utilities` table (GUVNL parent + GSECL gen + GETCO transmission + 4 DISCOMs + 3 private licensees), each with HQ, service territory (district list), consumer count, published AT&C loss, GERC tariff schedule ref. Existing `divisions`/`orgs` FK to `utilities`. Seed circles/divisions with realistic Gujarati names. All demo rows carry a `data_basis` note (`'modelled on GERC/GUVNL FY24 filings'`) so P1 isn't violated by silent fabrication. | ☑ `0028` — `utilities` table + 10 real entities, `orgs.utility_id`, applied+verified local. Division circle seeding + DISCOM-panel wiring still todo. |
 | 0.9 | **Theme → light default (blue/green/white)** | `:root` flipped to the light variant; dark moved to `[data-theme="dark"]`. DESIGN.md §5.2; palette validator + build + lint green. | ☑ |
 
@@ -36,7 +36,7 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 |---|---------|-------------|--------|
 | 1.1 | **Meter self-read (OCR)** — photo → reading → confirm → bill | `meter_readings` (0.2) | ☐ |
 | 1.2 | Multi-step payment wizard on bills | Razorpay + `payments` | ☐ |
-| 1.3 | P2P energy trading — list surplus, browse, buy | `p2p_listings/_trades` [synthetic prices] | ☐ |
+| 1.3 | P2P energy trading — `/consumer/trade`: browse open market, buy (place_order), list surplus, trade history | ☑ `0027` |
 | 1.4 | EV charging — register vehicle, schedule, nearby stations, session log | `ev_*`, `charging_stations` [synthetic] | ☐ |
 | 1.5 | Sustainability / ESG card | derived (0.6) | ☐ |
 | 1.6 | Site + nearby stations/DT map | `MapView` (0.4) | ☐ |
