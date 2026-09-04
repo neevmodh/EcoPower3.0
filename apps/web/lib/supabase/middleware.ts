@@ -4,7 +4,7 @@
 
 import { type CookieOptions, createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-import { scopeFromToken } from "../auth";
+
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
@@ -42,28 +42,30 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // getUser() revalidates against the auth server — do not swap for
-  // getSession(), which trusts an unverified cookie.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() verifies the JWT signature (locally for this project's ES256
+  // tokens; a getUser() fetch as a fallback on legacy HS256) and hands back
+  // the verified payload — the scope claims and all. One call instead of the
+  // old getUser() + getSession() pair. Do not swap for getSession() alone,
+  // which trusts an unverified cookie.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const claims = claimsData?.claims as Record<string, unknown> | undefined;
+  const authed = typeof claims?.sub === "string";
 
   const path = request.nextUrl.pathname;
   const gate = ROLE_GATES.find((g) => path.startsWith(g.prefix));
 
   if (gate) {
-    if (!user) {
+    if (!authed) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("next", path);
       return NextResponse.redirect(url);
     }
 
-    // Scope claims live in the JWT, not the stored user row — see lib/auth.ts.
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const { roles } = scopeFromToken(user, session?.access_token);
+    const appMetadata = (claims?.app_metadata ?? {}) as Record<string, unknown>;
+    const roles = Array.isArray(appMetadata.roles)
+      ? (appMetadata.roles as unknown[]).filter((r): r is string => typeof r === "string")
+      : [];
     const allowed = roles.some((r) => gate.roles.includes(r));
     if (!allowed) {
       // 404, not 403 — don't confirm the panel exists to someone who

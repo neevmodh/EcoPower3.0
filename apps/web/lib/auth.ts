@@ -44,15 +44,33 @@ export function scopeFromToken(user: User, accessToken: string | undefined): Sco
 }
 
 // Returns null when unauthenticated. Callers redirect.
+//
+// This project's tokens are ES256 (asymmetric), so getClaims() verifies the
+// JWT signature locally against the project JWKS — a fetch that is cached, not
+// a round trip per request the way getUser() is. That authenticity check is
+// what getUser() also does; the claims it returns are the same verified
+// payload the custom access-token hook (#4) wrote the scope into. On a legacy
+// HS256 project getClaims() falls back to a getUser() call, so this stays
+// correct either way.
 export async function getScope(supabase: SupabaseClient): Promise<Scope | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  const { data, error } = await supabase.auth.getClaims();
+  const claims = data?.claims as Record<string, unknown> | undefined;
+  if (error || !claims || typeof claims.sub !== "string") return null;
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const appMetadata = (claims.app_metadata ?? {}) as Record<string, unknown>;
+  const user = {
+    id: claims.sub,
+    email: typeof claims.email === "string" ? claims.email : undefined,
+    app_metadata: appMetadata,
+    user_metadata: (claims.user_metadata ?? {}) as Record<string, unknown>,
+    aud: typeof claims.aud === "string" ? claims.aud : "authenticated",
+    created_at: "",
+  } as unknown as User;
 
-  return scopeFromToken(user, session?.access_token);
+  return {
+    user,
+    roles: stringArray(appMetadata.roles),
+    orgIds: stringArray(appMetadata.org_ids),
+    divisionIds: stringArray(appMetadata.division_ids),
+  };
 }
