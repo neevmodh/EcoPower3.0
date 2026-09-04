@@ -256,10 +256,17 @@ async function backfillConsumers(client, days) {
   // dtId -> day (YYYY-MM-DD) -> total delta_import_kwh across that DT's consumers.
   const dtDailyImport = new Map(DT_HEAD_METERS.map((m) => [m.dt, new Map()]));
   const dtOfMeter = new Map();
+  // Only the consumer meters this script introduced. A meter that already
+  // has readings (the original demo consumer on DT A-21, backfilled by
+  // seed_large_dataset) must NOT be re-backfilled here — that would double
+  // its history and, once its energy is also folded into the DT-head via
+  // mergeNonFleetConsumerImports(), triple-count it. Its real import is
+  // merged in later instead.
   const { rows: consumerMeters } = await client.query(
     `select m.id as meter_id, m.serial, sc.sanctioned_load_kw, sc.dt_id
      from meters m join service_connections sc on sc.id = m.service_connection_id
-     where sc.dt_id = any($1::uuid[])`,
+     where sc.dt_id = any($1::uuid[])
+       and not exists (select 1 from meter_readings mr where mr.meter_id = m.id)`,
     [[DT_A21, DT_A22, DT_A23]],
   );
 
@@ -339,15 +346,51 @@ async function backfillConsumers(client, days) {
   return dtDailyImport;
 }
 
+// DT A-21 also carries the original demo consumer (seeded by
+// seed_large_dataset), whose per-tick TRUE delta this run never held in
+// memory. Fold that consumer's recorded daily import into dtDailyImport
+// before the DT-head is written — it models no tampering, so recorded ==
+// physically-delivered for it. Without this the DT-head under-counts and
+// DT A-21's loss goes negative.
+async function mergeNonFleetConsumerImports(client, dtDailyImport) {
+  const fleetMeterIds = [
+    ...CONSUMERS.map((_, i) => uuid(`0000e${String(i).padStart(3, "0")}`)),
+    ...DT_HEAD_METERS.map((m) => m.id),
+  ];
+  const { rows } = await client.query(
+    `select sc.dt_id,
+            to_char(mr.reading_ts at time zone 'UTC', 'YYYY-MM-DD') as day,
+            coalesce(sum(mr.delta_import_kwh), 0) as kwh
+       from meter_readings mr
+       join meters mtr on mtr.id = mr.meter_id
+       join service_connections sc on sc.id = mtr.service_connection_id
+      where sc.dt_id = any($1::uuid[])
+        and mtr.id <> all($2::uuid[])
+        and mr.delta_import_kwh is not null
+      group by 1, 2`,
+    [DT_HEAD_METERS.map((m) => m.dt), fleetMeterIds],
+  );
+  for (const r of rows) {
+    const daily = dtDailyImport.get(r.dt_id);
+    if (!daily) continue;
+    daily.set(r.day, (daily.get(r.day) ?? 0) + Number(r.kwh));
+  }
+}
+
 async function backfillDtHeadMeters(client, dtDailyImport) {
+  await mergeNonFleetConsumerImports(client, dtDailyImport);
   for (const m of DT_HEAD_METERS) {
+    // delivered is the TRUE energy that flowed (dtDailyImport holds the
+    // pre-tamper delta for fleet consumers, plus the merged demo consumer)
+    // grossed up by the modelled network loss. A tampered consumer's
+    // recorded register is lower than this, and dt_loss_summary() picks
+    // that gap up as extra AT&C loss — which is the whole point.
     const daily = dtDailyImport.get(m.dt);
     const days = [...daily.keys()].sort();
     let cumImport = 0;
     const rows = [];
     for (const day of days) {
-      const consumerTotal = daily.get(day);
-      const delivered = consumerTotal * (1 + m.lossFactor);
+      const delivered = daily.get(day) * (1 + m.lossFactor);
       cumImport += delivered;
       const ts = new Date(`${day}T12:00:00.000Z`); // one daily summary reading per DT-head meter
       rows.push([m.id, ts.toISOString(), round3(cumImport), 0, round3(delivered), 0, 86400, "meter", "good", 0]);

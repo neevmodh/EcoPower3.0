@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
 import { PanelIcon } from "@/components/Icon";
+import { ChartFrame } from "@/components/charts/ChartFrame";
+import { RankedBar, type RankedRow } from "@/components/charts/RankedBar";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+
+type LossRow = { dt_id: string; dt_name: string; loss_pct: number; delivered_kwh?: number; consumed_kwh?: number };
 
 // Server Component. Reads Supabase with the anon key + the user's session
 // cookie — no service_role, no ?role=. Every query below has no WHERE
@@ -32,6 +36,31 @@ export default async function DiscomPage() {
       ? lossRows.reduce((sum: number, r: { loss_pct: number }) => sum + Number(r.loss_pct), 0) / lossRows.length
       : null;
   const worstDt = lossRows && lossRows.length > 0 ? [...lossRows].sort((a, b) => b.loss_pct - a.loss_pct)[0] : null;
+
+  const lossBarRows: RankedRow[] = ((lossRows ?? []) as LossRow[]).map((r) => {
+    const pct = Number(r.loss_pct);
+    const color =
+      pct < 0
+        ? "var(--color-text-tertiary)"
+        : pct > 15
+          ? "var(--color-status-serious)"
+          : pct > 10
+            ? "var(--color-status-warning)"
+            : "var(--color-status-good)";
+    const basis =
+      r.delivered_kwh != null && r.consumed_kwh != null
+        ? `${Number(r.delivered_kwh).toFixed(0)} kWh delivered · ${Number(r.consumed_kwh).toFixed(0)} kWh metered`
+        : "Click to localize this DT's loss →";
+    return {
+      key: r.dt_id,
+      label: r.dt_name,
+      value: pct,
+      color,
+      display: `${pct.toFixed(1)}%`,
+      note: pct < 0 ? `${basis} — metered exceeds delivered, check the DT-head meter` : basis,
+      href: `/discom/losses/${r.dt_id}`,
+    };
+  });
 
   return (
     <PanelShell
@@ -73,6 +102,42 @@ export default async function DiscomPage() {
           </div>
         </div>
       </div>
+
+      {lossBarRows.length > 0 && (
+        <div className="mb-6">
+          <ChartFrame
+            title="AT&C loss by distribution transformer"
+            caption="Delivered vs metered over 120 days — RDSS targets 12–15%. Click a bar to localize."
+            table={
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
+                    <th className="py-1.5 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>DT</th>
+                    <th className="py-1.5 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Delivered</th>
+                    <th className="py-1.5 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Metered</th>
+                    <th className="py-1.5 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Loss</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {((lossRows ?? []) as LossRow[])
+                    .slice()
+                    .sort((a, b) => Number(b.loss_pct) - Number(a.loss_pct))
+                    .map((r) => (
+                      <tr key={r.dt_id} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
+                        <td className="py-1 pr-4">{r.dt_name}</td>
+                        <td className="py-1 pr-4 text-right mono">{Number(r.delivered_kwh).toFixed(0)}</td>
+                        <td className="py-1 pr-4 text-right mono">{Number(r.consumed_kwh).toFixed(0)}</td>
+                        <td className="py-1 text-right mono">{Number(r.loss_pct).toFixed(1)}%</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            }
+          >
+            <RankedBar rows={lossBarRows} unit="" />
+          </ChartFrame>
+        </div>
+      )}
 
       {worstDt && (
         <div

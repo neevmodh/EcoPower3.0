@@ -186,6 +186,18 @@ Rules:
 - Currency is `bigint` paise formatted to exactly 2 decimals via `Intl.NumberFormat('en-IN')`. `₹1,063,717.882` is impossible by construction.
 - Colour on the tile follows the **status** taxonomy if it has a state, and nothing otherwise. A tile is not decorated for decoration's sake.
 
+### 4.4 The chart toolkit (built)
+
+§4.2's forms are now real components under `apps/web/components/charts/`, all hand-rolled SVG per §4.1 — no charting library, same as `EnergyBarChart` and `Sparkline` before them:
+
+- **`ChartFrame` / `LegendDot`** — the shell every chart sits in: a title that names the one series, an optional filter row, a legend for ≥2 series, and a `<details>` **Table view** that is never optional. Server component; the plot is the client island inside it.
+- **`AreaChart`** — layered area, one axis, for two series sharing a unit (grid import vs solar export, generation vs load). Hover crosshair + tooltip, hit target the full width; the line paths trace themselves in once on mount via `.animate-draw` (`--draw-length` set inline from `getTotalLength()`), never animating the values.
+- **`LoadHeatmap`** — hour × weekday, sequential fill on the consumption token, per-cell tooltip. Fed by `hourly_load_profile()` (migration 0025), the first rollup below day granularity.
+- **`RankedBar`** — ordered horizontal bars with a direct value label per row (DT AT&C loss, later invoice breakdown and society allocation). Bars grow from the left once; a negative value (metered exceeds delivered — a DT-head data-quality flag) renders by magnitude in the tertiary text colour, never as a green "good" bar.
+- **`DonutChart`** — a single composition that sums to a real whole (fleet capacity by asset type). 3px circumference gap between segments, centre total, one segment lifts on hover. Not for time series.
+
+Wired into: consumer dashboard + analytics (area + heatmap), DISCOM overview (ranked loss bars), operator fleet (capacity donut). `OnboardingCard` (dismissed state in `localStorage`) gives each panel a first-run orientation strip.
+
 ---
 
 ## 5. Typography, spacing, surfaces

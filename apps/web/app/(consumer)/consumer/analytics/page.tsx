@@ -3,8 +3,14 @@ import { co2AvoidedKg, treeEquivalent, INDIA_GRID_EMISSION_FACTOR_KG_PER_KWH } f
 import { PanelShell } from "@/components/PanelShell";
 import { EnergyBarChart } from "@/components/EnergyBarChart";
 import { CsvExportButton } from "@/components/CsvExportButton";
+import { ChartFrame, LegendDot } from "@/components/charts/ChartFrame";
+import { AreaChart } from "@/components/charts/AreaChart";
+import { LoadHeatmap, type ProfileCell } from "@/components/charts/LoadHeatmap";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+
+type ProfileRow = { dow: number; hour: number; avg_import_kwh: number; avg_export_kwh: number; samples: number };
+const DOW_LABEL = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default async function ConsumerAnalyticsPage() {
   const supabase = await createClient();
@@ -22,12 +28,23 @@ export default async function ConsumerAnalyticsPage() {
   const { data: daily } = meter
     ? await supabase.rpc("daily_energy_summary", { p_meter_id: meter.id, p_days: 90 })
     : { data: null };
+  const { data: profileRaw } = meter
+    ? await supabase.rpc("hourly_load_profile", { p_meter_id: meter.id, p_days: 28 })
+    : { data: null };
 
   const rows = ((daily ?? []) as Array<{ day: string; import_kwh: number; export_kwh: number }>).map((d) => ({
     day: d.day,
     importKwh: Number(d.import_kwh),
     exportKwh: Number(d.export_kwh),
   }));
+
+  const profileCells: ProfileCell[] = ((profileRaw ?? []) as ProfileRow[]).map((r) => ({
+    dow: r.dow,
+    hour: r.hour,
+    kwh: Number(r.avg_import_kwh),
+    samples: Number(r.samples),
+  }));
+  const dayLabels = rows.map((r) => new Date(r.day).toLocaleDateString("en-IN", { day: "numeric", month: "short" }));
 
   const totalExportKwh = rows.reduce((sum, r) => sum + r.exportKwh, 0);
   const totalImportKwh = rows.reduce((sum, r) => sum + r.importKwh, 0);
@@ -143,18 +160,87 @@ export default async function ConsumerAnalyticsPage() {
             </div>
           )}
 
-          <div className="rounded-card border card-shadow p-5 mb-6" style={{ borderColor: "var(--color-border)" }}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold">Daily net grid exchange</h2>
-              <CsvExportButton filename="ecopower-daily-energy.csv" rows={csvRows} />
-            </div>
-            <EnergyBarChart data={rows} />
+          <div className="grid gap-5 mb-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))" }}>
+            <ChartFrame
+              title="Grid import vs solar export"
+              caption="Daily totals, last 90 days"
+              legend={
+                <>
+                  <LegendDot color="var(--color-diverging-import)">Grid import</LegendDot>
+                  <LegendDot color="var(--color-diverging-export)">Solar export</LegendDot>
+                </>
+              }
+              table={
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
+                      <th className="py-1.5 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>Day</th>
+                      <th className="py-1.5 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Import (kWh)</th>
+                      <th className="py-1.5 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Export (kWh)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.slice().reverse().map((r) => (
+                      <tr key={r.day} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
+                        <td className="py-1 pr-4 mono">{r.day}</td>
+                        <td className="py-1 pr-4 text-right mono">{r.importKwh.toFixed(2)}</td>
+                        <td className="py-1 text-right mono">{r.exportKwh.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              }
+            >
+              <AreaChart
+                unit="kWh"
+                labels={dayLabels}
+                series={[
+                  { key: "imp", label: "Grid import", color: "var(--color-diverging-import)", points: rows.map((r) => r.importKwh) },
+                  { key: "exp", label: "Solar export", color: "var(--color-diverging-export)", points: rows.map((r) => r.exportKwh) },
+                ]}
+              />
+            </ChartFrame>
+
+            {profileCells.length > 0 && (
+              <ChartFrame
+                title="When you draw from the grid"
+                caption="Average grid import by hour and weekday, last 4 weeks"
+                table={
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
+                        <th className="py-1.5 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>Weekday</th>
+                        <th className="py-1.5 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>Hour</th>
+                        <th className="py-1.5 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Avg import (kWh)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {profileCells
+                        .filter((c) => c.kwh > 0)
+                        .sort((a, b) => b.kwh - a.kwh)
+                        .slice(0, 16)
+                        .map((c) => (
+                          <tr key={`${c.dow}-${c.hour}`} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
+                            <td className="py-1 pr-4 mono">{DOW_LABEL[c.dow]}</td>
+                            <td className="py-1 pr-4 mono">{String(c.hour).padStart(2, "0")}:00</td>
+                            <td className="py-1 text-right mono">{c.kwh.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                }
+              >
+                <LoadHeatmap cells={profileCells} />
+              </ChartFrame>
+            )}
           </div>
 
-          <details className="rounded-card border card-shadow p-5" style={{ borderColor: "var(--color-border)" }}>
-            <summary className="text-sm font-semibold cursor-pointer">Table view</summary>
-            <div className="overflow-x-auto mt-3">
-              <table className="w-full text-sm">
+          <ChartFrame
+            title="Daily net grid exchange"
+            caption="Export minus import per day — a signed quantity around zero"
+            filters={<CsvExportButton filename="ecopower-daily-energy.csv" rows={csvRows} />}
+            table={
+              <table className="w-full text-xs">
                 <thead>
                   <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
                     <th className="py-1.5 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>Day</th>
@@ -165,15 +251,17 @@ export default async function ConsumerAnalyticsPage() {
                 <tbody>
                   {rows.slice().reverse().map((r) => (
                     <tr key={r.day} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
-                      <td className="py-1.5 pr-4 tabular">{r.day}</td>
-                      <td className="py-1.5 pr-4 text-right tabular">{r.importKwh.toFixed(2)}</td>
-                      <td className="py-1.5 text-right tabular">{r.exportKwh.toFixed(2)}</td>
+                      <td className="py-1 pr-4 mono">{r.day}</td>
+                      <td className="py-1 pr-4 text-right mono">{r.importKwh.toFixed(2)}</td>
+                      <td className="py-1 text-right mono">{r.exportKwh.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          </details>
+            }
+          >
+            <EnergyBarChart data={rows} />
+          </ChartFrame>
         </>
       )}
     </PanelShell>

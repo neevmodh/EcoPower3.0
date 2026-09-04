@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
 import { PanelIcon, type IconName } from "@/components/Icon";
+import { ChartFrame } from "@/components/charts/ChartFrame";
+import { DonutChart, type DonutSlice } from "@/components/charts/DonutChart";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,6 +11,13 @@ const ASSET_ICON: Record<string, IconName> = {
   inverter: "plug",
   battery: "battery",
   acdb: "bolt",
+};
+
+const ASSET_COLOR: Record<string, string> = {
+  pv_array: "var(--color-categorical-generation)",
+  inverter: "var(--color-categorical-consumption)",
+  battery: "var(--color-categorical-third)",
+  acdb: "#b394ff",
 };
 
 export default async function OperatorPage() {
@@ -30,6 +39,19 @@ export default async function OperatorPage() {
     return acc;
   }, {});
   const activeMeters = (meters ?? []).filter((m) => m.status === "active").length;
+
+  const capacityByType = (assets ?? []).reduce<Record<string, number>>((acc, a) => {
+    acc[a.asset_type] = (acc[a.asset_type] ?? 0) + (a.capacity_kw ?? 0);
+    return acc;
+  }, {});
+  const capacitySlices: DonutSlice[] = Object.entries(capacityByType)
+    .filter(([, kw]) => kw > 0)
+    .map(([type, kw]) => ({
+      key: type,
+      label: type.replace("_", " "),
+      value: Math.round(kw),
+      color: ASSET_COLOR[type] ?? "var(--color-text-tertiary)",
+    }));
 
   return (
     <PanelShell
@@ -59,6 +81,19 @@ export default async function OperatorPage() {
           <div className="text-2xl font-semibold tabular">{activeMeters}</div>
         </div>
       </div>
+
+      {capacitySlices.length > 0 && (
+        <div className="mb-8">
+          <ChartFrame title="Installed capacity by asset type" caption="Sums to the fleet total your org services">
+            <DonutChart
+              slices={capacitySlices}
+              centerLabel="kW total"
+              centerValue={`${Math.round(totalCapacityKw)}`}
+              unit="kW"
+            />
+          </ChartFrame>
+        </div>
+      )}
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
