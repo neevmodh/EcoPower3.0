@@ -33,6 +33,7 @@ export default async function DiscomLossesPage() {
         { href: "/discom/netmetering", label: "Net-metering" },
         { href: "/discom/prepaid", label: "Prepaid" },
         { href: "/discom/outages", label: "Outages" },
+        { href: "/discom/p2p", label: "P2P market" },
         { href: "/discom/audit", label: "Audit log" },
       ]}
     >

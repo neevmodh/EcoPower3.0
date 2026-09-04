@@ -48,13 +48,13 @@ Status: `☐` todo · `◐` doing · `☑` done · `⊘` cut
 
 | # | Feature | Data source | Status |
 |---|---------|-------------|--------|
-| 2.1 | Grid map — DT/feeder health + AT&C loss choropleth | `dt_loss_summary`, `MapView` | ☐ |
+| 2.9 | P2P market oversight — `/discom/p2p` (division-scoped, read-only) | ☑ `0027` |
 | 2.2 | Grid load / demand dashboard | aggregate `meter_readings` | ☐ |
 | 2.3 | Loss / theft localization drill-down (exists — keep) | `dt_consumer_breakdown` | ☑ |
 | 2.4 | Outage management console — log, assign, restore, ETR | `outages` (0.7) | ☐ |
 | 2.5 | Connection approvals (exists — keep) | `connections` | ☑ |
 | 2.6 | Revenue / collection-efficiency dashboard | `invoices` + `payments` | ☐ |
-| 2.7 | Self-read review queue (approve/reject consumer OCR reads) | `self_read_submissions` | ☐ |
+| 2.7 | Self-read review (field/support/DISCOM via RLS) | ☑ `0026` — `/field/readings` |
 | 2.8 | Prepaid watch · net metering · audit (exist — keep) | real | ☑ |
 
 ## Tier 3 — Operator (RESCO) panel (target 7)

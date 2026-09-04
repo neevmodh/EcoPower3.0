@@ -19,6 +19,8 @@ const NAV = [
   { href: "/discom/losses", label: "AT&C losses" },
   { href: "/discom/netmetering", label: "Net-metering" },
   { href: "/discom/prepaid", label: "Prepaid", active: true },
+  { href: "/discom/outages", label: "Outages" },
+  { href: "/discom/p2p", label: "P2P market" },
   { href: "/discom/audit", label: "Audit log" },
 ];
 
