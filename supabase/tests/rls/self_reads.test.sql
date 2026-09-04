@@ -2,7 +2,7 @@
 -- it, a reviewer accepts it and a meter_readings row appears.
 
 begin;
-select plan(7);
+select plan(8);
 
 select create_monthly_partition(date_trunc('month', now())::date);
 
@@ -70,10 +70,20 @@ select lives_ok(
 );
 
 select is(
+  (select status::text from self_read_submissions where id = 'c6000000-0000-0000-0000-0000000000f1'),
+  'accepted',
+  'the submission is marked accepted'
+);
+
+-- The meter_readings row is checked as the connection owner — meter_readings
+-- has no support_agent policy, so the reviewer cannot see the row they just
+-- caused to be written (correct: they get no consumer meter data).
+set local request.jwt.claims = '{"sub":"c6000000-0000-0000-0000-0000000000e1","role":"authenticated","app_metadata":{"roles":["consumer"],"org_ids":[],"division_ids":[]}}';
+select is(
   (select count(*)::int from meter_readings
      where meter_id = 'c6000000-0000-0000-0000-0000000000d1' and source = 'ocr' and kwh_import = 42571),
   1,
-  'accepting the submission writes an ocr-sourced meter_readings row'
+  'accepting the submission writes an ocr-sourced meter_readings row the consumer can see'
 );
 
 rollback;

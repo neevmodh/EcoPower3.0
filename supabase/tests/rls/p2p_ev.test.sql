@@ -57,8 +57,8 @@ select is((select count(*)::int from p2p_trades), 0, 'a consumer who is not a pa
 
 -- EV: vehicle is owner-scoped
 set local request.jwt.claims = '{"sub":"27000000-0000-0000-0000-0000000000e1","role":"authenticated","app_metadata":{"roles":["consumer"],"org_ids":[],"division_ids":[]}}';
-insert into ev_vehicles (id, owner_user_id, make_model, battery_kwh, range_km)
-  values ('27000000-0000-0000-0000-0000000000v1', '27000000-0000-0000-0000-0000000000e1', 'Tata Nexon EV', 40.5, 312);
+insert into ev_vehicles (owner_user_id, make_model, battery_kwh, range_km)
+  values ('27000000-0000-0000-0000-0000000000e1', 'Tata Nexon EV', 40.5, 312);
 set local request.jwt.claims = '{"sub":"27000000-0000-0000-0000-0000000000e2","role":"authenticated","app_metadata":{"roles":["consumer"],"org_ids":[],"division_ids":[]}}';
 select is((select count(*)::int from ev_vehicles), 0, 'a consumer cannot see another consumer''s vehicle');
 

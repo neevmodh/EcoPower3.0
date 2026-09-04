@@ -21,25 +21,27 @@ export default async function ConsumerTradePage() {
   const myConnIds = new Set((connections ?? []).map((c) => c.id));
   const myConnectionId = connections?.[0]?.id ?? null;
 
-  const { data: meter } = myConnectionId
-    ? await supabase.from("meters").select("id").eq("service_connection_id", myConnectionId).limit(1).maybeSingle()
-    : { data: null };
+  // The market and the trade history don't depend on this consumer's meter —
+  // fetch all three in one round trip.
+  const [{ data: meter }, { data: listingsRaw }, { data: tradesRaw }] = await Promise.all([
+    myConnectionId
+      ? supabase.from("meters").select("id").eq("service_connection_id", myConnectionId).limit(1).maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("p2p_listings")
+      .select("id, seller_connection_id, quantity_kwh, remaining_kwh, price_paise_per_kwh, delivery_window_start, delivery_window_end, status")
+      .order("delivery_window_start", { ascending: true }),
+    supabase
+      .from("p2p_trades")
+      .select("id, quantity_kwh, price_paise_per_kwh, amount_paise, traded_at, buyer_connection_id, seller_connection_id")
+      .order("traded_at", { ascending: false })
+      .limit(20),
+  ]);
+
   const { data: dailyRaw } = meter
     ? await supabase.rpc("daily_energy_summary", { p_meter_id: meter.id, p_days: 7 })
     : { data: null };
   const recentExportKwh = ((dailyRaw ?? []) as DailyRow[]).reduce((s, d) => s + Number(d.export_kwh), 0);
-
-  // RLS returns the open market + this consumer's own listings.
-  const { data: listingsRaw } = await supabase
-    .from("p2p_listings")
-    .select("id, seller_connection_id, quantity_kwh, remaining_kwh, price_paise_per_kwh, delivery_window_start, delivery_window_end, status")
-    .order("delivery_window_start", { ascending: true });
-
-  const { data: tradesRaw } = await supabase
-    .from("p2p_trades")
-    .select("id, quantity_kwh, price_paise_per_kwh, amount_paise, traded_at, buyer_connection_id, seller_connection_id")
-    .order("traded_at", { ascending: false })
-    .limit(20);
 
   const listings = (listingsRaw ?? []).map((l) => ({
     id: l.id,
