@@ -158,7 +158,7 @@ Wikipedia: [DGVCL](https://en.wikipedia.org/wiki/Dakshin_Gujarat_Vij_Company), [
 | Marketing | `/pricing`, `/how-it-works` + `MarketingNav` | ☑ `next` — build + lint green |
 | Consumer mobile / PWA responsive | consumer panel @ 390px, meter self-read (needs 0026 + tesseract) | ☐ |
 | Five-states demo | `/kitchen-sink` addition or `StatTile` state gallery | ☐ |
-| Society depth | overview: per-unit consumption ranked bar + table + avg/flag KPIs | ☑ (overview done; common-area split + notice board pending) |
+| Society depth | overview + `/society/common` — common-area/DG cost split by allocation share + notice board (migration 0034) | ☑ |
 | DISCOM depth | overview: division load curve (import vs behind-meter solar) + 24h KPIs via `division_load_profile` (migration 0031) | ☑ (load curve done; outage console pending) |
 | Operator depth | `/operator/guarantee` + fleet generation curve on the overview (migration 0032) | ☑ (guarantee + generation done; sites-detail/ESG pending) |
 | Field depth | work-order queue: KPI strip, priority sort, active/done split | ☑ (queue done; route/inspection/OCR pending) |

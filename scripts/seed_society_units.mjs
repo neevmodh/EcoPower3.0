@@ -140,8 +140,23 @@ async function seedUnitsAndMeters() {
     })),
   );
 
+  // Common-area charges + a couple of notices (0034) so the Society "Common
+  // area" page has content to split.
+  const periodEnd = new Date();
+  const periodStart = new Date(periodEnd.getFullYear(), periodEnd.getMonth() - 1, periodEnd.getDate());
+  const iso = (d) => d.toISOString().slice(0, 10);
+  await upsert("/rest/v1/society_common_charges", [
+    { id: uuid("sc-infra-1"), society_org_id: SOCIETY_ORG_ID, period_start: iso(periodStart), period_end: iso(periodEnd), category: "infrastructure", label: "Lifts & water pumps (metered)", amount_paise: 1_490_000, split_basis: "equal" },
+    { id: uuid("sc-light-1"), society_org_id: SOCIETY_ORG_ID, period_start: iso(periodStart), period_end: iso(periodEnd), category: "lighting", label: "Corridor & parking lighting", amount_paise: 610_000, split_basis: "equal" },
+    { id: uuid("sc-dg-1"), society_org_id: SOCIETY_ORG_ID, period_start: iso(periodStart), period_end: iso(periodEnd), category: "dg_fuel", label: "DG set — fuel + run hours (2.4 h)", amount_paise: 524_000, split_basis: "allocation" },
+  ]);
+  await upsert("/rest/v1/society_notices", [
+    { id: uuid("nt-1"), society_org_id: SOCIETY_ORG_ID, title: "Solar panel cleaning", body: "Scheduled 14 Sep, 7-9 AM. A minor generation dip is expected during the wash.", pinned: true },
+    { id: uuid("nt-2"), society_org_id: SOCIETY_ORG_ID, title: "AGM notice", body: "22 Sep, 6 PM in the community hall. The DISCOM tariff pass-through and next year's common-charge budget will be tabled.", pinned: false },
+  ]);
+
   const total = UNITS.reduce((sum, u) => sum + u.allocationPct, 0);
-  console.log(`Seeded ${UNITS.length} society units (allocation_pct total: ${total}%).`);
+  console.log(`Seeded ${UNITS.length} society units (allocation_pct total: ${total}%) + common charges + notices.`);
 }
 
 async function ensurePartitions(client, fromDate, toDate) {

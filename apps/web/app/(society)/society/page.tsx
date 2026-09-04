@@ -54,6 +54,7 @@ export default async function SocietyPage() {
         { href: "/society", label: "Overview", active: true },
         { href: "/society/units", label: "Units" },
         { href: "/society/allocation", label: "Allocation" },
+        { href: "/society/common", label: "Common area" },
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Society overview</h1>
