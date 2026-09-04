@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
 import { PanelIcon, type IconName } from "@/components/Icon";
-import { ChartFrame } from "@/components/charts/ChartFrame";
+import { ChartFrame, LegendDot } from "@/components/charts/ChartFrame";
+import { AreaChart } from "@/components/charts/AreaChart";
 import { DonutChart, type DonutSlice } from "@/components/charts/DonutChart";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -33,7 +34,24 @@ export default async function OperatorPage() {
 
   const { data: meters } = await supabase.from("meters").select("id, status");
 
+  // Fleet generation — hourly metered export across the connections this org
+  // services, last 48h. RLS (meter_readings_resco_scope, 0029) via the
+  // SECURITY INVOKER rollup (0032) is the scope.
+  const { data: genRaw } = (await supabase.rpc("resco_generation_profile", { p_hours: 48 })) as {
+    data: Array<{ bucket: string; generation_kwh: number; import_kwh: number; meters: number }> | null;
+  };
+  const gen = (genRaw ?? []).map((r) => ({ bucket: r.bucket, generationKwh: Number(r.generation_kwh) }));
+  const genLabels = gen.map((r) =>
+    new Date(r.bucket).toLocaleString("en-IN", { day: "numeric", hour: "2-digit", hour12: false }),
+  );
+  const genDay = gen.slice(-24).reduce((s, r) => s + r.generationKwh, 0);
+  // Capacity factor = generation / (installed kW * hours). Rough, labelled.
+
   const totalCapacityKw = (assets ?? []).reduce((sum, a) => sum + (a.capacity_kw ?? 0), 0);
+  const pvCapacityKw = (assets ?? [])
+    .filter((a) => a.asset_type === "pv_array")
+    .reduce((sum, a) => sum + (a.capacity_kw ?? 0), 0);
+  const capacityFactor = pvCapacityKw > 0 && gen.length > 0 ? genDay / (pvCapacityKw * gen.slice(-24).length) : null;
   const byType = (assets ?? []).reduce<Record<string, number>>((acc, a) => {
     acc[a.asset_type] = (acc[a.asset_type] ?? 0) + 1;
     return acc;
@@ -81,7 +99,63 @@ export default async function OperatorPage() {
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Active meters visible</div>
           <div className="text-2xl font-semibold tabular">{activeMeters}</div>
         </div>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
+          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Fleet generation · 24h</div>
+          <div className="text-2xl font-semibold tabular" style={{ color: "var(--color-diverging-export)" }}>
+            {gen.length > 0 ? `${genDay.toFixed(0)} kWh` : "—"}
+          </div>
+        </div>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
+          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Capacity factor · 24h (est.)</div>
+          <div className="text-2xl font-semibold tabular">
+            {capacityFactor != null ? `${(capacityFactor * 100).toFixed(1)}%` : "—"}
+          </div>
+        </div>
       </div>
+
+      {gen.length >= 2 && (
+        <div className="mb-8">
+          <ChartFrame
+            title="Fleet generation"
+            caption="Hourly metered export across every connection your org services, last 48 hours"
+            legend={<LegendDot color="var(--color-diverging-export)">Generation</LegendDot>}
+            table={
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
+                    <th className="py-1.5 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>Hour</th>
+                    <th className="py-1.5 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Generation (kWh)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {gen
+                    .slice()
+                    .reverse()
+                    .map((r) => (
+                      <tr key={r.bucket} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
+                        <td className="py-1 pr-4 mono">{new Date(r.bucket).toLocaleString("en-GB")}</td>
+                        <td className="py-1 text-right mono">{r.generationKwh.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            }
+          >
+            <AreaChart
+              unit="kWh"
+              labels={genLabels}
+              series={[
+                {
+                  key: "gen",
+                  label: "Generation",
+                  color: "var(--color-diverging-export)",
+                  points: gen.map((r) => r.generationKwh),
+                },
+              ]}
+            />
+          </ChartFrame>
+        </div>
+      )}
 
       {capacitySlices.length > 0 && (
         <div className="mb-8">
