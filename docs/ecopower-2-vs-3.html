@@ -1,0 +1,434 @@
+<title>EcoPower 2.0 vs 3.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --paper: #fbfcfd;
+    --panel: #ffffff;
+    --ink: #0f1c29;
+    --ink-soft: #46586a;
+    --ink-faint: #7c8b99;
+    --rule: #e3e9ef;
+    --rule-strong: #d0d9e1;
+    --v2: #a55f22;          /* 2.0 — the old way, warm/dated */
+    --v2-bg: #f6efe7;
+    --v3: #12885d;          /* 3.0 — EcoPower green */
+    --v3-bg: #e7f4ee;
+    --blue: #2a6fc9;
+    --warn: #b23b2e;
+    --warn-bg: #f8ece9;
+    --shadow: 0 1px 2px rgba(15,28,41,.05), 0 8px 30px -18px rgba(15,28,41,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0b141d;
+      --panel: #101c27;
+      --ink: #e8eef4;
+      --ink-soft: #a3b1bd;
+      --ink-faint: #6b7b89;
+      --rule: #1f2e3a;
+      --rule-strong: #2c3e4c;
+      --v2: #d99a5e;
+      --v2-bg: #241a12;
+      --v3: #3fbd8a;
+      --v3-bg: #10241c;
+      --blue: #6aa5e6;
+      --warn: #e08476;
+      --warn-bg: #241512;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 34px -18px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0b141d;
+    --panel: #101c27;
+    --ink: #e8eef4;
+    --ink-soft: #a3b1bd;
+    --ink-faint: #6b7b89;
+    --rule: #1f2e3a;
+    --rule-strong: #2c3e4c;
+    --v2: #d99a5e;
+    --v2-bg: #241a12;
+    --v3: #3fbd8a;
+    --v3-bg: #10241c;
+    --blue: #6aa5e6;
+    --warn: #e08476;
+    --warn-bg: #241512;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 34px -18px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.6;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+  h1, h2, h3 {
+    font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    text-wrap: balance;
+    margin: 0;
+  }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- header ---------- */
+  header { border-bottom: 1px solid var(--rule); padding: 56px 0 40px; }
+  .titlerow { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  h1 { font-size: clamp(30px, 5vw, 46px); }
+  h1 .arrow { color: var(--blue); font-weight: 700; padding: 0 .12em; }
+  .lede {
+    margin-top: 18px;
+    max-width: 62ch;
+    font-size: 17px;
+    color: var(--ink-soft);
+  }
+  .lede strong { color: var(--ink); font-weight: 600; }
+  .meta {
+    margin-top: 22px;
+    display: flex;
+    gap: 10px 22px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+  .meta .mono { color: var(--ink-soft); }
+
+  /* ---------- evidence block ---------- */
+  section { padding: 44px 0; border-bottom: 1px solid var(--rule); }
+  .sec-head { margin-bottom: 22px; }
+  .sec-head h2 { font-size: 21px; }
+  .sec-head p { margin: 8px 0 0; color: var(--ink-soft); max-width: 60ch; font-size: 14px; }
+
+  .evidence {
+    border: 1px solid var(--rule-strong);
+    border-left: 3px solid var(--warn);
+    border-radius: 10px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .evidence table { width: 100%; border-collapse: collapse; }
+  .evidence th, .evidence td { text-align: left; padding: 12px 18px; vertical-align: top; }
+  .evidence thead th {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-faint); font-weight: 500;
+    border-bottom: 1px solid var(--rule);
+    background: var(--warn-bg);
+  }
+  .evidence tbody tr + tr td { border-top: 1px solid var(--rule); }
+  .evidence td:first-child { font-weight: 600; white-space: nowrap; color: var(--ink); width: 1%; }
+  .evidence .said { color: var(--ink-soft); }
+  .evidence .said b { color: var(--warn); font-weight: 600; }
+
+  /* ---------- comparison table ---------- */
+  .cmp {
+    border: 1px solid var(--rule-strong);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+  }
+  .cmp table { width: 100%; border-collapse: collapse; }
+  .cmp col.label { width: 22%; }
+  .cmp col.two { width: 39%; }
+  .cmp col.three { width: 39%; }
+
+  .cmp thead th {
+    position: sticky; top: 0; z-index: 2;
+    padding: 14px 18px;
+    text-align: left;
+    font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    border-bottom: 1px solid var(--rule-strong);
+    background: var(--panel);
+  }
+  .cmp thead .h-label { font-size: 12px; color: var(--ink-faint); font-weight: 600; font-family: "IBM Plex Mono", monospace; letter-spacing: .12em; text-transform: uppercase; }
+  .cmp thead .h-2 { color: var(--v2); border-bottom-color: var(--v2); }
+  .cmp thead .h-3 { color: var(--v3); border-bottom-color: var(--v3); }
+  .cmp thead .h-2 .v, .cmp thead .h-3 .v { font-size: 17px; font-weight: 800; display: block; }
+  .cmp thead .h-2 .k, .cmp thead .h-3 .k { font-size: 11px; font-weight: 500; color: var(--ink-faint); font-family: "IBM Plex Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+
+  .cmp .group td {
+    background: var(--paper);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 16px 18px 8px;
+    border-top: 1px solid var(--rule-strong);
+  }
+  .cmp tbody tr.row td {
+    padding: 13px 18px;
+    vertical-align: top;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  .cmp tbody tr.row td.label { color: var(--ink); font-weight: 600; }
+  .cmp tbody tr.row td.c2 { color: var(--ink-soft); background: color-mix(in srgb, var(--v2-bg) 45%, transparent); }
+  .cmp tbody tr.row td.c3 { color: var(--ink); }
+  .cmp td.c2 .mono, .cmp td.c3 .mono { color: inherit; }
+  .cmp td .em { color: var(--v3); font-weight: 600; }
+  .cmp td .miss { color: var(--ink-faint); font-style: italic; }
+  .tick { color: var(--v3); font-weight: 700; }
+  .dash { color: var(--v2); }
+
+  /* ---------- closing quote ---------- */
+  .close { padding: 52px 0 64px; border-bottom: 0; }
+  blockquote {
+    margin: 0;
+    font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(20px, 3.4vw, 28px);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    max-width: 24ch;
+  }
+  blockquote .g { color: var(--v3); }
+  .close p { margin: 16px 0 0; color: var(--ink-soft); font-size: 14px; }
+
+  footer { padding: 26px 0 60px; color: var(--ink-faint); font-size: 12px; }
+  footer a { color: var(--blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  a:focus-visible, th:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  /* ---------- responsive: stack the comparison into cards ---------- */
+  @media (max-width: 720px) {
+    .table-scroll { overflow-x: visible; }
+    .cmp table, .cmp thead, .cmp tbody, .cmp tr, .cmp td, .cmp col { display: block; width: auto; }
+    .cmp thead { position: static; }
+    .cmp thead tr { display: none; }
+    .cmp .group td { border-top: 0; }
+    .cmp tbody tr.row { border-top: 1px solid var(--rule-strong); padding: 4px 0 10px; }
+    .cmp tbody tr.row td { border-top: 0; padding: 6px 18px; }
+    .cmp tbody tr.row td.label { padding-top: 12px; font-size: 15px; }
+    .cmp tbody tr.row td.c2::before { content: "2.0 — "; color: var(--v2); font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; }
+    .cmp tbody tr.row td.c3::before { content: "3.0 — "; color: var(--v3); font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; }
+    .cmp tbody tr.row td.c2 { background: transparent; }
+    .evidence table, .evidence thead, .evidence tbody, .evidence tr, .evidence td { display: block; }
+    .evidence thead { display: none; }
+    .evidence td { padding: 4px 16px; }
+    .evidence td:first-child { padding-top: 14px; }
+    .evidence tbody tr + tr td { border-top: 0; }
+    .evidence tbody tr + tr { border-top: 1px solid var(--rule); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Platform comparison</div>
+    <div class="titlerow" style="margin-top:14px">
+      <h1>EcoPower&nbsp;2.0 <span class="arrow">&rarr;</span> 3.0</h1>
+    </div>
+    <p class="lede">
+      2.0 looked finished. In front of a jury of utility operators it had one fatal flaw:
+      <strong>the interface asserted things that were not true.</strong> 3.0 keeps 2.0's
+      breadth and rebuilds every claim so it survives an audit.
+    </p>
+    <div class="meta">
+      <span><span class="mono">2.0</span> &nbsp;Next.js 16 &middot; Express &middot; MongoDB Atlas &middot; 3 dashboards</span>
+      <span><span class="mono">3.0</span> &nbsp;Next.js 15 &middot; Supabase / Postgres &middot; RLS everywhere &middot; 6 role panels &middot; 290+ tests</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>What went wrong in 2.0</h2>
+      <p>Captured from 2.0's own live deployment. Every badge below is a hardcoded constant &mdash;
+        &ldquo;Optimal&rdquo; is a string literal, the arrows point up because someone typed an up arrow.</p>
+    </div>
+    <div class="evidence">
+      <table>
+        <thead>
+          <tr><th>Screen</th><th>What 2.0 displayed</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Consumer dashboard</td>
+            <td class="said"><span class="mono">Solar Generated 0.0 kWh</span> with a green <b>&uarr; +12%</b> badge; <span class="mono">Savings &#8377;0</span> with <b>&uarr; +&#8377;450</b></td>
+          </tr>
+          <tr>
+            <td>Consumer analytics</td>
+            <td class="said">Four KPIs at <span class="mono">0.0</span>, badges reading <b>+12% / &minus;8% / +22%</b>, and the main chart an empty box captioned <i>&ldquo;No data available&rdquo;</i></td>
+          </tr>
+          <tr>
+            <td>Admin command centre</td>
+            <td class="said"><span class="mono">SYSTEM GENERATION 0 kWh</span> badged <b>&ldquo;Optimal&rdquo;</b>; <span class="mono">GREEN EFFICIENCY 0%</span> badged <b>&ldquo;Target Hit&rdquo;</b></td>
+          </tr>
+          <tr>
+            <td>Admin fleet</td>
+            <td class="said"><b>&ldquo;ALL SYSTEMS GO&rdquo;</b> beside a list containing <span class="mono">INV-000 &mdash; OFFLINE</span></td>
+          </tr>
+          <tr>
+            <td>Admin revenue</td>
+            <td class="said"><span class="mono">&#8377;1,063,717.882</span> &mdash; three decimals on a currency value, a float artifact</td>
+          </tr>
+          <tr>
+            <td>Everywhere</td>
+            <td class="said">A pulsing green <b>LIVE</b> dot &mdash; a CSS animation on a page that fetched once on mount</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede" style="margin-top:24px;font-size:15px">
+      3.0's first principle: <strong>no component may outlive its data.</strong> Every number, badge,
+      trend and status pill is derived, or it renders an empty state. A tile with no data shows
+      <span class="mono">&mdash;</span>, never <span class="mono">0.0</span> &mdash; because zero is a
+      measurement and absence is not. And any number can be expanded to the inputs it was computed from.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Side by side</h2>
+    </div>
+    <div class="table-scroll" style="overflow-x:auto">
+      <div class="cmp">
+        <table>
+          <colgroup><col class="label"><col class="two"><col class="three"></colgroup>
+          <thead>
+            <tr>
+              <th class="h-label">&nbsp;</th>
+              <th class="h-2"><span class="k">the old way</span><span class="v">EcoPower&nbsp;2.0</span></th>
+              <th class="h-3"><span class="k">rebuilt</span><span class="v">EcoPower&nbsp;3.0</span></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr class="group"><td colspan="3">Architecture</td></tr>
+            <tr class="row">
+              <td class="label">Backend</td>
+              <td class="c2">Node + Express 5, a bespoke API server on port 5005</td>
+              <td class="c3">Supabase &mdash; Postgres + PostgREST, <span class="em">no API server to secure</span></td>
+            </tr>
+            <tr class="row">
+              <td class="label">Database</td>
+              <td class="c2">MongoDB Atlas + Mongoose</td>
+              <td class="c3">Postgres: partitioned time-series, <span class="em">Row-Level Security on every table</span>, <span class="mono">pg_cron</span>, triggers, pgTAP</td>
+            </tr>
+            <tr class="row">
+              <td class="label">Auth &amp; tenancy</td>
+              <td class="c2">JWT; 3 roles (consumer / enterprise / admin); scoping written in application code</td>
+              <td class="c3"><span class="mono">9</span> roles scoped per org / division, enforced <span class="em">in the database</span> &mdash; the app never writes a <span class="mono">WHERE org_id</span></td>
+            </tr>
+            <tr class="row">
+              <td class="label">Realtime</td>
+              <td class="c2"><span class="miss">none</span> &mdash; a CSS &ldquo;LIVE&rdquo; dot on a fetch-once page</td>
+              <td class="c3">Broadcast &rarr; Postgres-Changes &rarr; polling fallback ladder; one <span class="mono">ConnectionState</span> component is the only thing allowed to say &ldquo;live&rdquo;</td>
+            </tr>
+            <tr class="row">
+              <td class="label">Meter model</td>
+              <td class="c2">ad hoc fields</td>
+              <td class="c3">OBIS / IS&nbsp;15959 cumulative registers; deltas computed at ingest, never at read time</td>
+            </tr>
+            <tr class="row">
+              <td class="label">Device ingest</td>
+              <td class="c2"><span class="dash">&mdash;</span></td>
+              <td class="c3">HMAC-authenticated endpoint, monotonicity + VEE validation</td>
+            </tr>
+            <tr class="row">
+              <td class="label">Tests</td>
+              <td class="c2"><span class="dash">&mdash;</span></td>
+              <td class="c3"><span class="mono">290+</span> &mdash; 154 pgTAP (RLS, triggers, ledgers) + ~170 unit (billing golden files, HMAC, carbon)</td>
+            </tr>
+
+            <tr class="group"><td colspan="3">Data honesty</td></tr>
+            <tr class="row">
+              <td class="label">Tariff</td>
+              <td class="c2">assumed slab rates</td>
+              <td class="c3">real <span class="em">GERC / Torrent RGP order</span>, extracted from the gazette PDF, a <span class="mono">source_document_url</span> beside every rate</td>
+            </tr>
+            <tr class="row">
+              <td class="label">AT&amp;C loss</td>
+              <td class="c2">a badge</td>
+              <td class="c3">computed live as <span class="mono">delivered &divide; metered</span> from real DT-head and consumer reads</td>
+            </tr>
+            <tr class="row">
+              <td class="label">Carbon</td>
+              <td class="c2"><span class="mono">0.82&nbsp;kg/kWh</span> constant &times; <span class="mono">0</span></td>
+              <td class="c3">metered export &times; the CEA combined-margin factor; no export &rarr; the page says so, it does not estimate</td>
+            </tr>
+            <tr class="row">
+              <td class="label">A bill line</td>
+              <td class="c2">a total</td>
+              <td class="c3">opens to the <span class="em">two register reads</span> that bracket it</td>
+            </tr>
+            <tr class="row">
+              <td class="label">DISCOM decisions</td>
+              <td class="c2"><span class="dash">&mdash;</span></td>
+              <td class="c3">written to an <span class="em">append-only, hash-chained audit ledger</span> by a trigger, DB-enforced immutable</td>
+            </tr>
+            <tr class="row">
+              <td class="label">Gujarat sector</td>
+              <td class="c2">one generic &ldquo;DISCOM&rdquo;</td>
+              <td class="c3">GUVNL + GSECL + GETCO + <span class="em">UGVCL / MGVCL / DGVCL / PGVCL</span> + Torrent + Adani, each with HQ, districts, consumer count &amp; published loss</td>
+            </tr>
+
+            <tr class="group"><td colspan="3">Features &mdash; 3.0 keeps 2.0's breadth</td></tr>
+            <tr class="row"><td class="label">AI advisor</td><td class="c2"><span class="tick">&check;</span> Groq LLaMA</td><td class="c3"><span class="tick">&check;</span> grounded in the caller's own rows, refuses to invent a number</td></tr>
+            <tr class="row"><td class="label">Notification centre</td><td class="c2"><span class="tick">&check;</span></td><td class="c3"><span class="tick">&check;</span> full page + live bell, wired to workflow triggers</td></tr>
+            <tr class="row"><td class="label">Payment flow</td><td class="c2">multi-step mock wizard</td><td class="c3">real Razorpay order + signature verify</td></tr>
+            <tr class="row"><td class="label">P2P energy trading</td><td class="c2"><span class="tick">&check;</span> mock</td><td class="c3"><span class="tick">&check;</span> <span class="mono">p2p_place_order()</span> locks the listing in one transaction; DISCOM sees the market in its division</td></tr>
+            <tr class="row"><td class="label">EV charging</td><td class="c2"><span class="tick">&check;</span> mock</td><td class="c3"><span class="tick">&check;</span> vehicles, 5 seeded Ahmedabad stations, sessions with a preferred source</td></tr>
+            <tr class="row"><td class="label">Sustainability / ESG</td><td class="c2"><span class="tick">&check;</span></td><td class="c3"><span class="tick">&check;</span> consumer carbon page + operator ESG report that states its data coverage</td></tr>
+            <tr class="row"><td class="label">Map &middot; PDF/CSV export</td><td class="c2"><span class="tick">&check;</span> Leaflet &middot; jsPDF</td><td class="c3"><span class="tick">&check;</span> carried forward; every chart also ships a Table view</td></tr>
+            <tr class="row"><td class="label">Languages</td><td class="c2">EN / HI / GU</td><td class="c3">EN / &#2361;&#2367;&#2306;&#2342;&#2368; / &#2711;&#2753;&#2716;&#2736;&#2750;&#2724;&#2752;, dependency-free, consumer surfaces end to end</td></tr>
+            <tr class="row"><td class="label">Meter self-read (OCR)</td><td class="c2"><span class="dash">&mdash;</span></td><td class="c3"><span class="em">new</span> &mdash; photograph the meter &rarr; tesseract.js reads the digits client-side &rarr; confidence-gated confirm &rarr; review queue &rarr; a reading marked <span class="mono">source='ocr', quality='estimated'</span></td></tr>
+            <tr class="row"><td class="label">Prepaid billing</td><td class="c2"><span class="dash">&mdash;</span></td><td class="c3">first-class: append-only <span class="mono">prepaid_ledger</span>, <span class="mono">pg_cron</span> daily settlement, a mandated 3-day disconnect grace</td></tr>
+            <tr class="row"><td class="label">Loss localisation</td><td class="c2"><span class="dash">&mdash;</span></td><td class="c3">click a DT &rarr; feeder read vs the sum of consumer reads, drill to the consumer</td></tr>
+            <tr class="row"><td class="label">Outage management</td><td class="c2"><span class="dash">&mdash;</span></td><td class="c3">log / timeline / ETR revision / restore; affected consumers see it</td></tr>
+            <tr class="row"><td class="label">Performance guarantees</td><td class="c2"><span class="dash">&mdash;</span></td><td class="c3">contracted terms &rarr; measured achievement &rarr; <span class="em">credit auto-computed</span> when missed, traceable to reads</td></tr>
+
+            <tr class="group"><td colspan="3">Panels</td></tr>
+            <tr class="row">
+              <td class="label">Role surfaces</td>
+              <td class="c2">3 dashboards &mdash; consumer, enterprise, admin</td>
+              <td class="c3"><span class="em">6 role panels</span>, each RLS-scoped: Consumer <span class="mono">(11)</span> &middot; DISCOM <span class="mono">(8)</span> &middot; Society <span class="mono">(4)</span> &middot; Operator <span class="mono">(4)</span> &middot; Support <span class="mono">(3)</span> &middot; Field <span class="mono">(3)</span> &mdash; plus <span class="mono">/</span>, <span class="mono">/pricing</span>, <span class="mono">/how-it-works</span></td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="close">
+  <div class="wrap">
+    <div class="eyebrow" style="margin-bottom:16px">The one-line difference</div>
+    <blockquote>
+      2.0 showed you a number. 3.0 lets you click it down to the <span class="g">meter read</span> it came from.
+    </blockquote>
+    <p>That is what a regulator cares about.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Full write-up: <a href="#">EcoPower-2.0-vs-3.0.md</a> &middot; design rationale in <span class="mono">DESIGN.md &sect;1</span>
+  </div>
+</footer>
