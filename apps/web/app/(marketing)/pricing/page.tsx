@@ -4,6 +4,9 @@ import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { PricingTable, type PlanRow } from "@/components/marketing/PricingTable";
 import { createClient } from "@/lib/supabase/server";
 
+// Anon, published-catalog data — safe to cache for a few minutes.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Pricing — EcoPower",
   description: "Subscribe to the energy, not the hardware. Real plan prices from the plans catalog.",

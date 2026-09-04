@@ -46,31 +46,29 @@ export default async function ConsumerPage() {
       ? await supabase.from("meters").select("id").in("service_connection_id", connectionIds).limit(1).maybeSingle()
       : { data: null };
 
-  const { data: liveState } = meter
-    ? await supabase
-        .from("meter_live_state")
-        .select("meter_id, last_reading_ts, kwh_import, kwh_export")
-        .eq("meter_id", meter.id)
-        .maybeSingle()
-    : { data: null };
-
   const prepaidConnection = (connections ?? []).find((c) => c.connection_type === "prepaid");
-  const { data: prepaid } = prepaidConnection
-    ? await supabase
-        .from("prepaid_accounts")
-        .select("balance_paise, low_balance_threshold_paise, disconnect_pending")
-        .eq("service_connection_id", prepaidConnection.id)
-        .maybeSingle()
-    : { data: null };
 
-  // Real rollups, server-side (0013 / 0025) — RLS confines both to this
-  // consumer's own meter.
-  const { data: dailyRaw } = meter
-    ? await supabase.rpc("daily_energy_summary", { p_meter_id: meter.id, p_days: 30 })
-    : { data: null };
-  const { data: profileRaw } = meter
-    ? await supabase.rpc("hourly_load_profile", { p_meter_id: meter.id, p_days: 28 })
-    : { data: null };
+  // These four are independent — one round trip instead of four sequential
+  // ones (the function runs in bom1, co-located with the DB, but latency
+  // still adds up over serial awaits).
+  const [{ data: liveState }, { data: prepaid }, { data: dailyRaw }, { data: profileRaw }] = await Promise.all([
+    meter
+      ? supabase
+          .from("meter_live_state")
+          .select("meter_id, last_reading_ts, kwh_import, kwh_export")
+          .eq("meter_id", meter.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    prepaidConnection
+      ? supabase
+          .from("prepaid_accounts")
+          .select("balance_paise, low_balance_threshold_paise, disconnect_pending")
+          .eq("service_connection_id", prepaidConnection.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    meter ? supabase.rpc("daily_energy_summary", { p_meter_id: meter.id, p_days: 30 }) : Promise.resolve({ data: null }),
+    meter ? supabase.rpc("hourly_load_profile", { p_meter_id: meter.id, p_days: 28 }) : Promise.resolve({ data: null }),
+  ]);
 
   const daily = ((dailyRaw ?? []) as DailyRow[]).map((d) => ({
     day: d.day,

@@ -6,6 +6,9 @@ import { PanelIcon } from "@/components/Icon";
 import { Logo } from "@/components/Logo";
 import { createClient } from "@/lib/supabase/server";
 
+// Anon, published-catalog data — safe to cache for a few minutes.
+export const revalidate = 300;
+
 // Marketing page, not an operator surface — DESIGN.md P6 explicitly draws
 // that line ("marketing pages get air; operator surfaces get information"),
 // and this is the one surface granted atmosphere: the grid backdrop and the

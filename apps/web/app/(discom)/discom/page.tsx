@@ -19,20 +19,17 @@ export default async function DiscomPage() {
   if (!scope) redirect("/login");
   const { user, divisionIds } = scope;
 
-  const { data: connections } = await supabase
-    .from("service_connections")
-    .select("id, dt_id");
-
-  const { data: dts } = await supabase.from("distribution_transformers").select("id, name, capacity_kva");
-
-  const { data: meters } = await supabase.from("meters").select("id, status, dt_id, service_connection_id");
-
-  const { data: lossRows } = await supabase.rpc("dt_loss_summary");
-
-  // Division load curve — hourly import vs behind-meter solar export, last
-  // 48h. RLS on meter_readings (via the SECURITY INVOKER rollup, 0031)
-  // confines it to this officer's division.
-  const { data: loadRaw } = (await supabase.rpc("division_load_profile", { p_hours: 48 })) as {
+  // All independent — one parallel round trip instead of five serial ones.
+  const [{ data: connections }, { data: dts }, { data: meters }, { data: lossRows }, loadResult] = await Promise.all([
+    supabase.from("service_connections").select("id, dt_id"),
+    supabase.from("distribution_transformers").select("id, name, capacity_kva"),
+    supabase.from("meters").select("id, status, dt_id, service_connection_id"),
+    supabase.rpc("dt_loss_summary"),
+    // Division load curve — hourly import vs behind-meter solar, last 48h;
+    // RLS on meter_readings (via the 0031 rollup) scopes it to this division.
+    supabase.rpc("division_load_profile", { p_hours: 48 }),
+  ]);
+  const { data: loadRaw } = loadResult as {
     data: Array<{ bucket: string; import_kwh: number; export_kwh: number; meters: number }> | null;
   };
   const load = (loadRaw ?? []).map((r) => ({
