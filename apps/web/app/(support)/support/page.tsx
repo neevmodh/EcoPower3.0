@@ -51,6 +51,7 @@ export default async function SupportQueuePage() {
       nav={[
         { href: "/support", label: "Queue", active: true },
         { href: "/support/lookup", label: "Consumer 360" },
+        { href: "/support/kb", label: "Knowledge base" },
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Support queue</h1>
