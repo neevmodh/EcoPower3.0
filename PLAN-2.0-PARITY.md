@@ -161,7 +161,7 @@ Wikipedia: [DGVCL](https://en.wikipedia.org/wiki/Dakshin_Gujarat_Vij_Company), [
 | Society depth | units register + allocation editor pages | ◐ (units/allocation pages exist, shallow) |
 | DISCOM depth | connections, prepaid watch, outages, command-centre buildout | ◐ (routes exist, shallow) |
 | Operator depth | sites & devices, ESG report, maintenance | ◐ (devices exists, shallow) |
-| Field depth | work-order queue UI, route, inspection, OCR capture | ◐ |
+| Field depth | work-order queue: KPI strip, priority sort, active/done split | ☑ (queue done; route/inspection/OCR pending) |
 | Support depth | queue, consumer 360, knowledge base | ◐ |
 | Payment wizard | multi-step `PaymentWizard` on `/consumer/bills` | ☐ |
 | New-feature panels | P2P / EV / ESG card (needs 0027) | ☐ |
