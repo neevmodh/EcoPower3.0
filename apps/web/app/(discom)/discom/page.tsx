@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
 import { PanelIcon } from "@/components/Icon";
-import { ChartFrame } from "@/components/charts/ChartFrame";
+import { ChartFrame, LegendDot } from "@/components/charts/ChartFrame";
+import { AreaChart } from "@/components/charts/AreaChart";
 import { RankedBar, type RankedRow } from "@/components/charts/RankedBar";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -27,6 +28,24 @@ export default async function DiscomPage() {
   const { data: meters } = await supabase.from("meters").select("id, status, dt_id, service_connection_id");
 
   const { data: lossRows } = await supabase.rpc("dt_loss_summary");
+
+  // Division load curve — hourly import vs behind-meter solar export, last
+  // 48h. RLS on meter_readings (via the SECURITY INVOKER rollup, 0031)
+  // confines it to this officer's division.
+  const { data: loadRaw } = (await supabase.rpc("division_load_profile", { p_hours: 48 })) as {
+    data: Array<{ bucket: string; import_kwh: number; export_kwh: number; meters: number }> | null;
+  };
+  const load = (loadRaw ?? []).map((r) => ({
+    bucket: r.bucket,
+    importKwh: Number(r.import_kwh),
+    exportKwh: Number(r.export_kwh),
+  }));
+  const loadLabels = load.map((r) =>
+    new Date(r.bucket).toLocaleString("en-IN", { day: "numeric", hour: "2-digit", hour12: false }),
+  );
+  const importDay = load.slice(-24).reduce((s, r) => s + r.importKwh, 0);
+  const exportDay = load.slice(-24).reduce((s, r) => s + r.exportKwh, 0);
+  const solarShare = importDay + exportDay > 0 ? (exportDay / (importDay + exportDay)) * 100 : null;
 
   const totalConsumers = connections?.length ?? 0;
   const totalDts = dts?.length ?? 0;
@@ -101,7 +120,64 @@ export default async function DiscomPage() {
             {avgLossPct != null ? `${avgLossPct.toFixed(1)}%` : "—"}
           </div>
         </div>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
+          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Division import · 24h</div>
+          <div className="text-2xl font-semibold tabular">{load.length > 0 ? `${importDay.toFixed(0)} kWh` : "—"}</div>
+        </div>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
+          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Behind-meter solar share</div>
+          <div className="text-2xl font-semibold tabular" style={{ color: "var(--color-diverging-export)" }}>
+            {solarShare != null ? `${solarShare.toFixed(1)}%` : "—"}
+          </div>
+        </div>
       </div>
+
+      {load.length >= 2 && (
+        <div className="mb-8">
+          <ChartFrame
+            title="Division load vs behind-meter solar"
+            caption="Hourly totals across every metered connection in your division, last 48 hours"
+            legend={
+              <>
+                <LegendDot color="var(--color-diverging-import)">Grid import</LegendDot>
+                <LegendDot color="var(--color-diverging-export)">Solar export</LegendDot>
+              </>
+            }
+            table={
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
+                    <th className="py-1.5 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>Hour</th>
+                    <th className="py-1.5 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Import</th>
+                    <th className="py-1.5 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Export</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {load
+                    .slice()
+                    .reverse()
+                    .map((r) => (
+                      <tr key={r.bucket} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
+                        <td className="py-1 pr-4 mono">{new Date(r.bucket).toLocaleString("en-GB")}</td>
+                        <td className="py-1 pr-4 text-right mono">{r.importKwh.toFixed(2)}</td>
+                        <td className="py-1 text-right mono">{r.exportKwh.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            }
+          >
+            <AreaChart
+              unit="kWh"
+              labels={loadLabels}
+              series={[
+                { key: "imp", label: "Grid import", color: "var(--color-diverging-import)", points: load.map((r) => r.importKwh) },
+                { key: "exp", label: "Solar export", color: "var(--color-diverging-export)", points: load.map((r) => r.exportKwh) },
+              ]}
+            />
+          </ChartFrame>
+        </div>
+      )}
 
       {lossBarRows.length > 0 && (
         <div className="mb-6">

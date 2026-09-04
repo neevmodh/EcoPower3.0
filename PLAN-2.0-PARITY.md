@@ -159,7 +159,7 @@ Wikipedia: [DGVCL](https://en.wikipedia.org/wiki/Dakshin_Gujarat_Vij_Company), [
 | Consumer mobile / PWA responsive | consumer panel @ 390px, meter self-read (needs 0026 + tesseract) | ☐ |
 | Five-states demo | `/kitchen-sink` addition or `StatTile` state gallery | ☐ |
 | Society depth | overview: per-unit consumption ranked bar + table + avg/flag KPIs | ☑ (overview done; common-area split + notice board pending) |
-| DISCOM depth | connections, prepaid watch, outages, command-centre buildout | ◐ (routes exist, shallow) |
+| DISCOM depth | overview: division load curve (import vs behind-meter solar) + 24h KPIs via `division_load_profile` (migration 0031) | ☑ (load curve done; outage console pending) |
 | Operator depth | `/operator/guarantee` — contracted terms + settlements + credit KPIs (migration 0029 grants RESCO read on guarantees/settlements/readings) | ☑ (guarantee done; sites/ESG pending) |
 | Field depth | work-order queue: KPI strip, priority sort, active/done split | ☑ (queue done; route/inspection/OCR pending) |
 | Support depth | queue, consumer 360, knowledge base | ◐ |
