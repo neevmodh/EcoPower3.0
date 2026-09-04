@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
+import { consumerNav } from "@/lib/panelNav";
 import { SupportTicketForm } from "@/components/SupportTicketForm";
 import { TicketThread } from "@/components/TicketThread";
 import { getScope } from "@/lib/auth";
@@ -42,13 +43,7 @@ export default async function ConsumerSupportPage() {
     <PanelShell
       panel="consumer"
       email={user.email ?? ""}
-      nav={[
-        { href: "/consumer", label: "My energy" },
-        { href: "/consumer/bills", label: "Bills" },
-        { href: "/consumer/plan", label: "Plan" },
-        { href: "/consumer/analytics", label: "Analytics" },
-        { href: "/consumer/support", label: "Support", active: true },
-      ]}
+      nav={consumerNav("/consumer/support")}
     >
       <h1 className="text-2xl font-semibold mb-6">Support</h1>
 

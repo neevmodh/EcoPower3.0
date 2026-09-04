@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { formatInrFromPaise } from "@ecopower/shared";
 import { PanelShell } from "@/components/PanelShell";
+import { consumerNav } from "@/lib/panelNav";
 import { PanelIcon, type IconName } from "@/components/Icon";
 import { SubscribeButton, SubscriptionLifecycleActions } from "@/components/SubscriptionActions";
 import { NetMeteringApplyForm } from "@/components/NetMeteringApplyForm";
@@ -95,13 +96,7 @@ export default async function ConsumerPlanPage({
     <PanelShell
       panel="consumer"
       email={user.email ?? ""}
-      nav={[
-        { href: "/consumer", label: "My energy" },
-        { href: "/consumer/bills", label: "Bills" },
-        { href: "/consumer/plan", label: "Plan", active: true },
-        { href: "/consumer/analytics", label: "Analytics" },
-        { href: "/consumer/support", label: "Support" },
-      ]}
+      nav={consumerNav("/consumer/plan")}
     >
       <h1 className="text-2xl font-semibold mb-2">Your plan</h1>
       <p className="text-sm mb-8" style={{ color: "var(--color-text-secondary)" }}>

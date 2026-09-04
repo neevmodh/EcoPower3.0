@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { co2AvoidedKg, treeEquivalent, INDIA_GRID_EMISSION_FACTOR_KG_PER_KWH } from "@ecopower/shared";
 import { PanelShell } from "@/components/PanelShell";
+import { consumerNav } from "@/lib/panelNav";
 import { EnergyBarChart } from "@/components/EnergyBarChart";
 import { CsvExportButton } from "@/components/CsvExportButton";
 import { ChartFrame, LegendDot } from "@/components/charts/ChartFrame";
@@ -89,13 +90,7 @@ export default async function ConsumerAnalyticsPage() {
     <PanelShell
       panel="consumer"
       email={user.email ?? ""}
-      nav={[
-        { href: "/consumer", label: "My energy" },
-        { href: "/consumer/bills", label: "Bills" },
-        { href: "/consumer/plan", label: "Plan" },
-        { href: "/consumer/analytics", label: "Analytics", active: true },
-        { href: "/consumer/support", label: "Support" },
-      ]}
+      nav={consumerNav("/consumer/analytics")}
     >
       <h1 className="text-2xl font-semibold mb-1">Analytics</h1>
       <p className="text-sm mb-8" style={{ color: "var(--color-text-secondary)" }}>

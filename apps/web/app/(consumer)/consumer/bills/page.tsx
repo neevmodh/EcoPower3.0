@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { formatInrFromPaise } from "@ecopower/shared";
 import { PanelShell } from "@/components/PanelShell";
+import { consumerNav } from "@/lib/panelNav";
 import { InvoiceCard } from "@/components/InvoiceCard";
 import { CsvExportButton } from "@/components/CsvExportButton";
 import { getScope } from "@/lib/auth";
@@ -33,13 +34,7 @@ export default async function ConsumerBillsPage() {
     <PanelShell
       panel="consumer"
       email={user.email ?? ""}
-      nav={[
-        { href: "/consumer", label: "My energy" },
-        { href: "/consumer/bills", label: "Bills", active: true },
-        { href: "/consumer/plan", label: "Plan" },
-        { href: "/consumer/analytics", label: "Analytics" },
-        { href: "/consumer/support", label: "Support" },
-      ]}
+      nav={consumerNav("/consumer/bills")}
     >
       <div className="flex items-center justify-between mb-6">
         <div>

@@ -41,5 +41,8 @@
   "common.loading": "Loading…",
   "login.preview": "Session preview",
   "login.scope": "Session scope",
-  "login.rls": "These claims ride in the access token. Row-Level Security reads them inside the database — the UI never decides what you can see."
+  "login.rls": "These claims ride in the access token. Row-Level Security reads them inside the database — the UI never decides what you can see.",
+  "nav.carbon": "Carbon & solar",
+  "nav.notifications": "Notifications",
+  "nav.settings": "Settings"
 }

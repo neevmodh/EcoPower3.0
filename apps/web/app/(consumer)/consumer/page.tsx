@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { co2AvoidedKg } from "@ecopower/shared";
 import { PanelShell } from "@/components/PanelShell";
+import { consumerNav } from "@/lib/panelNav";
 import { PanelIcon } from "@/components/Icon";
 import { StatTile } from "@/components/StatTile";
 import { LiveMeterTile } from "@/components/LiveMeterTile";
@@ -102,13 +103,7 @@ export default async function ConsumerPage() {
       panelLabel={t("consumer.panelName")}
       signOutLabel={t("nav.signOut")}
       headerExtra={<LocaleSwitcher current={locale} />}
-      nav={[
-        { href: "/consumer", label: t("nav.myEnergy"), active: true },
-        { href: "/consumer/bills", label: t("nav.bills") },
-        { href: "/consumer/plan", label: t("nav.plan") },
-        { href: "/consumer/analytics", label: t("nav.analytics") },
-        { href: "/consumer/support", label: t("nav.support") },
-      ]}
+      nav={consumerNav("/consumer", t)}
     >
       <OnboardingCard
         id="consumer-v1"
