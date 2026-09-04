@@ -14,14 +14,12 @@
   "login.role.operator": "ऑपरेटर",
   "login.role.field": "फ़ील्ड तकनीशियन",
   "login.role.support": "सहायता एजेंट",
-
   "nav.myEnergy": "मेरी ऊर्जा",
   "nav.bills": "बिल",
   "nav.plan": "प्लान",
   "nav.analytics": "विश्लेषण",
   "nav.support": "सहायता",
   "nav.signOut": "साइन आउट",
-
   "consumer.panelName": "उपभोक्ता पैनल",
   "consumer.stat.connections": "कनेक्शन",
   "consumer.stat.liveImport": "लाइव खपत",
@@ -31,17 +29,17 @@
   "consumer.connections.none": "इस खाते से अभी तक कोई कनेक्शन नहीं जुड़ा है।",
   "consumer.connections.sanctioned": "{kw} kW स्वीकृत भार",
   "consumer.noMeter": "अभी तक कोई मीटर चालू नहीं हुआ है।",
-
   "prepaid.balance": "प्रीपेड बैलेंस",
   "prepaid.balance.low": "प्रीपेड बैलेंस · कम",
   "prepaid.belowThreshold": "कटौती सीमा से नीचे — कनेक्शन बनाए रखने के लिए रिचार्ज करें।",
   "prepaid.recharge": "रिचार्ज करें",
-
   "conn.connecting": "कनेक्ट हो रहा है…",
   "conn.live": "लाइव",
   "conn.reconnecting": "फिर से कनेक्ट हो रहा है…",
   "conn.polling": "पोलिंग (5 सेकंड)",
-
   "common.asOf": "{time} तक",
-  "common.loading": "लोड हो रहा है…"
+  "common.loading": "लोड हो रहा है…",
+  "login.preview": "सत्र पूर्वावलोकन",
+  "login.scope": "सत्र का दायरा",
+  "login.rls": "ये दावे एक्सेस टोकन में जाते हैं। डेटाबेस के भीतर रो-लेवल सुरक्षा इन्हें पढ़ती है — UI यह तय नहीं करता कि आप क्या देख सकते हैं।"
 }

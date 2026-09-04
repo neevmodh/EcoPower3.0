@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
+import { PanelIcon } from "@/components/Icon";
 import { StatTile } from "@/components/StatTile";
 import { LiveMeterTile } from "@/components/LiveMeterTile";
 import { PrepaidBalanceCard } from "@/components/PrepaidBalanceCard";
@@ -63,7 +64,7 @@ export default async function ConsumerPage() {
       ]}
     >
       <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
-        <StatTile icon="⚡" label={t("consumer.stat.connections")} value={connections?.length ?? 0} />
+        <StatTile icon={<PanelIcon name="plug" />} label={t("consumer.stat.connections")} value={connections?.length ?? 0} />
         {meter ? (
           <LiveMeterTile
             meterId={meter.id}
@@ -81,7 +82,7 @@ export default async function ConsumerPage() {
         ) : (
           // No meter commissioned yet — honestly no data, not a fabricated
           // 0.0 with a badge. The exact distinction #68 exists to enforce.
-          <StatTile icon="☀️" label={t("consumer.stat.solarGenerated")} value={null} unit="kWh" />
+          <StatTile icon={<PanelIcon name="sun" />} label={t("consumer.stat.solarGenerated")} value={null} unit="kWh" />
         )}
         {prepaid && prepaidConnection ? (
           <PrepaidBalanceCard
@@ -96,7 +97,7 @@ export default async function ConsumerPage() {
             }}
           />
         ) : (
-          <StatTile icon="₹" label={t("consumer.stat.estSavings")} valuePaise={null} />
+          <StatTile icon={<PanelIcon name="rupee" />} label={t("consumer.stat.estSavings")} valuePaise={null} />
         )}
       </div>
 

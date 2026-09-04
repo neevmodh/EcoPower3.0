@@ -1,0 +1,404 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
+      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
+      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
+      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30); --violet:oklch(0.74 0.16 295);
+      --dsp:"Archivo",system-ui,sans-serif; --bdy:"IBM Plex Sans",system-ui,sans-serif; --mno:"IBM Plex Mono",ui-monospace,monospace;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.5;-webkit-font-smoothing:antialiased}
+    h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.025em;line-height:1.1;font-weight:700}
+    p{margin:0}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
+    .eyebrow{font-family:var(--mno);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3)}
+    .ic{width:17px;height:17px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+    .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:8px}
+    .lift{transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease}
+    .lift:hover{border-color:var(--ln2);transform:translateY(-2px);box-shadow:0 16px 40px -22px #000}
+    .navi{display:flex;align-items:center;gap:11px;padding:8px 11px;border-radius:6px;font-size:13px;font-weight:500;color:var(--tx3);cursor:pointer;transition:all .16s ease;position:relative}
+    .navi:hover{color:var(--tx2);background:rgba(255,255,255,.03)}
+    .navi.on{color:var(--tx);background:rgba(255,255,255,.055);font-weight:600}
+    .navi.on::before{content:"";position:absolute;left:-11px;top:9px;bottom:9px;width:2px;border-radius:2px;background:var(--lime);box-shadow:0 0 10px var(--lime)}
+    .kbd{font-family:var(--mno);font-size:10px;border:1px solid var(--ln2);border-radius:3px;padding:1px 5px;color:var(--tx3)}
+    .seg{display:flex;padding:2px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;gap:2px}
+    .seg button{height:26px;padding:0 11px;border:0;border-radius:3px;background:transparent;color:var(--tx3);font-family:var(--mno);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s ease}
+    .seg button.on{background:var(--pnl);color:var(--tx)}
+    .pulse{position:relative;width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)}
+    .pulse::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid var(--lime);animation:ring 1.9s ease-out infinite}
+    @keyframes ring{0%{opacity:.7;transform:scale(.6)}100%{opacity:0;transform:scale(1.7)}}
+    .draw{stroke-dasharray:1400;stroke-dashoffset:1400;animation:draw 1.7s cubic-bezier(.2,.7,.2,1) forwards}
+    @keyframes draw{to{stroke-dashoffset:0}}
+    .ringp{transition:stroke-dashoffset .7s cubic-bezier(.2,.7,.2,1)}
+    .feed{animation:slide .4s cubic-bezier(.2,.8,.2,1)}
+    @keyframes slide{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+    .qa{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--ln);border-radius:6px;background:#0c1219;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .16s ease}
+    .qa:hover{border-color:var(--ln2);color:var(--tx);transform:translateY(-1px)}
+    .slab{position:relative;height:26px;border-radius:4px;overflow:hidden;background:#0c1219;border:1px solid var(--ln);display:flex}
+    @media (prefers-reduced-motion:reduce){.pulse::after,.draw,.feed{animation:none}.draw{stroke-dashoffset:0}}
+  </style>
+</helmet>
+
+<div style="--lime:{{accent}};display:grid;grid-template-columns:214px 1fr;min-height:100%;background:var(--bg)">
+
+  <!-- SIDEBAR -->
+  <aside style="border-right:1px solid var(--ln);background:var(--bg1);display:flex;flex-direction:column;padding:16px 11px">
+    <div style="display:flex;align-items:center;gap:10px;padding:5px 8px 18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" style="stroke:var(--lime);fill:none;stroke-width:1.9;stroke-linejoin:round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      <span style="font-family:var(--dsp);font-weight:800;font-size:14px">ECOPOWER</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{nav}}" as="n" hint-placeholder-count="8">
+        <div class="navi {{n.cls}}" onClick="{{n.pick}}">
+          <span style="display:flex" dangerouslySetInnerHTML="{{n.icon}}"></span>{{n.label}}
+          <sc-if value="{{n.badge}}" hint-placeholder-val="{{true}}">
+            <span class="mn" style="margin-left:auto;font-size:9.5px;background:{{n.bc}};color:#04140b;border-radius:9px;padding:1px 6px;font-weight:600">{{n.badge}}</span>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="flex:1"></div>
+    <div class="pnl" style="padding:11px;background:#0c1219">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
+        <span style="width:26px;height:26px;border-radius:6px;background:var(--lime);color:#04140b;display:grid;place-items:center;font-family:var(--dsp);font-weight:700;font-size:12px">A</span>
+        <span style="min-width:0">
+          <span style="display:block;font-size:11.5px;font-weight:600">Anjali M.</span>
+          <span class="mn" style="display:block;font-size:9.5px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">AHD-A-100001</span>
+        </span>
+      </div>
+      <div style="display:flex;gap:6px">
+        <sc-for list="{{langs}}" as="l" hint-placeholder-count="3">
+          <button onClick="{{l.pick}}" style="flex:1;height:24px;border:1px solid var(--ln);border-radius:4px;background:{{l.bg}};color:{{l.c}};font-family:var(--bdy);font-size:10px;font-weight:600;cursor:pointer">{{l.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div style="display:flex;flex-direction:column;min-width:0">
+    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--ln);background:rgba(11,15,20,.8);backdrop-filter:blur(12px)">
+      <div style="display:flex;align-items:center;gap:14px">
+        <span style="font-family:var(--dsp);font-weight:600;font-size:15px">{{t_title}}</span>
+        <span class="mn" style="font-size:11px;color:var(--tx3);border-left:1px solid var(--ln);padding-left:14px">{{t_conn}}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="display:flex;align-items:center;gap:8px;height:30px;padding:0 11px;border:1px solid var(--ln);border-radius:5px;background:#0c1219;color:var(--tx3);font-size:12px">
+          <svg class="ic" style="width:14px;height:14px" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          {{t_search}}<span class="kbd" style="margin-left:14px">⌘K</span>
+        </div>
+        <span style="position:relative;display:flex;color:var(--tx3);cursor:pointer">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+          <span style="position:absolute;top:-2px;right:-2px;width:6px;height:6px;border-radius:50%;background:var(--amber)"></span>
+        </span>
+      </div>
+    </header>
+
+    <div style="padding:20px 22px;display:flex;flex-direction:column;gap:16px;overflow:auto">
+
+      <!-- HERO ROW -->
+      <div style="display:grid;grid-template-columns:1.9fr 1fr;gap:16px">
+        <div class="pnl" style="padding:20px;background:linear-gradient(150deg,var(--pnl),var(--bg1))">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <span class="eyebrow">{{t_live}}</span>
+              <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px">
+                <span class="mn" style="font-size:38px;font-weight:600;letter-spacing:-.02em">{{kwh}}</span>
+                <span style="font-size:14px;color:var(--tx3)">kWh</span>
+                <span class="mn" style="font-size:12px;color:var(--lime);border:1px solid oklch(0.84 0.19 145/.35);border-radius:3px;padding:2px 8px;background:oklch(0.84 0.19 145/.1)">{{kw}} kW now</span>
+              </div>
+              <div class="mn" style="font-size:11px;color:var(--tx3);margin-top:6px">{{t_updated}} {{ago}}s · quality good · {{t_via}}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+              <span style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--lime);font-family:var(--mno)"><span class="pulse"></span>{{t_stream}}</span>
+              <div class="seg">
+                <sc-for list="{{ranges}}" as="r" hint-placeholder-count="3">
+                  <button class="{{r.cls}}" onClick="{{r.pick}}">{{r.label}}</button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <svg viewBox="0 0 700 160" preserveAspectRatio="none" style="width:100%;height:160px;margin-top:16px;display:block">
+            <defs>
+              <linearGradient id="ar" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="oklch(0.84 0.19 145/.42)"/><stop offset="100%" stop-color="oklch(0.84 0.19 145/0)"/>
+              </linearGradient>
+            </defs>
+            <sc-for list="{{gridLines}}" as="g" hint-placeholder-count="4">
+              <line x1="0" y1="{{g}}" x2="700" y2="{{g}}" stroke="#1e2833" stroke-width="1"/>
+            </sc-for>
+            <path d="{{areaPath}}" fill="url(#ar)"/>
+            <path class="draw" d="{{linePath}}" fill="none" stroke="var(--lime)" stroke-width="2" stroke-linejoin="round"/>
+            <path d="{{importPath}}" fill="none" stroke="var(--coral)" stroke-width="1.6" stroke-dasharray="3 4"/>
+          </svg>
+          <div class="mn" style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-top:2px">
+            <span>{{rangeStart}}</span><span>{{rangeMid}}</span><span>{{t_now}}</span>
+          </div>
+        </div>
+
+        <!-- prepaid ring -->
+        <div class="pnl lift" style="padding:20px;display:flex;flex-direction:column;border-color:{{ppBorder}}">
+          <span class="eyebrow">{{t_prepaid}}</span>
+          <div style="display:flex;align-items:center;gap:18px;margin-top:12px">
+            <svg width="98" height="98" viewBox="0 0 100 100" style="flex:none;transform:rotate(-90deg)">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#1e2833" stroke-width="8"/>
+              <circle class="ringp" cx="50" cy="50" r="42" fill="none" stroke="{{ppColor}}" stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="264" stroke-dashoffset="{{ppDash}}" style="filter:drop-shadow(0 0 6px {{ppColor}})"/>
+            </svg>
+            <div>
+              <div class="mn" style="font-size:26px;font-weight:600;color:{{ppColor}}">₹{{ppBal}}</div>
+              <div class="mn" style="font-size:11px;color:var(--tx3);margin-top:3px">{{t_days}} {{ppDays}}</div>
+              <div class="mn" style="font-size:11px;color:var(--tx3)">{{t_rate}} ₹6.50/kWh</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:16px">
+            <sc-for list="{{topups}}" as="t" hint-placeholder-count="3">
+              <button onClick="{{t.pick}}" style="flex:1;height:32px;border:1px solid var(--ln2);border-radius:5px;background:#0c1219;color:var(--tx);font-family:var(--mno);font-size:11.5px;cursor:pointer">{{t.label}}</button>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--ln)">
+            <svg class="ic" style="stroke:var(--cyan);width:14px;height:14px" viewBox="0 0 24 24"><path d="M17 2 21 6l-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22 3 18l4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            <span style="font-size:11px;color:var(--tx3)">{{t_autopay}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECOND ROW -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+        <div class="pnl lift" style="padding:18px">
+          <span class="eyebrow">{{t_slab}}</span>
+          <div class="mn" style="font-size:22px;font-weight:600;margin-top:9px">288.0 <span style="font-size:11px;color:var(--tx3)">kWh {{t_sofar}}</span></div>
+          <div class="slab" style="margin-top:12px">
+            <sc-for list="{{slabs}}" as="s" hint-placeholder-count="3">
+              <div style="width:{{s.w}};background:{{s.bg}};position:relative;display:flex;align-items:center;justify-content:center">
+                <span class="mn" style="font-size:9.5px;color:{{s.tc}}">{{s.rate}}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div class="mn" style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-top:6px">
+            <span>0</span><span>50</span><span>200</span><span>288</span>
+          </div>
+          <p style="font-size:11.5px;color:var(--tx2);margin-top:11px;text-wrap:pretty">{{t_slabNote}}</p>
+        </div>
+
+        <div class="pnl lift" style="padding:18px">
+          <span class="eyebrow">{{t_forecast}}</span>
+          <div class="mn" style="font-size:22px;font-weight:600;margin-top:9px">₹1,410 <span style="font-size:11px;color:var(--tx3)">± 120</span></div>
+          <div style="display:flex;align-items:flex-end;gap:3px;height:44px;margin-top:12px">
+            <sc-for list="{{fc}}" as="f" hint-placeholder-count="12">
+              <div style="flex:1;height:{{f.h}};background:{{f.c}};border-radius:2px 2px 0 0"></div>
+            </sc-for>
+          </div>
+          <p style="font-size:11.5px;color:var(--tx2);margin-top:11px;text-wrap:pretty">{{t_fcNote}}</p>
+        </div>
+
+        <div class="pnl lift" style="padding:18px">
+          <span class="eyebrow">{{t_peer}}</span>
+          <div style="display:flex;align-items:baseline;gap:9px;margin-top:9px">
+            <span class="mn" style="font-size:22px;font-weight:600;color:var(--lime)">−18%</span>
+            <span style="font-size:11px;color:var(--tx2)">{{t_below}}</span>
+          </div>
+          <div style="position:relative;height:34px;margin-top:14px">
+            <div style="position:absolute;left:0;right:0;top:15px;height:3px;background:linear-gradient(90deg,var(--lime),var(--amber),var(--coral));border-radius:2px;opacity:.55"></div>
+            <div style="position:absolute;left:50%;top:9px;width:1px;height:15px;background:var(--tx3)"></div>
+            <div style="position:absolute;left:32%;top:8px;width:12px;height:12px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime);border:2px solid var(--bg)"></div>
+          </div>
+          <div class="mn" style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3)">
+            <span>{{t_you}}</span><span>{{t_median}}</span>
+          </div>
+          <p style="font-size:11.5px;color:var(--tx2);margin-top:9px">{{t_peerNote}}</p>
+        </div>
+      </div>
+
+      <!-- THIRD ROW -->
+      <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:16px">
+        <div class="pnl" style="padding:18px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span class="eyebrow">{{t_feed}}</span>
+            <span class="mn" style="font-size:10px;color:var(--tx3)">{{t_last24}}</span>
+          </div>
+          <sc-for list="{{events}}" as="e" hint-placeholder-count="5">
+            <div class="feed" style="display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--ln)">
+              <span style="width:24px;height:24px;border-radius:5px;display:grid;place-items:center;flex:none;color:{{e.c}};background:rgba(255,255,255,.04)" dangerouslySetInnerHTML="{{e.icon}}"></span>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font-size:12.5px;color:var(--tx)">{{e.title}}</span>
+                <span style="display:block;font-size:11px;color:var(--tx3);margin-top:1px">{{e.body}}</span>
+              </span>
+              <span class="mn" style="font-size:10.5px;color:var(--tx3);flex:none">{{e.t}}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div class="pnl" style="padding:18px">
+          <span class="eyebrow">{{t_jump}}</span>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+            <sc-for list="{{quick}}" as="q" hint-placeholder-count="6">
+              <div class="qa"><span style="display:flex;color:{{q.c}}" dangerouslySetInnerHTML="{{q.icon}}"></span>{{q.label}}</div>
+            </sc-for>
+          </div>
+          <div style="margin-top:16px;padding:14px;border-radius:6px;background:#0c1219;border:1px solid var(--ln)">
+            <div style="display:flex;align-items:center;gap:9px">
+              <span style="width:24px;height:24px;border-radius:5px;background:var(--lime);color:#04140b;display:grid;place-items:center">
+                <svg class="ic" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8"/></svg>
+              </span>
+              <span style="font-size:12.5px;font-weight:600">{{t_ask}}</span>
+            </div>
+            <p style="font-size:11.5px;color:var(--tx2);margin-top:9px;text-wrap:pretty">{{t_askBody}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#7bf1a8","section":"Theme"}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state={ nav:"energy", range:"30d", lang:"en", kwh:10528.0, ago:2, kw:0.82, bal:280 }; }
+  componentDidMount(){ this._t=setInterval(()=>this.setState(s=>({
+    kwh:+(s.kwh+Math.random()*0.35+0.05).toFixed(1), ago:(s.ago>=9?1:s.ago+1), kw:+(0.45+Math.random()*0.9).toFixed(2)
+  })),2400); }
+  componentWillUnmount(){ clearInterval(this._t); }
+  set(k,v){ return ()=> this.setState({[k]:v}); }
+
+  ic(n){ const P={
+    bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+    receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+    wallet:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14h2"/>',
+    trend:'<path d="M3 17 9 11l4 4 8-8"/><path d="M15 7h6v6"/>',
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4 4l2 2M18 18l2 2M2 12h3M19 12h3M4 20l2-2M18 6l2-2"/>',
+    leaf:'<path d="M4 20c0-9 7-15 16-16 1 10-6 17-16 16z"/>',
+    chat:'<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8"/>',
+    gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4 6l2 1M18 17l2 1M4 18l2-1M18 7l2-1"/>',
+    plug:'<path d="M9 7V3M15 7V3M6 7h12v4a6 6 0 0 1-12 0z"/><path d="M12 17v4"/>',
+    gift:'<rect x="3" y="8" width="18" height="4"/><path d="M5 12v9h14v-9M12 8v13"/>',
+    bell:'<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+    doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>',
+    help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2.2-2.4 4M12 17h.01"/>',
+    alert:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+    check:'<path d="M20 6 9 17l-5-5"/>'
+  }; return { __html:'<svg class="ic" style="width:15px;height:15px" viewBox="0 0 24 24">'+(P[n]||P.bolt)+'</svg>' }; }
+
+  mul(seed){ let a=seed; return ()=>{ a|=0; a=(a+0x6d2b79f5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+
+  renderVals(){
+    const L="var(--lime)", C="var(--cyan)", A="var(--amber)", R="var(--coral)";
+    const T={
+      en:{ title:"My energy", conn:"AHD-A-100001 · RGP prepaid", search:"Search or ask…", live:"Live import register",
+           updated:"updated", via:"via Realtime Broadcast", stream:"streaming", prepaid:"Prepaid balance",
+           days:"≈ 6 days at present load", rate:"vend rate", autopay:"UPI Autopay tops up below ₹100",
+           slab:"Slab position", sofar:"this cycle", slabNote:"88 units into the ₹5.00 slab. The next unit costs ₹5.00 plus 10% duty.",
+           forecast:"Next-bill forecast", fcNote:"Weather-adjusted from your own curve. 12 of 30 days billed.",
+           peer:"Peer benchmark", below:"below feeder median", you:"you", median:"median of 47 homes",
+           peerNote:"Similar homes on Feeder A-2, anonymised.",
+           feed:"Activity", last24:"last 24 h", jump:"Jump to", ask:"Ask the advisor",
+           askBody:"Grounded in your account only. It narrates real numbers and refuses to invent one.",
+           now:"now",
+           nav:["My energy","Bills","Plan & prepaid","Analytics","Solar","Carbon","Support","Settings"] },
+      hi:{ title:"मेरी ऊर्जा", conn:"AHD-A-100001 · आरजीपी प्रीपेड", search:"खोजें या पूछें…", live:"लाइव आयात रजिस्टर",
+           updated:"अपडेट", via:"रियलटाइम प्रसारण से", stream:"लाइव", prepaid:"प्रीपेड बैलेंस",
+           days:"≈ 6 दिन वर्तमान भार पर", rate:"वेंड दर", autopay:"₹100 से नीचे ऑटोपे रिचार्ज",
+           slab:"स्लैब स्थिति", sofar:"इस चक्र में", slabNote:"₹5.00 स्लैब में 88 यूनिट। अगली यूनिट ₹5.00 + 10% शुल्क।",
+           forecast:"अगला बिल अनुमान", fcNote:"आपके अपने वक्र से, मौसम-समायोजित। 30 में से 12 दिन।",
+           peer:"तुलना", below:"फीडर औसत से नीचे", you:"आप", median:"47 घरों का औसत",
+           peerNote:"फीडर A-2 के समान घर, गुमनाम।",
+           feed:"गतिविधि", last24:"पिछले 24 घंटे", jump:"जाएँ", ask:"सलाहकार से पूछें",
+           askBody:"केवल आपके खाते पर आधारित। यह असली संख्याएँ बताता है, बनाता नहीं।",
+           now:"अभी",
+           nav:["मेरी ऊर्जा","बिल","प्लान और प्रीपेड","विश्लेषण","सौर","कार्बन","सहायता","सेटिंग्स"] },
+      gu:{ title:"મારી ઊર્જા", conn:"AHD-A-100001 · આરજીપી પ્રીપેડ", search:"શોધો અથવા પૂછો…", live:"લાઇવ આયાત રજિસ્ટર",
+           updated:"અપડેટ", via:"રિયલટાઇમ બ્રોડકાસ્ટથી", stream:"લાઇવ", prepaid:"પ્રીપેડ બેલેન્સ",
+           days:"≈ 6 દિવસ વર્તમાન ભાર પર", rate:"વેન્ડ દર", autopay:"₹100 થી નીચે ઓટોપે રિચાર્જ",
+           slab:"સ્લેબ સ્થિતિ", sofar:"આ ચક્રમાં", slabNote:"₹5.00 સ્લેબમાં 88 યુનિટ. આગલી યુનિટ ₹5.00 + 10% ડ્યુટી.",
+           forecast:"આગલા બિલનો અંદાજ", fcNote:"તમારા પોતાના વળાંકથી, હવામાન-સમાયોજિત. 30 માંથી 12 દિવસ.",
+           peer:"સરખામણી", below:"ફીડર સરેરાશથી નીચે", you:"તમે", median:"47 ઘરની સરેરાશ",
+           peerNote:"ફીડર A-2 પરના સમાન ઘર, અનામી.",
+           feed:"પ્રવૃત્તિ", last24:"છેલ્લા 24 કલાક", jump:"જાઓ", ask:"સલાહકારને પૂછો",
+           askBody:"ફક્ત તમારા ખાતા પર આધારિત. તે સાચા આંકડા કહે છે, બનાવતું નથી.",
+           now:"હમણાં",
+           nav:["મારી ઊર્જા","બિલ","પ્લાન અને પ્રીપેડ","વિશ્લેષણ","સૌર","કાર્બન","સહાય","સેટિંગ્સ"] }
+    };
+    const tr=T[this.state.lang];
+
+    const NAV=[["energy","bolt","",""],["bills","receipt","",""],["plan","wallet","LOW",A],["analytics","trend","",""],
+               ["solar","sun","",""],["carbon","leaf","",""],["support","chat","1",C],["settings","gear","",""]];
+    const nav=NAV.map((n,i)=>({ label:tr.nav[i], cls:this.state.nav===n[0]?"on":"", pick:this.set("nav",n[0]),
+      icon:this.ic(n[1]), badge:n[2], bc:n[3] }));
+
+    // chart
+    const N={ "7d":7, "30d":30, "90d":90 }[this.state.range];
+    const rnd=this.mul(this.state.range==="7d"?7:this.state.range==="30d"?31:97);
+    const pts=[]; for(let i=0;i<N;i++){ pts.push(20+rnd()*76); }
+    const W=700,H=160,step=W/(N-1);
+    let line="", area="M0 "+H;
+    pts.forEach((v,i)=>{ const x=(i*step).toFixed(1), y=(H-(v/100)*(H-16)-8).toFixed(1);
+      line += (i===0?"M":"L")+x+" "+y+" "; area += " L"+x+" "+y; });
+    area += " L"+W+" "+H+" Z";
+    const imp=[]; for(let i=0;i<N;i++){ imp.push(12+rnd()*30); }
+    let ipath=""; imp.forEach((v,i)=>{ const x=(i*step).toFixed(1), y=(H-(v/100)*(H-16)-8).toFixed(1); ipath+=(i===0?"M":"L")+x+" "+y+" "; });
+    const rangeLabels={ "7d":["28 Aug","31 Aug"], "30d":["5 Aug","19 Aug"], "90d":["6 Jun","25 Jul"] }[this.state.range];
+
+    const bal=this.state.bal, cap=500;
+    const pct=Math.max(0,Math.min(1,bal/cap));
+
+    const fcR=this.mul(19);
+    const fc=Array.from({length:12},(_,i)=>({ h:(28+fcR()*68).toFixed(0)+"%", c:i<5?"var(--lime)":"#1e2833" }));
+
+    const EV=[
+      ["alert",A,"Prepaid balance crossed ₹300","Autopay mandate will trigger below ₹100","2 h"],
+      ["check",L,"Net-metering application approved","DISCOM Division A · roof inspection cleared","6 h"],
+      ["sun",A,"Soiling flagged on the array","Performance ratio 4.1% under clear-sky expectation","9 h"],
+      ["receipt","var(--tx2)","August invoice issued","288.0 kWh · ₹1,339.02 · traced to 2 reads","1 d"],
+      ["bolt",C,"Meter reconnected after 4 min gap","Readings backfilled and labelled estimated","1 d"]
+    ].map(e=>({ icon:this.ic(e[0]), c:e[1], title:e[2], body:e[3], t:e[4] }));
+
+    const quick=[["Net-metering","plug",C],["Solar health","sun",A],["Subsidy","gift",A],
+                 ["Alerts","bell",C],["Tax docs","doc","var(--tx2)"],["Get help","help",L]]
+      .map(q=>({ label:q[0], icon:this.ic(q[1]), c:q[2] }));
+
+    return {
+      accent:this.props.accent ?? "#7bf1a8",
+      nav,
+      langs:[["en","EN"],["hi","हि"],["gu","ગુ"]].map(l=>({ label:l[1], pick:this.set("lang",l[0]),
+        bg:this.state.lang===l[0]?"rgba(255,255,255,.07)":"transparent",
+        c:this.state.lang===l[0]?"var(--tx)":"var(--tx3)" })),
+      ranges:[["7d","7D"],["30d","30D"],["90d","90D"]].map(r=>({ label:r[1], cls:this.state.range===r[0]?"on":"", pick:this.set("range",r[0]) })),
+      kwh:this.state.kwh.toLocaleString("en-IN",{minimumFractionDigits:1,maximumFractionDigits:1}),
+      ago:this.state.ago, kw:this.state.kw.toFixed(2),
+      gridLines:[32,64,96,128], linePath:line, areaPath:area, importPath:ipath,
+      rangeStart:rangeLabels[0], rangeMid:rangeLabels[1],
+      ppBal:bal.toFixed(2), ppDays:"6",
+      ppColor:bal<100?"var(--coral)":(bal<300?"var(--amber)":"var(--lime)"),
+      ppBorder:bal<100?"oklch(0.72 0.19 30/.5)":"var(--ln)",
+      ppDash:(264-264*pct).toFixed(0),
+      topups:[100,200,500].map(v=>({ label:"+ ₹"+v, pick:()=>this.setState(s=>({bal:Math.min(500,s.bal+v)})) })),
+      slabs:[
+        { w:"17%", bg:"oklch(0.84 0.19 145/.28)", rate:"₹3.20", tc:"var(--lime)" },
+        { w:"52%", bg:"oklch(0.84 0.16 80/.28)", rate:"₹3.95", tc:"var(--amber)" },
+        { w:"31%", bg:"oklch(0.72 0.19 30/.32)", rate:"₹5.00", tc:"var(--coral)" }
+      ],
+      fc, events:EV, quick,
+      t_title:tr.title, t_conn:tr.conn, t_search:tr.search, t_live:tr.live, t_updated:tr.updated,
+      t_via:tr.via, t_stream:tr.stream, t_prepaid:tr.prepaid, t_days:tr.days, t_rate:tr.rate,
+      t_autopay:tr.autopay, t_slab:tr.slab, t_sofar:tr.sofar, t_slabNote:tr.slabNote,
+      t_forecast:tr.forecast, t_fcNote:tr.fcNote, t_peer:tr.peer, t_below:tr.below,
+      t_you:tr.you, t_median:tr.median, t_peerNote:tr.peerNote, t_feed:tr.feed,
+      t_last24:tr.last24, t_jump:tr.jump, t_ask:tr.ask, t_askBody:tr.askBody, t_now:tr.now
+    };
+  }
+}
+</script>
+</body>
+</html>

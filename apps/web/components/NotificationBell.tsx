@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
+import { PanelIcon } from "./Icon";
 
 type Notification = {
   id: string;
@@ -56,10 +57,12 @@ export function NotificationBell() {
         style={{ width: 36, height: 36, borderColor: "var(--color-border)" }}
         aria-label="Notifications"
       >
-        🔔
+        <span style={{ color: "var(--color-text-secondary)" }}>
+          <PanelIcon name="bell" size={17} />
+        </span>
         {unreadCount > 0 && (
           <span
-            className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full text-white font-semibold tabular"
+            className="absolute -top-1 -right-1 inline-flex items-center justify-center rounded-full on-accent font-semibold tabular"
             style={{ minWidth: 16, height: 16, fontSize: 10, padding: "0 3px", background: "var(--color-status-critical)" }}
           >
             {unreadCount > 9 ? "9+" : unreadCount}

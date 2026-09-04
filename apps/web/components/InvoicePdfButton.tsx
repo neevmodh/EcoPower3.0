@@ -1,4 +1,5 @@
 "use client";
+import { PanelIcon } from "./Icon";
 
 // Real PDF export — 2.0's genuinely-working feature (its jsPDF invoice
 // generation was the one export path the earlier audit confirmed was
@@ -92,7 +93,8 @@ export function InvoicePdfButton({
       className="rounded-control px-3 py-1.5 text-xs font-semibold border"
       style={{ borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}
     >
-      📄 PDF
+      <PanelIcon name="doc" size={14} />
+      PDF
     </button>
   );
 }

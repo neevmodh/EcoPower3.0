@@ -23,7 +23,7 @@ export default async function DiscomAuditPage() {
   const supabase = await createClient();
   const scope = await getScope(supabase);
   if (!scope) redirect("/login");
-  const { user } = scope;
+  const { user, divisionIds } = scope;
 
   // RLS scopes this to the officer's division. audit_log is append-only in
   // the database — see 0023.
@@ -36,6 +36,7 @@ export default async function DiscomAuditPage() {
 
   return (
     <PanelShell
+      scopeNote={`division_ids · ${divisionIds.length} claim${divisionIds.length === 1 ? "" : "s"}`}
       panel="discom"
       email={user.email ?? ""}
       nav={[

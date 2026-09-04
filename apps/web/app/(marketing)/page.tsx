@@ -1,311 +1,388 @@
 import Link from "next/link";
-import { formatInrFromPaise } from "@ecopower/shared";
-import { LiveFlowIllustration } from "@/components/LiveFlowIllustration";
+import { CapabilityExplorer } from "@/components/marketing/CapabilityExplorer";
+import { PricingTable, type PlanRow } from "@/components/marketing/PricingTable";
+import { ProofChain } from "@/components/marketing/ProofChain";
+import { PanelIcon } from "@/components/Icon";
 import { Logo } from "@/components/Logo";
 import { createClient } from "@/lib/supabase/server";
 
 // Marketing page, not an operator surface — DESIGN.md P6 explicitly draws
-// that line ("marketing pages get air; operator surfaces get information")
-// and §8 keeps 2.0's landing-page composition. What changes from 2.0:
-// every number below is either a real, checkable fact about this build
-// (RLS role count, the cited tariff source, the CI test count) or clearly
-// labelled illustrative — never an invented customer count or a fabricated
-// testimonial. This is the same discipline DESIGN.md §1 demands of the
-// in-app dashboards, applied to the one surface that's allowed to have air.
+// that line ("marketing pages get air; operator surfaces get information"),
+// and this is the one surface granted atmosphere: the grid backdrop and the
+// aurora wash. What does NOT change from the dashboards is the honesty rule:
+// every number below is either a real, checkable fact about this build (the
+// CI test count, the RLS role count, the cited tariff) or fetched live from
+// the database. There is no invented customer count and no testimonial.
 //
-// Server-rendered by default — the only client code on the page is the
-// small energy-flow illustration and the nav's mobile toggle omission
-// (there isn't one; five links fit). No scroll listeners, no counter
-// animation library, no icon package — matches "fast speed": this ships
-// as static HTML plus one tiny client island.
+// Server-rendered by default. The only client islands are the three
+// interactive pieces: the proof chain, the capability filter, and the
+// pricing cycle toggle.
 
-const PANELS: Array<{ label: string; accent: string; icon: string; blurb: string }> = [
-  { label: "Consumer", accent: "var(--color-categorical-third)", icon: "🏠", blurb: "Live usage, billing, subscriptions" },
-  { label: "Society", accent: "#7c5cd6", icon: "🏢", blurb: "Units, allocation, aggregate load" },
-  { label: "DISCOM", accent: "var(--color-categorical-consumption)", icon: "⚡", blurb: "Division-scoped, RLS-enforced" },
-  { label: "Operator", accent: "#5c6470", icon: "🛠️", blurb: "Fleet health, asset registry" },
-  { label: "Field", accent: "var(--color-categorical-generation)", icon: "📶", blurb: "Offline-first, commissioning" },
+const PANELS: Array<{ label: string; accent: string; icon: "home" | "building" | "grid" | "gauge" | "pin" | "chat"; blurb: string }> = [
+  { label: "Consumer", accent: "var(--color-categorical-third)", icon: "home", blurb: "Live usage, provable bills, prepaid" },
+  { label: "Society", accent: "#b394ff", icon: "building", blurb: "Units, allocation, aggregate load" },
+  { label: "DISCOM", accent: "var(--color-categorical-consumption)", icon: "grid", blurb: "Division-scoped, RLS-enforced" },
+  { label: "Operator", accent: "#8fa0b4", icon: "gauge", blurb: "Fleet health, asset registry" },
+  { label: "Field", accent: "var(--color-categorical-generation)", icon: "pin", blurb: "Work orders, commissioning" },
+  { label: "Support", accent: "#4fd6c4", icon: "chat", blurb: "Ticket queue with real billing context" },
 ];
 
-const UNIT_LABEL: Record<string, string> = {
-  kwh: "kWh",
-  availability_hours: "hrs",
-  ton_hours: "ton-hrs",
-  lumen_hours: "lumen-hrs",
-};
-
-const STATS: Array<{ value: string; label: string }> = [
-  { value: "3", label: "Real tariff slabs, cited to the GERC order — not estimated" },
-  { value: "9", label: "Row-secured roles, default-deny by construction" },
-  { value: "<1s", label: "Meter reading to dashboard, over Realtime Broadcast" },
-  { value: "290+", label: "Automated unit, property, and RLS tests run in CI on every change" },
+const MARQUEE = [
+  "OBIS / IS 15959 register model",
+  "HMAC-authenticated devices",
+  "Partitioned time-series",
+  "Row-Level Security on every table",
+  "GERC tariff order, cited",
+  "CEA combined-margin CO₂",
+  "MoP FY25 loss benchmark",
+  "pg_cron settlement",
+  "Append-only audit ledger",
+  "English · हिन्दी · ગુજરાતી",
 ];
 
-const STEPS: Array<{ n: string; icon: string; title: string; desc: string; tone: string }> = [
-  { n: "01", icon: "📋", title: "Subscribe to a service", desc: "Solar, battery backup, or a performance guarantee — chosen, not defaulted.", tone: "var(--color-categorical-third)" },
-  { n: "02", icon: "📡", title: "A smart meter reports in", desc: "OBIS-standard readings over MQTT, ingested and validated in real time.", tone: "var(--color-categorical-consumption)" },
-  { n: "03", icon: "📈", title: "Watch it live", desc: "Realtime Broadcast pushes the number to your screen — or it says why it can't.", tone: "var(--color-categorical-generation)" },
-  { n: "04", icon: "🧾", title: "See exactly what you're billed", desc: "Every invoice line opens to the two register reads it was computed from.", tone: "#7c5cd6" },
-];
-
-const FEATURES: Array<{ icon: string; title: string; desc: string }> = [
-  { icon: "📡", title: "Real AMI, not a demo feed", desc: "OBIS/IS-15959 register model, an MQTT broker, HMAC-authenticated devices, and a physically modelled simulator behind every reading." },
-  { icon: "🔒", title: "Default-deny security", desc: "Row-Level Security on every table, division-scoped for DISCOM staff, owner-scoped for consumers — proven with pgTAP, not asserted in a slide." },
-  { icon: "🧮", title: "A real tariff, not a guess", desc: "Gujarat's actual RGP order for Torrent Power Ahmedabad, extracted from the primary PDF — three slabs, phase-based fixed charges, cited." },
-  { icon: "🧾", title: "Provenance on every rupee", desc: "Click an invoice line, see the bracketing meter reads it came from. The billing engine works in bigint paise — no floating-point currency." },
-  { icon: "🤝", title: "Performance guarantees, settled", desc: "CUF, performance ratio, and uptime guarantees compared against real meter data, with automatic credit lines when the contract isn't met." },
-  { icon: "🛰️", title: "Live means live, honestly", desc: "A connection indicator that reflects the actual socket — connected, reconnecting, or polling — never a decorative dot on a page that fetched once." },
-  { icon: "🔎", title: "Loss, localised to a meter", desc: "The DT loss map drills to the consumers under a high-loss transformer, ranked by real signals — tamper flags, VEE quality, reporting gaps — with an append-only audit trail behind every decision." },
-  { icon: "💳", title: "Prepaid, drawn down daily", desc: "A real prepaid balance settled against metered consumption at a vend rate, with a low-balance state, a recharge flow, and a DISCOM disconnection watch list." },
-  { icon: "🌐", title: "English, हिन्दी, ગુજરાતી", desc: "The consumer surfaces switch language from a cookie, server-rendered — because a low-literacy consumer is who PS1 is actually written for." },
+const DISCOM_POINTS = [
+  "Delivered versus consumed from real DT-head and consumer registers, not a modelled estimate.",
+  "The signals an inspector uses: tamper bits, suspect reads, silent meters, cohort position.",
+  "Row-Level Security confines every query to the officer's own division, enforced in the database.",
+  "Each decision lands in an append-only ledger a trigger writes, never application code.",
 ];
 
 export default async function LandingPage() {
-  // Anon-readable, same "published catalog" exception as tariffs (#20) —
-  // real prices from the real plans table, not marketing copy that can
-  // drift from what a subscribing consumer actually sees (#77).
+  // Anon-readable, same "published catalog" exception as tariffs (#20) — real
+  // prices from the real plans table, so marketing cannot drift from what a
+  // subscribing consumer sees (#77).
   const supabase = await createClient();
-  const { data: plans } = await supabase
+  const { data } = await supabase
     .from("plans")
-    .select("id, name, description, price_paise_per_month, plan_services(included_quantity, service_types(name, unit))")
+    .select(
+      "id, name, description, price_paise_per_month, price_paise_per_year, billing_cycle, plan_services(included_quantity, service_types(name, unit))",
+    )
     .eq("active", true)
     .order("price_paise_per_month");
 
+  const plans: PlanRow[] = (data ?? []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price_paise_per_month: Number(p.price_paise_per_month),
+    price_paise_per_year: p.price_paise_per_year == null ? null : Number(p.price_paise_per_year),
+    billing_cycle: p.billing_cycle,
+    services: ((p.plan_services ?? []) as unknown as Array<{
+      included_quantity: number;
+      service_types: { name: string; unit: string };
+    }>).map((s) => ({ name: s.service_types.name, unit: s.service_types.unit, quantity: s.included_quantity })),
+  }));
+
   return (
-    <div style={{ background: "var(--color-surface)" }}>
+    <div style={{ background: "var(--color-surface)", overflowX: "hidden" }}>
       {/* NAV */}
       <nav
-        className="sticky top-0 z-10 border-b backdrop-blur"
-        style={{ borderColor: "var(--color-border)", background: "color-mix(in oklab, var(--color-surface) 88%, transparent)" }}
+        className="sticky top-0 z-30 border-b backdrop-blur"
+        style={{ borderColor: "var(--color-border)", background: "color-mix(in oklab, var(--color-surface) 76%, transparent)" }}
       >
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 font-semibold text-lg" style={{ color: "var(--color-text-primary)" }}>
-            <Logo size={32} />
-            EcoPower
+        <div className="max-w-[1200px] mx-auto px-10 h-[70px] flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5" style={{ color: "var(--color-text-primary)" }}>
+            <Logo size={26} />
+            <span className="font-display font-extrabold text-[17px] tracking-tight">ECOPOWER</span>
+            <span
+              className="mono text-[10px] border rounded-control px-1.5 py-0.5"
+              style={{ borderColor: "var(--color-border)", color: "var(--color-text-tertiary)" }}
+            >
+              v3.0
+            </span>
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>
-            <a href="#how-it-works" className="hover:text-current transition-colors duration-state">How it works</a>
-            <a href="#features" className="hover:text-current transition-colors duration-state">Features</a>
-            <a href="#pricing" className="hover:text-current transition-colors duration-state">Pricing</a>
-            <a href="#panels" className="hover:text-current transition-colors duration-state">Panels</a>
+          <div className="hidden md:flex items-center gap-8 text-sm" style={{ color: "var(--color-text-secondary)" }}>
+            <a href="#proof" style={{ color: "inherit" }}>Proof</a>
+            <a href="#platform" style={{ color: "inherit" }}>Platform</a>
+            <a href="#discom" style={{ color: "inherit" }}>For DISCOMs</a>
+            <a href="#pricing" style={{ color: "inherit" }}>Pricing</a>
           </div>
-          <Link
-            href="/login"
-            className="rounded-control px-4 py-2 text-sm font-semibold text-white transition-colors duration-state"
-            style={{ background: "var(--color-categorical-consumption)" }}
-          >
-            Sign in
+          <Link href="/login" className="btn btn-primary h-9 px-4 text-[13px]">
+            Open live demo
           </Link>
         </div>
       </nav>
 
       {/* HERO */}
-      <section className="hero-wash">
-        <div className="max-w-6xl mx-auto px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
-          <div className="animate-fade-up">
-            <div
-              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold mb-6"
-              style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
-            >
-              ✦ Energy-as-a-Service for Indian DISCOMs
-            </div>
-            <h1 className="text-5xl font-semibold tracking-tight leading-[1.05] mb-5" style={{ color: "var(--color-text-primary)" }}>
-              Clean energy,{" "}
-              <span style={{ color: "var(--color-categorical-third)" }}>metered honestly.</span>
+      <section className="relative overflow-hidden">
+        <div className="grid-backdrop" />
+        <div className="aurora" />
+        <div className="relative z-10 max-w-[1200px] mx-auto px-10 pt-24 pb-24 grid lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <div className="eyebrow animate-fade-up">Energy-as-a-Service · Gujarat</div>
+            <h1 className="text-[64px] mt-5 animate-fade-up font-bold" style={{ animationDelay: "80ms" }}>
+              Every rupee
+              <br />
+              traced to a
+              <br />
+              <span
+                style={{
+                  background: "linear-gradient(96deg, var(--color-categorical-third), var(--color-categorical-consumption))",
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                register read.
+              </span>
             </h1>
-            <p className="text-lg mb-8 max-w-md" style={{ color: "var(--color-text-secondary)" }}>
-              Subscribe to solar, battery backup, or a performance guarantee. Every
-              number on your bill traces back to a real meter reading — not a
-              badge that outlived its data.
+            <p
+              className="text-lg mt-6 max-w-[452px] animate-fade-up"
+              style={{ color: "var(--color-text-secondary)", animationDelay: "160ms", textWrap: "pretty" }}
+            >
+              Subscribe to solar, backup, or a performance guarantee. Open any invoice line and see the two meter reads
+              it was computed from — the whole platform is built so that claim survives an audit.
             </p>
-            <div className="flex flex-wrap gap-3 mb-10">
-              <Link
-                href="/login"
-                className="rounded-control px-6 py-3 text-sm font-semibold text-white transition-colors duration-state hover:opacity-90"
-                style={{ background: "var(--color-categorical-third)" }}
-              >
-                Sign in →
+            <div className="flex gap-3 mt-9 animate-fade-up" style={{ animationDelay: "240ms" }}>
+              <Link href="/login" className="btn btn-primary h-12 px-6">
+                Open live demo
+                <PanelIcon name="arrowRight" size={16} />
               </Link>
-              <a
-                href="#how-it-works"
-                className="rounded-control px-6 py-3 text-sm font-semibold border transition-colors duration-state hover:bg-black/[0.03]"
-                style={{ borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}
-              >
-                See how it works
+              <a href="#proof" className="btn btn-ghost h-12 px-6">
+                See the proof chain
               </a>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {["Default-deny RLS", "Real GERC tariff", "Sub-second live data"].map((b) => (
-                <span
-                  key={b}
-                  className="rounded-full border px-3 py-1 text-xs font-medium"
-                  style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
-                >
-                  {b}
-                </span>
+            <div className="flex gap-8 mt-10 animate-fade-up" style={{ animationDelay: "320ms" }}>
+              {[
+                { v: "293", l: "tests green in CI" },
+                { v: "9", l: "row-secured roles" },
+                { v: "16.16%", l: "national loss benchmark" },
+              ].map((s) => (
+                <div key={s.l}>
+                  <div className="mono text-[23px] font-semibold">{s.v}</div>
+                  <div className="text-[11.5px] mt-0.5" style={{ color: "var(--color-text-tertiary)" }}>
+                    {s.l}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
-          <div className="animate-fade-up" style={{ animationDelay: "120ms" }}>
-            <LiveFlowIllustration />
-          </div>
-        </div>
-      </section>
 
-      {/* STATS */}
-      <section className="border-y" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}>
-        <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {STATS.map((s, i) => (
-            <div key={s.label} className="animate-fade-up" style={{ animationDelay: `${i * 80}ms` }}>
-              <div className="text-4xl font-semibold tracking-tight" style={{ color: "var(--color-categorical-third)" }}>
-                {s.value}
-              </div>
-              <div className="text-sm mt-2" style={{ color: "var(--color-text-secondary)" }}>
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl font-semibold tracking-tight mb-3" style={{ color: "var(--color-text-primary)" }}>
-            How it works
-          </h2>
-          <p className="text-base max-w-lg mx-auto" style={{ color: "var(--color-text-secondary)" }}>
-            Four steps, and every one of them is a real system, not a mockup.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-4 gap-6">
-          {STEPS.map((s) => (
-            <div key={s.n} className="rounded-card border p-6 card-lift" style={{ borderColor: "var(--color-border)" }}>
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className="rounded-control flex items-center justify-center"
-                  style={{ width: 44, height: 44, fontSize: "1.25rem", background: "var(--color-surface-card)", border: "1px solid var(--color-border)" }}
-                  aria-hidden="true"
-                >
-                  {s.icon}
-                </div>
-                <span className="text-2xl font-semibold" style={{ color: "var(--color-border)" }}>
-                  {s.n}
+          {/* Feeder topology. Illustrative of the modelled demo division —
+              labelled as such; the live figures live in the DISCOM panel. */}
+          <div className="animate-fade-up" style={{ animationDelay: "280ms" }}>
+            <div
+              className="rounded-card border p-6"
+              style={{
+                borderColor: "var(--color-border)",
+                background: "linear-gradient(180deg, var(--color-surface-card), var(--color-surface-raised))",
+              }}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="eyebrow">Feeder A-2 · demo division</span>
+                <span className="mono text-[11px]" style={{ color: "var(--color-text-tertiary)" }}>
+                  120-day window
                 </span>
               </div>
-              <h3 className="text-base font-semibold mb-2" style={{ color: "var(--color-text-primary)" }}>
-                {s.title}
-              </h3>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-                {s.desc}
-              </p>
+              <svg viewBox="0 0 420 250" className="w-full h-auto block" role="img" aria-label="Feeder topology with four distribution transformers and their AT and C loss">
+                <defs>
+                  <linearGradient id="feed" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="var(--color-categorical-consumption)" />
+                    <stop offset="100%" stopColor="var(--color-categorical-third)" />
+                  </linearGradient>
+                </defs>
+                <path d="M40 42 H210 V96 H360" stroke="var(--color-border-strong)" strokeWidth="1.5" fill="none" />
+                <path d="M210 42 V150 H70" stroke="var(--color-border-strong)" strokeWidth="1.5" fill="none" />
+                <path d="M210 150 V206 H360" stroke="var(--color-border-strong)" strokeWidth="1.5" fill="none" />
+                <path className="flow-line" d="M40 42 H210 V96 H360" stroke="url(#feed)" strokeWidth="2" fill="none" />
+                <path className="flow-line" d="M210 42 V150 H70" stroke="url(#feed)" strokeWidth="2" fill="none" style={{ animationDelay: "400ms" }} />
+                <path className="flow-line" d="M210 150 V206 H360" stroke="var(--color-status-serious)" strokeWidth="2" fill="none" style={{ animationDelay: "800ms" }} />
+                <circle cx="40" cy="42" r="7" fill="var(--color-categorical-consumption)" />
+                <text x="40" y="20" textAnchor="middle" fontSize="9" className="mono" fill="var(--color-text-tertiary)">SS-A</text>
+                {[
+                  { x: 360, y: 96, c: "var(--color-categorical-third)", label: "DT A-21", ty: 76, loss: "6.6%", lx: 376, ly: 100, anchor: "start" as const },
+                  { x: 70, y: 150, c: "var(--color-categorical-third)", label: "DT A-22", ty: 172, loss: "5.7%", lx: 70, ly: 188, anchor: "middle" as const },
+                  { x: 360, y: 206, c: "var(--color-status-serious)", label: "DT A-23", ty: 230, loss: "19.1%", lx: 376, ly: 210, anchor: "start" as const },
+                ].map((n) => (
+                  <g key={n.label}>
+                    <circle cx={n.x} cy={n.y} r="6" fill={n.c} />
+                    <text x={n.x} y={n.ty} textAnchor="middle" fontSize="9" className="mono" fill="var(--color-text-tertiary)">{n.label}</text>
+                    <text x={n.lx} y={n.ly} textAnchor={n.anchor} fontSize="10.5" className="mono" fill={n.c}>{n.loss}</text>
+                  </g>
+                ))}
+              </svg>
+              <div className="flex gap-5 mt-2.5 mono text-[10.5px]" style={{ color: "var(--color-text-tertiary)" }}>
+                <span className="flex items-center gap-1.5">
+                  <span style={{ width: 9, height: 2, background: "var(--color-categorical-third)" }} />
+                  within RDSS band
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span style={{ width: 9, height: 2, background: "var(--color-status-serious)" }} />
+                  above 18%
+                </span>
+              </div>
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section id="features" style={{ background: "var(--color-surface-card)" }}>
-        <div className="max-w-6xl mx-auto px-6 py-20">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-semibold tracking-tight mb-3" style={{ color: "var(--color-text-primary)" }}>
-              Built for what PS1 actually asks
+      {/* MARQUEE */}
+      <section
+        className="border-y overflow-hidden py-4"
+        style={{ borderColor: "var(--color-border)", background: "var(--color-surface-raised)" }}
+      >
+        {/* Duplicated once so the -50% translate loops seamlessly. The second
+            copy is aria-hidden — a screen reader should hear the list once. */}
+        <div className="flex gap-14 w-max" style={{ animation: "marquee 40s linear infinite" }}>
+          {MARQUEE.map((m) => (
+            <span key={m} className="mono text-[11.5px] whitespace-nowrap" style={{ color: "var(--color-text-tertiary)" }}>
+              {m}
+            </span>
+          ))}
+          <span aria-hidden="true" className="flex gap-14">
+            {MARQUEE.map((m) => (
+              <span key={m} className="mono text-[11.5px] whitespace-nowrap" style={{ color: "var(--color-text-tertiary)" }}>
+                {m}
+              </span>
+            ))}
+          </span>
+        </div>
+      </section>
+
+      {/* PROOF */}
+      <section id="proof" className="max-w-[1200px] mx-auto px-10 py-28">
+        <div className="grid lg:grid-cols-[.85fr_1.15fr] gap-16 items-start">
+          <div className="lg:sticky lg:top-28">
+            <div className="eyebrow">The proof chain</div>
+            <h2 className="text-[42px] mt-3.5 font-bold">
+              One rupee,
+              <br />
+              four hops back
+              <br />
+              to the meter.
             </h2>
-            <p className="text-base max-w-lg mx-auto" style={{ color: "var(--color-text-secondary)" }}>
-              Every card below is a shipped, tested feature — not a roadmap item.
+            <p className="text-[15px] mt-4.5 max-w-[340px]" style={{ color: "var(--color-text-secondary)", textWrap: "pretty" }}>
+              Most billing systems ask you to trust a total. This one hands you the chain — open a hop.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="rounded-card border p-6 card-lift" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
-                <div
-                  className="rounded-control flex items-center justify-center mb-4"
-                  style={{ width: 44, height: 44, fontSize: "1.25rem", background: "var(--color-surface-card)", border: "1px solid var(--color-border)" }}
-                  aria-hidden="true"
-                >
-                  {f.icon}
+          <ProofChain />
+        </div>
+      </section>
+
+      {/* PLATFORM */}
+      <section id="platform" className="border-t" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-raised)" }}>
+        <div className="max-w-[1200px] mx-auto px-10 py-26" style={{ paddingTop: 104, paddingBottom: 104 }}>
+          <CapabilityExplorer />
+        </div>
+      </section>
+
+      {/* DISCOM */}
+      <section id="discom" className="max-w-[1200px] mx-auto px-10 py-28">
+        <div className="grid lg:grid-cols-2 gap-14 items-center">
+          <div>
+            <div className="eyebrow">For distribution utilities</div>
+            <h2 className="text-[40px] mt-3.5 font-bold">
+              Loss, localised
+              <br />
+              to a meter.
+            </h2>
+            <p className="text-[15px] mt-4.5" style={{ color: "var(--color-text-secondary)", textWrap: "pretty" }}>
+              Delivered energy at the DT head against the sum of consumer registers underneath it. Where the gap is
+              real, the drill-down ranks the consumers on that transformer by the signals an inspector actually uses.
+            </p>
+            <div className="flex flex-col gap-3 mt-7">
+              {DISCOM_POINTS.map((p) => (
+                <div key={p} className="flex gap-3 items-start">
+                  <span style={{ color: "var(--color-categorical-third)", marginTop: 3 }}>
+                    <PanelIcon name="check" size={16} />
+                  </span>
+                  <span className="text-sm" style={{ color: "var(--color-text-secondary)", textWrap: "pretty" }}>
+                    {p}
+                  </span>
                 </div>
-                <h3 className="text-base font-semibold mb-2" style={{ color: "var(--color-text-primary)" }}>
-                  {f.title}
-                </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-                  {f.desc}
-                </p>
+              ))}
+            </div>
+          </div>
+          <div
+            className="rounded-card border p-5"
+            style={{
+              borderColor: "var(--color-border)",
+              background: "linear-gradient(180deg, var(--color-surface-card), var(--color-surface-raised))",
+            }}
+          >
+            <div className="flex justify-between items-center mb-3.5">
+              <span className="eyebrow">Division A · AT&amp;C loss</span>
+              <span className="mono text-[10.5px]" style={{ color: "var(--color-text-tertiary)" }}>
+                MoP FY25 avg 16.16%
+              </span>
+            </div>
+            {[
+              { dt: "DT A-23", pct: 19.1, c: "var(--color-status-serious)" },
+              { dt: "DT A-21", pct: 6.6, c: "var(--color-categorical-third)" },
+              { dt: "DT A-22", pct: 5.7, c: "var(--color-categorical-third)" },
+              { dt: "DT A-24", pct: 2.4, c: "var(--color-categorical-third)" },
+            ].map((l) => (
+              <div key={l.dt} className="flex items-center gap-3.5 py-3 border-t" style={{ borderColor: "var(--color-border)" }}>
+                <span className="mono text-xs w-14" style={{ color: "var(--color-text-secondary)" }}>
+                  {l.dt}
+                </span>
+                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--color-surface)" }}>
+                  <div style={{ width: `${Math.min(100, (l.pct / 25) * 100)}%`, height: "100%", background: l.c, boxShadow: `0 0 12px ${l.c}` }} />
+                </div>
+                <span className="mono text-xs font-semibold w-12 text-right" style={{ color: l.c }}>
+                  {l.pct}%
+                </span>
               </div>
             ))}
+            <div
+              className="mt-4 p-3.5 rounded-control border"
+              style={{
+                background: "color-mix(in oklab, var(--color-status-serious) 10%, transparent)",
+                borderColor: "color-mix(in oklab, var(--color-status-serious) 32%, transparent)",
+              }}
+            >
+              <div className="text-xs font-semibold" style={{ color: "var(--color-status-serious)" }}>
+                AHD-A-300001 · priority 40
+              </div>
+              <div className="mono text-[11px] mt-1" style={{ color: "var(--color-text-secondary)" }}>
+                tamper flags on 492 readings · 30-day window
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* PRICING */}
-      {plans && plans.length > 0 && (
-        <section id="pricing" style={{ background: "var(--color-surface-card)" }}>
-          <div className="max-w-6xl mx-auto px-6 py-20">
-            <div className="text-center mb-14">
-              <h2 className="text-3xl font-semibold tracking-tight mb-3" style={{ color: "var(--color-text-primary)" }}>
-                Real pricing, fetched live
-              </h2>
-              <p className="text-base max-w-lg mx-auto" style={{ color: "var(--color-text-secondary)" }}>
-                These are the actual rows in the plans table — not marketing copy. Sign in and the numbers match exactly.
+      {plans.length > 0 && (
+        <section id="pricing" className="border-t" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-raised)" }}>
+          <div className="max-w-[1200px] mx-auto px-10" style={{ paddingTop: 104, paddingBottom: 104 }}>
+            <div className="text-center">
+              <div className="eyebrow">Pricing</div>
+              <h2 className="text-[40px] mt-3.5 font-bold">The rows in the plans table</h2>
+              <p className="text-[15px] mt-3.5" style={{ color: "var(--color-text-secondary)" }}>
+                Fetched live from the database. Sign in and these numbers match exactly.
               </p>
             </div>
-            <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
-              {plans.map((plan) => {
-                const services = (plan.plan_services ?? []) as unknown as Array<{
-                  included_quantity: number;
-                  service_types: { name: string; unit: string };
-                }>;
-                return (
-                  <div key={plan.id} className="rounded-card border p-6 card-lift" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
-                    <div className="text-lg font-semibold mb-1">{plan.name}</div>
-                    <p className="text-sm mb-4" style={{ color: "var(--color-text-secondary)" }}>
-                      {plan.description}
-                    </p>
-                    <div className="text-3xl font-semibold tracking-tight mb-1 tabular">
-                      {formatInrFromPaise(BigInt(plan.price_paise_per_month))}
-                    </div>
-                    <div className="text-xs mb-5" style={{ color: "var(--color-text-secondary)" }}>
-                      per month
-                    </div>
-                    <ul className="space-y-2 text-sm">
-                      {services.map((s) => (
-                        <li key={s.service_types.name} style={{ color: "var(--color-text-secondary)" }}>
-                          ✓ {s.service_types.name} — {s.included_quantity} {UNIT_LABEL[s.service_types.unit] ?? s.service_types.unit}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
+            <PricingTable plans={plans} />
+            <p className="mono text-center text-[11px] mt-6" style={{ color: "var(--color-text-tertiary)" }}>
+              Energy beyond the included quantity bills on the GERC RGP telescopic slab — 50 @ ₹3.20 · 150 @ ₹3.95 ·
+              rest @ ₹5.00, plus 10% electricity duty.
+            </p>
           </div>
         </section>
       )}
 
       {/* PANELS */}
-      <section id="panels" className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl font-semibold tracking-tight mb-3" style={{ color: "var(--color-text-primary)" }}>
-            Five panels, one row-secured spine
-          </h2>
-          <p className="text-base max-w-lg mx-auto" style={{ color: "var(--color-text-secondary)" }}>
-            Identity lives in the rail, not the data. Every panel reads the same honest chart canvas.
-          </p>
+      <section className="max-w-[1200px] mx-auto px-10 py-28">
+        <div className="text-center mb-12">
+          <div className="eyebrow">Six panels</div>
+          <h2 className="text-[40px] mt-3.5 font-bold">Identity in the rail, never the data</h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid gap-3.5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(178px, 1fr))" }}>
           {PANELS.map((p) => (
-            <div key={p.label} className="rounded-card border p-4 card-lift" style={{ borderColor: "var(--color-border)" }}>
+            <div
+              key={p.label}
+              className="rounded-card border p-4 card-lift"
+              style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}
+            >
               <span
-                className="inline-flex items-center justify-center rounded-full mb-3"
-                style={{ width: 32, height: 32, background: p.accent, fontSize: 15 }}
-                aria-hidden="true"
+                className="inline-flex items-center justify-center rounded-control"
+                style={{ width: 32, height: 32, background: p.accent, color: "#04140b" }}
               >
-                {p.icon}
+                <PanelIcon name={p.icon} size={17} />
               </span>
-              <div className="text-sm font-semibold" style={{ color: "var(--color-text-primary)" }}>
-                {p.label}
-              </div>
-              <div className="text-xs mt-1" style={{ color: "var(--color-text-secondary)" }}>
+              <div className="font-display font-bold text-sm mt-3">{p.label}</div>
+              <div className="text-[11.5px] mt-1" style={{ color: "var(--color-text-tertiary)" }}>
                 {p.blurb}
               </div>
             </div>
@@ -314,33 +391,30 @@ export default async function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="border-t" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}>
-        <div className="max-w-3xl mx-auto px-6 py-20 text-center">
-          <h2 className="text-3xl font-semibold tracking-tight mb-4" style={{ color: "var(--color-text-primary)" }}>
-            See it live, in one click
-          </h2>
-          <p className="text-base mb-8" style={{ color: "var(--color-text-secondary)" }}>
-            Sign in as any of the five roles above with a demo account — no password to remember.
+      <section className="relative overflow-hidden border-t" style={{ borderColor: "var(--color-border)" }}>
+        <div className="aurora" style={{ opacity: 0.26 }} />
+        <div className="relative z-10 max-w-[720px] mx-auto px-10 py-28 text-center">
+          <h2 className="text-[44px] font-bold">Six roles. One click each.</h2>
+          <p className="text-base mt-4.5 mb-8 max-w-[490px] mx-auto" style={{ color: "var(--color-text-secondary)" }}>
+            Every panel seeded with real modelled data, scoped by Row-Level Security, in English, हिन्दी or ગુજરાતી.
           </p>
-          <Link
-            href="/login"
-            className="inline-block rounded-control px-8 py-3.5 text-sm font-semibold text-white transition-colors duration-state"
-            style={{ background: "var(--color-categorical-third)" }}
-          >
-            Sign in →
+          <Link href="/login" className="btn btn-primary h-13 px-8" style={{ height: 52 }}>
+            Open live demo
+            <PanelIcon name="arrowRight" size={16} />
           </Link>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t" style={{ borderColor: "var(--color-border)" }}>
-        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--color-text-secondary)" }}>
-            <Logo size={24} />
-            EcoPower 3.0 — INSTINCT 4.0
+      <footer className="border-t" style={{ borderColor: "var(--color-border)", background: "var(--color-surface-raised)" }}>
+        <div className="max-w-[1200px] mx-auto px-10 py-9 flex flex-wrap items-center justify-between gap-3.5">
+          <div className="flex items-center gap-2.5">
+            <Logo size={20} />
+            <span className="mono text-xs" style={{ color: "var(--color-text-tertiary)" }}>
+              EcoPower 3.0 · INSTINCT 4.0 · Ahmedabad
+            </span>
           </div>
-          <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-            Metering, billing, and DISCOM operations on one row-secured spine.
+          <span className="mono text-[11px]" style={{ color: "var(--color-text-tertiary)" }}>
+            Metering · billing · DISCOM operations
           </span>
         </div>
       </footer>

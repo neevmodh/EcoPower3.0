@@ -26,7 +26,7 @@ export default async function DiscomPrepaidPage() {
   const supabase = await createClient();
   const scope = await getScope(supabase);
   if (!scope) redirect("/login");
-  const { user } = scope;
+  const { user, divisionIds } = scope;
 
   const { data } = await supabase
     .from("prepaid_accounts")
@@ -37,7 +37,7 @@ export default async function DiscomPrepaidPage() {
   const pending = rows.filter((r) => r.disconnect_pending);
 
   return (
-    <PanelShell panel="discom" email={user.email ?? ""} nav={NAV}>
+    <PanelShell panel="discom" email={user.email ?? ""} nav={NAV} scopeNote={`division_ids · ${divisionIds.length} claim${divisionIds.length === 1 ? "" : "s"}`}>
       <h1 className="text-2xl font-semibold mb-1">Prepaid oversight</h1>
       <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
         Prepaid connections in your division, lowest balance first. Balance is drawn down daily against metered

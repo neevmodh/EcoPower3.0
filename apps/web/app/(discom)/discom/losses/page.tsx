@@ -16,13 +16,14 @@ export default async function DiscomLossesPage() {
   const supabase = await createClient();
   const scope = await getScope(supabase);
   if (!scope) redirect("/login");
-  const { user } = scope;
+  const { user, divisionIds } = scope;
 
   const { data: lossRows } = await supabase.rpc("dt_loss_summary");
   const rows = (lossRows ?? []) as LossRow[];
 
   return (
     <PanelShell
+      scopeNote={`division_ids · ${divisionIds.length} claim${divisionIds.length === 1 ? "" : "s"}`}
       panel="discom"
       email={user.email ?? ""}
       nav={[

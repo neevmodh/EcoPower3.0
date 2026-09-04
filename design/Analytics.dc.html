@@ -1,0 +1,390 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
+      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
+      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
+      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30); --violet:oklch(0.74 0.16 295);
+      --dsp:"Archivo",system-ui,sans-serif; --bdy:"IBM Plex Sans",system-ui,sans-serif; --mno:"IBM Plex Mono",ui-monospace,monospace;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.5;-webkit-font-smoothing:antialiased}
+    h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.025em;line-height:1.1;font-weight:700}
+    p{margin:0}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
+    .eyebrow{font-family:var(--mno);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3)}
+    .ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+    .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:8px}
+    .fgroup{border-top:1px solid var(--ln);padding:15px 0}
+    .fgroup:first-of-type{border-top:0;padding-top:0}
+    .opt{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:5px;cursor:pointer;font-size:12.5px;color:var(--tx2);transition:all .14s ease;width:100%;text-align:left;background:transparent;border:0;font-family:var(--bdy)}
+    .opt:hover{background:rgba(255,255,255,.03);color:var(--tx)}
+    .opt.on{color:var(--tx)}
+    .box{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--ln2);flex:none;display:grid;place-items:center;transition:all .16s ease}
+    .opt.on .box{background:var(--lime);border-color:var(--lime);color:#04140b}
+    .seg{display:flex;padding:2px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;gap:2px}
+    .seg button{flex:1;height:26px;border:0;border-radius:3px;background:transparent;color:var(--tx3);font-family:var(--mno);font-size:11px;cursor:pointer;transition:all .15s ease}
+    .seg button.on{background:var(--pnl);color:var(--tx)}
+    .fchip{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 6px 0 10px;border-radius:4px;background:oklch(0.84 0.19 145/.12);border:1px solid oklch(0.84 0.19 145/.4);color:var(--lime);font-size:11.5px;font-family:var(--bdy);font-weight:500}
+    .fchip button{border:0;background:none;color:inherit;cursor:pointer;display:flex;padding:0;opacity:.7}
+    .fchip button:hover{opacity:1}
+    input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--ln2);border-radius:2px;outline:none}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--lime);cursor:pointer;box-shadow:0 0 10px oklch(0.84 0.19 145/.6)}
+    input[type=range]::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:var(--lime);cursor:pointer}
+    table{width:100%;border-collapse:collapse}
+    th{font-family:var(--mno);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);font-weight:500;text-align:left;padding:9px 12px;cursor:pointer;user-select:none;white-space:nowrap}
+    th:hover{color:var(--tx2)}
+    td{padding:9px 12px;font-size:12.5px;border-top:1px solid var(--ln)}
+    tbody tr{transition:background .13s ease}
+    tbody tr:hover{background:rgba(255,255,255,.025)}
+    .bar{transition:height .45s cubic-bezier(.2,.7,.2,1)}
+    .ghost{height:32px;padding:0 13px;border:1px solid var(--ln2);border-radius:5px;background:transparent;color:var(--tx2);font-family:var(--bdy);font-weight:600;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .16s ease}
+    .ghost:hover{color:var(--tx);border-color:var(--tx3)}
+    .qd{width:7px;height:7px;border-radius:2px;flex:none}
+    @media (prefers-reduced-motion:reduce){.bar{transition:none}}
+  </style>
+</helmet>
+
+<div style="--lime:{{accent}};display:grid;grid-template-columns:236px 1fr;min-height:100%;background:var(--bg)">
+
+  <!-- FILTER RAIL -->
+  <aside style="border-right:1px solid var(--ln);background:var(--bg1);padding:16px 14px;overflow:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <span style="display:flex;align-items:center;gap:8px;font-family:var(--dsp);font-weight:700;font-size:13px">
+        <svg class="ic" style="stroke:var(--lime);width:15px;height:15px" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>Filters
+      </span>
+      <sc-if value="{{dirty}}" hint-placeholder-val="{{true}}">
+        <button onClick="{{reset}}" style="border:0;background:none;color:var(--coral);font-family:var(--bdy);font-size:11px;cursor:pointer;font-weight:600">Reset</button>
+      </sc-if>
+    </div>
+
+    <div class="fgroup">
+      <div class="eyebrow" style="margin-bottom:8px">Period</div>
+      <div class="seg">
+        <sc-for list="{{periods}}" as="p" hint-placeholder-count="4">
+          <button class="{{p.cls}}" onClick="{{p.pick}}">{{p.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <div class="eyebrow" style="margin-bottom:8px">Meter</div>
+      <sc-for list="{{meters}}" as="m" hint-placeholder-count="4">
+        <button class="opt {{m.cls}}" onClick="{{m.pick}}">
+          <span class="box"><sc-if value="{{m.on}}" hint-placeholder-val="{{true}}"><svg class="ic" style="width:11px;height:11px;stroke-width:3" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></sc-if></span>
+          <span class="mn" style="flex:1;font-size:11.5px">{{m.label}}</span>
+          <span class="mn" style="font-size:10px;color:var(--tx3)">{{m.n}}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div class="fgroup">
+      <div class="eyebrow" style="margin-bottom:8px">Read quality</div>
+      <sc-for list="{{quals}}" as="q" hint-placeholder-count="4">
+        <button class="opt {{q.cls}}" onClick="{{q.pick}}">
+          <span class="box"><sc-if value="{{q.on}}" hint-placeholder-val="{{true}}"><svg class="ic" style="width:11px;height:11px;stroke-width:3" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></sc-if></span>
+          <span class="qd" style="background:{{q.c}}"></span>
+          <span style="flex:1">{{q.label}}</span>
+          <span class="mn" style="font-size:10px;color:var(--tx3)">{{q.n}}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div class="fgroup">
+      <div class="eyebrow" style="margin-bottom:8px">Net direction</div>
+      <div class="seg">
+        <sc-for list="{{dirs}}" as="d" hint-placeholder-count="3">
+          <button class="{{d.cls}}" onClick="{{d.pick}}">{{d.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <div style="display:flex;justify-content:space-between;margin-bottom:9px">
+        <span class="eyebrow">Min daily kWh</span>
+        <span class="mn" style="font-size:11px;color:var(--lime)">{{minKwh}}</span>
+      </div>
+      <input type="range" min="0" max="60" step="1" value="{{minKwh}}" onInput="{{onMin}}">
+      <div class="mn" style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--tx3);margin-top:5px"><span>0</span><span>60</span></div>
+    </div>
+
+    <div class="fgroup">
+      <button class="opt {{tamperCls}}" onClick="{{toggleTamper}}">
+        <span class="box"><sc-if value="{{tamperOn}}" hint-placeholder-val="{{true}}"><svg class="ic" style="width:11px;height:11px;stroke-width:3" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></sc-if></span>
+        <span style="flex:1">Tamper-flagged only</span>
+      </button>
+      <button class="opt {{weekendCls}}" onClick="{{toggleWeekend}}">
+        <span class="box"><sc-if value="{{weekendOn}}" hint-placeholder-val="{{true}}"><svg class="ic" style="width:11px;height:11px;stroke-width:3" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></sc-if></span>
+        <span style="flex:1">Weekends only</span>
+      </button>
+    </div>
+
+    <div class="fgroup">
+      <div class="eyebrow" style="margin-bottom:8px">Saved views</div>
+      <sc-for list="{{views}}" as="v" hint-placeholder-count="3">
+        <button class="opt" onClick="{{v.pick}}" style="padding-left:8px">
+          <svg class="ic" style="width:13px;height:13px;stroke:{{v.c}}" viewBox="0 0 24 24"><path d="m12 3 2.6 5.6 6.4.8-4.7 4.3 1.3 6.3L12 17l-5.6 3 1.3-6.3L3 9.4l6.4-.8z"/></svg>
+          <span style="flex:1;font-size:12px">{{v.label}}</span>
+        </button>
+      </sc-for>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div style="display:flex;flex-direction:column;min-width:0">
+    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--ln);background:rgba(11,15,20,.8);backdrop-filter:blur(12px)">
+      <div style="display:flex;align-items:center;gap:14px">
+        <span style="font-family:var(--dsp);font-weight:600;font-size:15px">Analytics</span>
+        <span class="mn" style="font-size:11px;color:var(--tx3);border-left:1px solid var(--ln);padding-left:14px">
+          <b style="color:var(--lime)">{{rows}}</b> of {{total}} intervals
+        </span>
+      </div>
+      <div style="display:flex;gap:9px">
+        <button class="ghost"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v13M7 11l5 5 5-5M4 21h16"/></svg>Export {{rows}} rows</button>
+      </div>
+    </header>
+
+    <div style="padding:18px 22px;display:flex;flex-direction:column;gap:16px;overflow:auto">
+
+      <!-- ACTIVE CHIPS -->
+      <sc-if value="{{dirty}}" hint-placeholder-val="{{true}}">
+        <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+          <span class="eyebrow" style="margin-right:3px">Active</span>
+          <sc-for list="{{active}}" as="a" hint-placeholder-count="3">
+            <span class="fchip">{{a.label}}<button onClick="{{a.clear}}"><svg class="ic" style="width:12px;height:12px" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></span>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- KPI -->
+      <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px">
+        <sc-for list="{{kpis}}" as="k" hint-placeholder-count="5">
+          <div class="pnl" style="padding:14px">
+            <span class="eyebrow">{{k.k}}</span>
+            <div class="mn" style="font-size:19px;font-weight:600;margin-top:6px;color:{{k.c}}">{{k.v}}</div>
+            <div style="font-size:10.5px;color:var(--tx3);margin-top:2px">{{k.sub}}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- CHART -->
+      <div class="pnl" style="padding:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <span class="eyebrow">Daily net exchange · filtered</span>
+          <div class="mn" style="display:flex;gap:16px;font-size:10.5px;color:var(--tx3)">
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:3px;background:var(--lime)"></span>export</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:3px;background:var(--coral)"></span>import</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:3px;background:var(--amber)"></span>estimated read</span>
+          </div>
+        </div>
+        <sc-if value="{{hasRows}}" hint-placeholder-val="{{true}}">
+          <div style="display:flex;align-items:flex-end;gap:2px;height:170px">
+            <sc-for list="{{bars}}" as="b" hint-placeholder-count="30">
+              <div class="bar" style="flex:1;height:{{b.h}};background:{{b.c}};border-radius:2px 2px 0 0;min-width:2px;opacity:{{b.o}}"></div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{noRows}}" hint-placeholder-val="{{true}}">
+          <div style="height:170px;display:grid;place-items:center;color:var(--tx3);font-size:13px">No intervals match these filters.</div>
+        </sc-if>
+      </div>
+
+      <!-- TABLE -->
+      <div class="pnl" style="overflow:hidden">
+        <table>
+          <thead>
+            <tr style="background:#0c1219">
+              <sc-for list="{{cols}}" as="c" hint-placeholder-count="6">
+                <th onClick="{{c.sort}}" style="text-align:{{c.align}};color:{{c.c}}">{{c.label}}{{c.arrow}}</th>
+              </sc-for>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{table}}" as="r" hint-placeholder-count="10">
+              <tr>
+                <td class="mn" style="color:var(--tx2)">{{r.date}}</td>
+                <td class="mn" style="font-size:11.5px">{{r.meter}}</td>
+                <td class="mn" style="text-align:right">{{r.imp}}</td>
+                <td class="mn" style="text-align:right;color:var(--lime)">{{r.exp}}</td>
+                <td class="mn" style="text-align:right;color:{{r.netc}};font-weight:500">{{r.net}}</td>
+                <td><span style="display:inline-flex;align-items:center;gap:7px"><span class="qd" style="background:{{r.qc}}"></span><span style="font-size:11.5px;color:var(--tx2)">{{r.q}}</span></span></td>
+                <td style="text-align:right">
+                  <sc-if value="{{r.tamper}}" hint-placeholder-val="{{true}}">
+                    <span class="mn" style="font-size:10px;color:var(--coral);border:1px solid var(--coral);border-radius:2px;padding:1px 6px">0x08</span>
+                  </sc-if>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <sc-if value="{{more}}" hint-placeholder-val="{{true}}">
+          <div class="mn" style="padding:11px 12px;font-size:11px;color:var(--tx3);border-top:1px solid var(--ln);background:#0c1219">
+            Showing first 12 of {{rows}} matching intervals
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#7bf1a8","section":"Theme"}}'>
+class Component extends DCLogic {
+  constructor(p){
+    super(p);
+    this.state={ period:"30d", meters:["MTR-AHD-A-100001"], quals:["good","estimated","suspect"],
+                 dir:"all", min:0, tamper:false, weekend:false, sortKey:"date", sortDir:"desc" };
+    this.data=this.build();
+  }
+  mul(seed){ let a=seed; return ()=>{ a|=0; a=(a+0x6d2b79f5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+
+  build(){
+    const METERS=["MTR-AHD-A-100001","MTR-AHD-A-100002","MTR-SUN-101","MTR-AHD-A-300001"];
+    const rows=[]; const r=this.mul(20260903);
+    const base=new Date(Date.UTC(2026,8,3));
+    for(let d=0; d<90; d++){
+      const day=new Date(base.getTime()-d*86400000);
+      for(let m=0;m<METERS.length;m++){
+        const rr=r();
+        const imp=+(4+rr*44).toFixed(1);
+        const exp=+(rr>0.30 ? (2+r()*46) : 0).toFixed(1);
+        const q = rr>0.94 ? "suspect" : (rr>0.86 ? "estimated" : (rr>0.845 ? "missing" : "good"));
+        const tamper = METERS[m]==="MTR-AHD-A-300001" && d<30 && r()>0.82;
+        rows.push({
+          d, meter:METERS[m], date:day.toISOString().slice(0,10),
+          dow:day.getUTCDay(), imp, exp, net:+(exp-imp).toFixed(1), q, tamper
+        });
+      }
+    }
+    return rows;
+  }
+
+  set(k,v){ return ()=> this.setState({[k]:v}); }
+  toggleIn(key,v){ return ()=> this.setState(s=>{
+    const cur=s[key]; const next=cur.indexOf(v)>=0 ? cur.filter(x=>x!==v) : cur.concat([v]);
+    return {[key]:next};
+  }); }
+
+  renderVals(){
+    const L="var(--lime)", C="var(--cyan)", A="var(--amber)", R="var(--coral)";
+    const S=this.state;
+    const days={ "7d":7, "30d":30, "90d":90, "ytd":90 }[S.period];
+
+    const QC={ good:L, estimated:A, suspect:R, missing:"var(--tx3)" };
+    const METERS=["MTR-AHD-A-100001","MTR-AHD-A-100002","MTR-SUN-101","MTR-AHD-A-300001"];
+
+    const inWindow=this.data.filter(x=>x.d<days);
+    const pass=(x)=>
+      (S.meters.length===0 || S.meters.indexOf(x.meter)>=0) &&
+      (S.quals.length===0 || S.quals.indexOf(x.q)>=0) &&
+      (S.dir==="all" || (S.dir==="export" ? x.net>0 : x.net<=0)) &&
+      (x.imp>=S.min) &&
+      (!S.tamper || x.tamper) &&
+      (!S.weekend || x.dow===0 || x.dow===6);
+
+    const sel=inWindow.filter(pass);
+
+    const sk=S.sortKey, sd=S.sortDir==="asc"?1:-1;
+    const sorted=sel.slice().sort((a,b)=>{
+      let av=a[sk], bv=b[sk];
+      if(sk==="date"){ av=a.date; bv=b.date; }
+      if(av<bv) return -1*sd; if(av>bv) return 1*sd; return 0;
+    });
+
+    const sumImp=sel.reduce((s,x)=>s+x.imp,0);
+    const sumExp=sel.reduce((s,x)=>s+x.exp,0);
+    const flagged=sel.filter(x=>x.tamper).length;
+    const estPct= sel.length ? Math.round(100*sel.filter(x=>x.q!=="good").length/sel.length) : 0;
+
+    // chart: aggregate by day
+    const byDay={};
+    sel.forEach(x=>{ if(!byDay[x.date]) byDay[x.date]={net:0,est:false};
+      byDay[x.date].net+=x.net; if(x.q!=="good") byDay[x.date].est=true; });
+    const keys=Object.keys(byDay).sort();
+    const maxAbs=Math.max(1, ...keys.map(k=>Math.abs(byDay[k].net)));
+    const bars=keys.map(k=>{
+      const v=byDay[k];
+      return { h:Math.max(3,Math.round(Math.abs(v.net)/maxAbs*100))+"%",
+               c: v.est ? A : (v.net>0 ? L : R), o: v.est ? ".85" : "1" };
+    });
+
+    const meters=METERS.map(m=>{
+      const on=S.meters.indexOf(m)>=0;
+      return { label:m.replace("MTR-",""), on, cls:on?"on":"", pick:this.toggleIn("meters",m),
+               n:inWindow.filter(x=>x.meter===m).length };
+    });
+    const quals=["good","estimated","suspect","missing"].map(q=>{
+      const on=S.quals.indexOf(q)>=0;
+      return { label:q, on, cls:on?"on":"", c:QC[q], pick:this.toggleIn("quals",q),
+               n:inWindow.filter(x=>x.q===q).length };
+    });
+
+    const COLS=[["date","Date","left"],["meter","Meter","left"],["imp","Import","right"],
+                ["exp","Export","right"],["net","Net kWh","right"],["q","Quality","left"],["tamper","Flags","right"]];
+    const cols=COLS.map(c=>({ label:c[1], align:c[2],
+      c: sk===c[0] ? "var(--lime)" : "var(--tx3)",
+      arrow: sk===c[0] ? (S.sortDir==="asc"?" ↑":" ↓") : "",
+      sort: ()=> this.setState(s=>({ sortKey:c[0], sortDir: s.sortKey===c[0] && s.sortDir==="desc" ? "asc" : "desc" })) }));
+
+    const table=sorted.slice(0,12).map(x=>({
+      date:x.date, meter:x.meter.replace("MTR-",""),
+      imp:x.imp.toFixed(1), exp:x.exp.toFixed(1),
+      net:(x.net>0?"+":"")+x.net.toFixed(1), netc:x.net>0?L:R,
+      q:x.q, qc:QC[x.q], tamper:x.tamper
+    }));
+
+    const defQ=["good","estimated","suspect"];
+    const sameQ = S.quals.length===defQ.length && defQ.every(q=>S.quals.indexOf(q)>=0);
+    const dirty = S.period!=="30d" || S.meters.length!==1 || S.meters[0]!=="MTR-AHD-A-100001"
+               || !sameQ || S.dir!=="all" || S.min>0 || S.tamper || S.weekend;
+
+    const active=[];
+    if(S.period!=="30d") active.push({ label:"Period "+S.period, clear:this.set("period","30d") });
+    if(S.meters.length!==1 || S.meters[0]!=="MTR-AHD-A-100001")
+      active.push({ label:S.meters.length+" meters", clear:this.set("meters",["MTR-AHD-A-100001"]) });
+    if(!sameQ) active.push({ label:"Quality: "+(S.quals.length?S.quals.join(", "):"none"), clear:this.set("quals",defQ) });
+    if(S.dir!=="all") active.push({ label:"Net "+S.dir, clear:this.set("dir","all") });
+    if(S.min>0) active.push({ label:"≥ "+S.min+" kWh import", clear:this.set("min",0) });
+    if(S.tamper) active.push({ label:"Tamper-flagged", clear:this.set("tamper",false) });
+    if(S.weekend) active.push({ label:"Weekends", clear:this.set("weekend",false) });
+
+    return {
+      accent:this.props.accent ?? "#7bf1a8",
+      periods:[["7d","7D"],["30d","30D"],["90d","90D"],["ytd","YTD"]].map(p=>({ label:p[1], cls:S.period===p[0]?"on":"", pick:this.set("period",p[0]) })),
+      dirs:[["all","All"],["export","Export"],["import","Import"]].map(d=>({ label:d[1], cls:S.dir===d[0]?"on":"", pick:this.set("dir",d[0]) })),
+      meters, quals, cols, table, bars, active,
+      minKwh:S.min, onMin:(e)=>this.setState({min:Number(e.target.value)}),
+      tamperOn:S.tamper, tamperCls:S.tamper?"on":"", toggleTamper:()=>this.setState(s=>({tamper:!s.tamper})),
+      weekendOn:S.weekend, weekendCls:S.weekend?"on":"", toggleWeekend:()=>this.setState(s=>({weekend:!s.weekend})),
+      views:[
+        { label:"Theft investigation", c:R, pick:()=>this.setState({ period:"30d", meters:["MTR-AHD-A-300001"], quals:["good","estimated","suspect","missing"], dir:"all", min:0, tamper:true, weekend:false }) },
+        { label:"Estimated reads only", c:A, pick:()=>this.setState({ period:"90d", meters:METERS.slice(), quals:["estimated","missing"], dir:"all", min:0, tamper:false, weekend:false }) },
+        { label:"High-export days", c:L, pick:()=>this.setState({ period:"90d", meters:["MTR-AHD-A-100001"], quals:["good"], dir:"export", min:20, tamper:false, weekend:false }) }
+      ],
+      rows:sel.length, total:inWindow.length,
+      hasRows:sel.length>0, noRows:sel.length===0, more:sel.length>12,
+      dirty, reset:()=>this.setState({ period:"30d", meters:["MTR-AHD-A-100001"], quals:defQ, dir:"all", min:0, tamper:false, weekend:false }),
+      kpis:[
+        { k:"Intervals", v:String(sel.length), sub:"after filters", c:"var(--tx)" },
+        { k:"Import", v:sumImp.toFixed(0)+" kWh", sub:"summed", c:R },
+        { k:"Export", v:sumExp.toFixed(0)+" kWh", sub:"summed", c:L },
+        { k:"Non-good reads", v:estPct+"%", sub:"estimated or worse", c:estPct>12?A:"var(--tx)" },
+        { k:"Tamper flags", v:String(flagged), sub:"IS 15959 events", c:flagged>0?R:"var(--tx)" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

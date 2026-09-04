@@ -1,27 +1,26 @@
-// One shell, five panels. DESIGN.md §6: panel identity lives in the rail and
-// the header, never in the data area — a 3px accent bar on the active nav item
-// and a role chip in the header. The content canvas is identical in all five,
-// so the charts never fight the panel colour.
+// One shell, six panels. DESIGN.md §6: panel identity lives in the rail and
+// the header, never in the data area — a glowing 2px bar on the active nav
+// item and a role chip in the header. The content canvas is identical in all
+// six, so a chart never fights the panel colour.
 //
-// DESIGN.md §5: neutral page, hairline borders. The nav/header chrome itself
-// stays flat — no shadow, no wash; depth there comes from spacing and
-// tinted fills. Individual cards (the account card below, StatTile,
-// InvoiceCard) do carry a real resting shadow (#89) since they're
-// self-contained, real-data surfaces, not the page frame 2.0 washed.
+// DESIGN.md §5: on the dark ground the chrome separates from the canvas by a
+// lighter raised surface plus a hairline, not by a shadow — a drop shadow is
+// invisible here. Cards inside the canvas still carry real resting elevation.
 
 import Link from "next/link";
 import { NotificationBell } from "./NotificationBell";
 import { AIAdvisor } from "./AIAdvisor";
+import { PanelIcon, type IconName } from "./Icon";
 
 export type PanelKey = "consumer" | "society" | "discom" | "operator" | "field" | "support";
 
 const ACCENTS: Record<PanelKey, string> = {
-  consumer: "var(--color-categorical-third)", // aqua
-  society: "#7c5cd6", // violet
-  discom: "var(--color-categorical-consumption)", // blue
-  operator: "#5c6470", // slate
+  consumer: "var(--color-categorical-third)", // lime
+  society: "#b394ff", // violet
+  discom: "var(--color-categorical-consumption)", // cyan
+  operator: "#8fa0b4", // slate
   field: "var(--color-categorical-generation)", // amber
-  support: "#0d9488", // teal — distinct from consumer's aqua and operator's slate
+  support: "#4fd6c4", // teal — distinct from consumer lime and operator slate
 };
 
 const LABELS: Record<PanelKey, string> = {
@@ -33,13 +32,13 @@ const LABELS: Record<PanelKey, string> = {
   support: "Support",
 };
 
-const ICONS: Record<PanelKey, string> = {
-  consumer: "🏠",
-  society: "🏢",
-  discom: "⚡",
-  operator: "🛠️",
-  field: "📶",
-  support: "🎧",
+const ICONS: Record<PanelKey, IconName> = {
+  consumer: "home",
+  society: "building",
+  discom: "grid",
+  operator: "gauge",
+  field: "pin",
+  support: "chat",
 };
 
 // `dense` panels (DISCOM, operator, support) are table-forward;
@@ -48,22 +47,11 @@ const ICONS: Record<PanelKey, string> = {
 const DENSITY: Record<PanelKey, string> = {
   consumer: "p-6",
   society: "p-6",
-  discom: "p-4",
-  operator: "p-4",
+  discom: "p-5",
+  operator: "p-5",
   field: "p-6",
-  support: "p-4",
+  support: "p-5",
 };
-
-function hexToRgba(hex: string, alpha: number): string {
-  // Handles both #rrggbb literals and var(--...) tokens gracefully — for
-  // CSS custom properties we fall back to color-mix, which every browser
-  // this app targets supports.
-  if (hex.startsWith("var(")) return `color-mix(in srgb, ${hex} ${alpha * 100}%, transparent)`;
-  const r = Number.parseInt(hex.slice(1, 3), 16);
-  const g = Number.parseInt(hex.slice(3, 5), 16);
-  const b = Number.parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
 
 export function PanelShell({
   panel,
@@ -73,6 +61,7 @@ export function PanelShell({
   panelLabel,
   signOutLabel = "Sign out",
   headerExtra,
+  scopeNote,
 }: {
   panel: PanelKey;
   email: string;
@@ -81,34 +70,39 @@ export function PanelShell({
   panelLabel?: string; // translated "<Panel> panel" chip; defaults to English
   signOutLabel?: string;
   headerExtra?: React.ReactNode; // e.g. a LocaleSwitcher, rendered in the header
+  scopeNote?: string; // what RLS confines this session to, shown in the rail
 }) {
   const accent = ACCENTS[panel];
   const initial = email ? email[0]?.toUpperCase() : "?";
 
   return (
     <div className="min-h-screen flex" style={{ background: "var(--color-surface)" }}>
-      <nav className="w-60 shrink-0 border-r flex flex-col" style={{ borderColor: "var(--color-border)" }}>
-        <div className="px-5 py-6 flex items-center gap-2">
-          <span
-            className="inline-flex items-center justify-center rounded-control text-white font-semibold"
-            style={{ width: 28, height: 28, background: accent, fontSize: 14 }}
-          >
-            ⚡
-          </span>
-          <span className="font-semibold text-lg tracking-tight">EcoPower</span>
+      <nav
+        className="w-56 shrink-0 border-r flex flex-col px-3 py-4"
+        style={{ borderColor: "var(--color-border)", background: "var(--color-surface-raised)" }}
+      >
+        <div className="flex items-center gap-2.5 px-2 pb-5">
+          <PanelIcon name="bolt" size={21} style={{ color: accent }} />
+          <span className="font-display font-extrabold text-sm tracking-tight">ECOPOWER</span>
         </div>
 
-        <ul className="flex-1 px-2 space-y-0.5">
+        <ul className="flex-1 space-y-0.5">
           {nav.map((item) => (
-            <li key={item.href}>
+            <li key={item.href} className="relative">
+              {item.active && (
+                <span
+                  aria-hidden="true"
+                  className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full"
+                  style={{ background: accent, boxShadow: `0 0 10px ${accent}` }}
+                />
+              )}
               <Link
                 href={item.href}
                 className="flex items-center gap-2 px-3 py-2 rounded-control text-sm transition-colors duration-state"
                 style={{
-                  background: item.active ? hexToRgba(accent, 0.12) : "transparent",
-                  borderLeft: `3px solid ${item.active ? accent : "transparent"}`,
-                  color: item.active ? "var(--color-text-primary)" : "var(--color-text-secondary)",
-                  fontWeight: item.active ? 600 : 400,
+                  background: item.active ? "color-mix(in oklab, var(--color-text-primary) 5%, transparent)" : "transparent",
+                  color: item.active ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
+                  fontWeight: item.active ? 600 : 500,
                 }}
               >
                 {item.label}
@@ -117,22 +111,40 @@ export function PanelShell({
           ))}
         </ul>
 
-        <div className="p-3 mx-2 mb-3 rounded-card border card-shadow" style={{ borderColor: "var(--color-border)" }}>
-          <div className="flex items-center gap-2 mb-3">
+        {scopeNote && (
+          <div
+            className="mb-3 rounded-card border p-3"
+            style={{ borderColor: "var(--color-border)", background: "var(--color-surface-sunken)" }}
+          >
+            <div className="eyebrow mb-1.5">Session scope</div>
+            <div className="mono text-[10.5px]" style={{ color: "var(--color-text-secondary)" }}>
+              {scopeNote}
+            </div>
+            <p className="text-[10px] mt-2" style={{ color: "var(--color-text-tertiary)" }}>
+              Row-Level Security confines every query below to this claim.
+            </p>
+          </div>
+        )}
+
+        <div
+          className="rounded-card border p-3 card-shadow"
+          style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}
+        >
+          <div className="flex items-center gap-2.5 mb-2.5">
             <span
-              className="inline-flex items-center justify-center rounded-full font-medium text-white shrink-0"
-              style={{ width: 32, height: 32, background: accent, fontSize: 13 }}
+              className="inline-flex items-center justify-center rounded-control font-display font-bold shrink-0"
+              style={{ width: 28, height: 28, background: accent, color: "#04140b", fontSize: 12 }}
             >
               {initial}
             </span>
-            <span className="text-xs tabular truncate" style={{ color: "var(--color-text-secondary)" }} title={email}>
+            <span className="mono text-[10px] truncate" style={{ color: "var(--color-text-tertiary)" }} title={email}>
               {email}
             </span>
           </div>
           <form action="/auth/signout" method="post">
             <button
               type="submit"
-              className="w-full text-xs rounded-control border px-2 py-1.5 transition-colors duration-state hover:opacity-80"
+              className="w-full text-xs rounded-control border py-1.5 transition-colors duration-state"
               style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
             >
               {signOutLabel}
@@ -141,22 +153,22 @@ export function PanelShell({
         </div>
       </nav>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         <header
-          className="flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor: "var(--color-border)" }}
+          className="flex items-center justify-between px-6 h-14 border-b shrink-0"
+          style={{ borderColor: "var(--color-border)", background: "var(--color-surface-raised)" }}
         >
           <span
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
-            style={{ background: accent, color: "#fff" }}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 h-7 text-xs font-display font-semibold"
+            style={{ background: accent, color: "#04140b" }}
           >
-            <span aria-hidden="true">{ICONS[panel]}</span>
+            <PanelIcon name={ICONS[panel]} size={13} />
             {panelLabel ?? `${LABELS[panel]} panel`}
           </span>
           <div className="flex items-center gap-4">
             {headerExtra}
             <NotificationBell />
-            <span className="text-sm tabular" style={{ color: "var(--color-text-secondary)" }}>
+            <span className="mono text-[11px]" style={{ color: "var(--color-text-tertiary)" }}>
               {email}
             </span>
           </div>

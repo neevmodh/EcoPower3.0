@@ -1,4 +1,5 @@
 "use client";
+import { PanelIcon } from "./Icon";
 
 import { useState } from "react";
 
@@ -33,7 +34,8 @@ export function BillExplainer({ invoiceId }: { invoiceId: string }) {
         style={{ borderColor: "var(--color-categorical-third)", background: "color-mix(in oklab, var(--color-categorical-third) 6%, transparent)" }}
       >
         <div className="text-xs font-semibold mb-1" style={{ color: "var(--color-categorical-third)" }}>
-          ✨ AI explanation
+          <PanelIcon name="search" size={13} />
+          Explanation
         </div>
         {explanation}
       </div>
@@ -49,7 +51,7 @@ export function BillExplainer({ invoiceId }: { invoiceId: string }) {
         className="rounded-control px-3 py-1.5 text-xs font-semibold border disabled:opacity-50"
         style={{ borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}
       >
-        {busy ? "Explaining…" : "✨ Explain this bill"}
+        {busy ? "Explaining…" : <><PanelIcon name="search" size={14} />Explain this bill</>}
       </button>
       {error && (
         <p className="text-xs mt-1" style={{ color: "var(--color-status-critical)" }}>

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
+import { PanelIcon } from "@/components/Icon";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,6 +35,7 @@ export default async function DiscomPage() {
 
   return (
     <PanelShell
+      scopeNote={`division_ids · ${divisionIds.length} claim${divisionIds.length === 1 ? "" : "s"}`}
       panel="discom"
       email={user.email ?? ""}
       nav={[
@@ -81,7 +83,14 @@ export default async function DiscomPage() {
           }}
         >
           <div className="text-sm font-semibold mb-1">
-            {worstDt.loss_pct > 15 ? "⚠️ Worst-performing DT this period" : "Best-performing DT this period"}
+            <span className="inline-flex items-center gap-2">
+              {worstDt.loss_pct > 15 && (
+                <span style={{ color: "var(--color-status-serious)" }}>
+                  <PanelIcon name="alert" size={15} />
+                </span>
+              )}
+              {worstDt.loss_pct > 15 ? "Worst-performing DT this period" : "Best-performing DT this period"}
+            </span>
           </div>
           <div className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
             <strong>{worstDt.dt_name}</strong> — {Number(worstDt.loss_pct).toFixed(1)}% loss over the last 120 days,

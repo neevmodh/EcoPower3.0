@@ -1,26 +1,26 @@
 {
   "categorical": {
-    "generation": { "light": "#eda100", "dark": "#c98500" },
-    "consumption": { "light": "#2a78d6", "dark": "#3987e5" },
-    "third": { "light": "#1baf7a", "dark": "#199e70" }
+    "generation": { "light": "#eda100", "dark": "#ffbd34" },
+    "consumption": { "light": "#2a78d6", "dark": "#00d3ff" },
+    "third": { "light": "#1baf7a", "dark": "#6fea77" }
   },
   "diverging": {
-    "export": { "light": "#1baf7a", "dark": "#199e70" },
-    "zero": { "light": "#f0efec", "dark": "#383835" },
-    "import": { "light": "#eb6834", "dark": "#d95926" }
+    "export": { "light": "#1baf7a", "dark": "#6fea77" },
+    "zero": { "light": "#f0efec", "dark": "#232b35" },
+    "import": { "light": "#eb6834", "dark": "#ff6c58" }
   },
   "sequential": {
     "ramp": ["#cde2fb", "#a8c9f5", "#86b6ef", "#5f96e0", "#3a76c9", "#1d549e", "#0d366b"],
     "ordinalFloor": { "light": "#86b6ef", "dark": "#184f95" }
   },
   "status": {
-    "good": { "light": "#008300", "dark": "#008300" },
-    "warning": { "light": "#eda100", "dark": "#c98500" },
-    "serious": { "light": "#eb6834", "dark": "#d95926" },
-    "critical": { "light": "#e34948", "dark": "#e66767" }
+    "good": { "light": "#008300", "dark": "#65db7c" },
+    "warning": { "light": "#eda100", "dark": "#ffbd34" },
+    "serious": { "light": "#eb6834", "dark": "#ff6c58" },
+    "critical": { "light": "#e34948", "dark": "#f8495f" }
   },
   "surface": {
     "light": "#ffffff",
-    "dark": "#121212"
+    "dark": "#07090c"
   }
 }

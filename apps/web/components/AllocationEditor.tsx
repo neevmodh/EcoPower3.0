@@ -49,7 +49,7 @@ export function AllocationEditor({ unitId, initialPct }: { unitId: string; initi
           }
           router.refresh();
         }}
-        className="rounded-control px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+        className="rounded-control px-3 py-1 text-xs font-semibold on-accent disabled:opacity-50"
         style={{ background: "var(--color-categorical-third)" }}
       >
         {busy ? "…" : "Save"}

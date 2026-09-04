@@ -1,16 +1,17 @@
 import { redirect } from "next/navigation";
 import { formatInrFromPaise } from "@ecopower/shared";
 import { PanelShell } from "@/components/PanelShell";
+import { PanelIcon, type IconName } from "@/components/Icon";
 import { SubscribeButton, SubscriptionLifecycleActions } from "@/components/SubscriptionActions";
 import { NetMeteringApplyForm } from "@/components/NetMeteringApplyForm";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
-const SERVICE_ICON: Record<string, string> = {
-  solar_kwh: "☀️",
-  backup_availability: "🔋",
-  cooling_ton_hours: "❄️",
-  lighting: "💡",
+const SERVICE_ICON: Record<string, IconName> = {
+  solar_kwh: "sun",
+  backup_availability: "battery",
+  cooling_ton_hours: "gauge",
+  lighting: "bolt",
 };
 
 const UNIT_LABEL: Record<string, string> = {
@@ -119,7 +120,7 @@ export default async function ConsumerPlanPage({
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span
-                  className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+                  className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold on-accent"
                   style={{ background: "var(--color-categorical-third)" }}
                 >
                   {activeSubscription.status === "active" ? "Active" : "Paused"}
@@ -154,7 +155,7 @@ export default async function ConsumerPlanPage({
           {netmeteringApp ? (
             <div>
               <span
-                className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium text-white mb-2"
+                className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium on-accent mb-2"
                 style={{
                   background:
                     netmeteringApp.status === "approved"
@@ -258,7 +259,9 @@ export default async function ConsumerPlanPage({
               <ul className="flex-1 space-y-2.5 mb-6">
                 {services.map((s) => (
                   <li key={s.service_types.code} className="flex items-start gap-2 text-sm">
-                    <span aria-hidden="true">{SERVICE_ICON[s.service_types.code] ?? "•"}</span>
+                    <span style={{ color: "var(--color-categorical-third)" }}>
+                      <PanelIcon name={SERVICE_ICON[s.service_types.code] ?? "check"} size={15} />
+                    </span>
                     <span>
                       {s.service_types.name} —{" "}
                       <span className="tabular font-medium">

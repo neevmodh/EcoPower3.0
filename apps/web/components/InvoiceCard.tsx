@@ -9,6 +9,7 @@ import { formatInrFromPaise } from "@ecopower/shared";
 import { PayButton } from "./PayButton";
 import { BillExplainer } from "./BillExplainer";
 import { InvoicePdfButton } from "./InvoicePdfButton";
+import { PanelIcon } from "./Icon";
 
 type InvoiceLine = {
   id: string;
@@ -52,7 +53,7 @@ export function InvoiceCard({ invoice, consumerNumber }: { invoice: Invoice; con
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span
-              className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+              className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold on-accent"
               style={{ background: STATUS_COLOR[invoice.status] ?? "var(--color-text-secondary)" }}
             >
               {invoice.status}
@@ -68,8 +69,17 @@ export function InvoiceCard({ invoice, consumerNumber }: { invoice: Invoice; con
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-lg font-semibold tabular">{formatInrFromPaise(BigInt(invoice.total_paise))}</span>
-          <span style={{ color: "var(--color-text-secondary)" }}>{expanded ? "▲" : "▼"}</span>
+          <span className="text-lg font-semibold mono">{formatInrFromPaise(BigInt(invoice.total_paise))}</span>
+          <span
+            style={{
+              color: "var(--color-text-tertiary)",
+              transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
+              transition: "transform 250ms cubic-bezier(.2,.7,.2,1)",
+              display: "inline-flex",
+            }}
+          >
+            <PanelIcon name="chevronRight" size={16} />
+          </span>
         </div>
       </button>
 
@@ -92,7 +102,7 @@ export function InvoiceCard({ invoice, consumerNumber }: { invoice: Invoice; con
                       </div>
                     )}
                   </td>
-                  <td className="py-2 text-right tabular whitespace-nowrap">{formatInrFromPaise(BigInt(line.amount_paise))}</td>
+                  <td className="py-2 text-right mono whitespace-nowrap">{formatInrFromPaise(BigInt(line.amount_paise))}</td>
                 </tr>
               ))}
             </tbody>

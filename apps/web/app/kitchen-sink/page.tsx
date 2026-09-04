@@ -6,6 +6,7 @@
 
 import type { DataState } from "@ecopower/shared";
 import { StatTileWithState } from "@/components/StatTileWithState";
+import { PanelIcon } from "@/components/Icon";
 
 type NumericData = { value: number; unit?: string };
 
@@ -80,39 +81,39 @@ export default function KitchenSinkPage() {
 
       <Section title="StatTile — the five required states">
         <Labeled label="loading">
-          <StatTileWithState icon="☀️" label="Solar generated" tileState={loading} />
+          <StatTileWithState icon={<PanelIcon name="sun" />} label="Solar generated" tileState={loading} />
         </Labeled>
         <Labeled label="empty">
-          <StatTileWithState icon="☀️" label="Solar generated" tileState={empty} onWiden={() => {}} />
+          <StatTileWithState icon={<PanelIcon name="sun" />} label="Solar generated" tileState={empty} onWiden={() => {}} />
         </Labeled>
         <Labeled label="partial (confidence: estimated)">
-          <StatTileWithState icon="☀️" label="Solar generated" tileState={readyEstimated} />
+          <StatTileWithState icon={<PanelIcon name="sun" />} label="Solar generated" tileState={readyEstimated} />
         </Labeled>
         <Labeled label="stale">
-          <StatTileWithState icon="☀️" label="Solar generated" tileState={readyStale} />
+          <StatTileWithState icon={<PanelIcon name="sun" />} label="Solar generated" tileState={readyStale} />
         </Labeled>
         <Labeled label="error">
-          <StatTileWithState icon="☀️" label="Solar generated" tileState={error} onRetry={() => {}} />
+          <StatTileWithState icon={<PanelIcon name="sun" />} label="Solar generated" tileState={error} onRetry={() => {}} />
         </Labeled>
       </Section>
 
       <Section title="StatTile — happy path + confidence variants (P3)">
         <Labeled label="ready, fresh, measured">
-          <StatTileWithState icon="☀️" label="Solar generated" tileState={readyFresh} />
+          <StatTileWithState icon={<PanelIcon name="sun" />} label="Solar generated" tileState={readyFresh} />
         </Labeled>
         <Labeled label="ready, with a real comparison badge">
           <StatTileWithState
-            icon="☀️"
+            icon={<PanelIcon name="sun" />}
             label="Solar generated"
             comparison={{ value: 37.2, windowLabel: "last week" }}
             tileState={readyWithBadge}
           />
         </Labeled>
         <Labeled label="forecast (beyond now, #53)">
-          <StatTileWithState icon="☀️" label="Solar generated" tileState={readyForecast} />
+          <StatTileWithState icon={<PanelIcon name="sun" />} label="Solar generated" tileState={readyForecast} />
         </Labeled>
         <Labeled label="status colour: critical">
-          <StatTileWithState icon="⚠️" label="Tamper flag" state="critical" tileState={readyFresh} />
+          <StatTileWithState icon={<PanelIcon name="alert" />} label="Tamper flag" state="critical" tileState={readyFresh} />
         </Labeled>
       </Section>
     </main>

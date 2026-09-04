@@ -7,6 +7,7 @@
 // computed, it never invents one.
 
 import { useState } from "react";
+import { PanelIcon } from "./Icon";
 
 type Message = { id: string; role: "user" | "assistant"; text: string };
 
@@ -57,7 +58,7 @@ export function AIAdvisor() {
           <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--color-border)" }}>
             <span className="text-sm font-semibold">EcoPower advisor</span>
             <button type="button" onClick={() => setOpen(false)} aria-label="Close" style={{ color: "var(--color-text-secondary)" }}>
-              ✕
+              <PanelIcon name="x" size={16} />
             </button>
           </div>
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
@@ -68,7 +69,7 @@ export function AIAdvisor() {
                 style={{
                   marginLeft: m.role === "user" ? "auto" : 0,
                   background: m.role === "user" ? "var(--color-categorical-third)" : "var(--color-surface)",
-                  color: m.role === "user" ? "#fff" : "var(--color-text-primary)",
+                  color: m.role === "user" ? "#04140b" : "var(--color-text-primary)",
                   border: m.role === "assistant" ? "1px solid var(--color-border)" : "none",
                 }}
               >
@@ -94,7 +95,7 @@ export function AIAdvisor() {
               type="button"
               onClick={send}
               disabled={busy}
-              className="rounded-control px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="rounded-control px-3 py-2 text-sm font-semibold on-accent disabled:opacity-50"
               style={{ background: "var(--color-categorical-third)" }}
             >
               Send
@@ -105,11 +106,11 @@ export function AIAdvisor() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="rounded-full flex items-center justify-center text-white text-2xl transition-colors duration-state"
+        className="rounded-full flex items-center justify-center on-accent transition-colors duration-state"
         style={{ width: 56, height: 56, background: "var(--color-categorical-third)" }}
         aria-label="Open AI advisor"
       >
-        💬
+        <PanelIcon name="chat" size={22} />
       </button>
     </div>
   );

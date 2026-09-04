@@ -21,10 +21,21 @@ const config: Config = {
         "status-serious": "var(--color-status-serious)",
         "status-critical": "var(--color-status-critical)",
         surface: "var(--color-surface)",
+        "surface-raised": "var(--color-surface-raised)",
         "surface-card": "var(--color-surface-card)",
+        "surface-sunken": "var(--color-surface-sunken)",
         border: "var(--color-border)",
+        "border-strong": "var(--color-border-strong)",
         "text-primary": "var(--color-text-primary)",
         "text-secondary": "var(--color-text-secondary)",
+        "text-tertiary": "var(--color-text-tertiary)",
+      },
+      fontFamily: {
+        // Loaded by next/font in app/layout.tsx — these read the CSS
+        // variables it defines, so web and (later) mobile share one ramp.
+        display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       borderRadius: {
         // DESIGN.md §5 (#89) — one set: 6px controls, 16px cards, full pills.

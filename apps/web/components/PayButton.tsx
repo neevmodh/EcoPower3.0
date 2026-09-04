@@ -1,4 +1,5 @@
 "use client";
+import { PanelIcon } from "./Icon";
 
 // Loads the real checkout.razorpay.com SDK and opens the real Checkout
 // modal against a server-created order — this is what 2.0's
@@ -83,10 +84,19 @@ export function PayButton({ invoiceId, label = "Pay now" }: { invoiceId: string;
         type="button"
         onClick={handlePay}
         disabled={status === "loading"}
-        className="rounded-control px-4 py-2 text-sm font-semibold text-white transition-colors duration-state disabled:opacity-50"
+        className="rounded-control px-4 py-2 text-sm font-semibold on-accent transition-colors duration-state disabled:opacity-50"
         style={{ background: "var(--color-categorical-third)" }}
       >
-        {status === "loading" ? "Starting…" : status === "verified" ? "Paid ✓" : label}
+        {status === "loading" ? (
+          "Starting…"
+        ) : status === "verified" ? (
+          <>
+            <PanelIcon name="check" size={14} />
+            Paid
+          </>
+        ) : (
+          label
+        )}
       </button>
       {error && (
         <p className="text-xs mt-2" style={{ color: "var(--color-status-critical)" }}>

@@ -208,6 +208,27 @@ Scale (rem): `0.75 · 0.875 · 1 · 1.125 · 1.25 · 1.5 · 2 · 2.5 · 3.5`. No
 
 **Motion.** 150ms ease-out for state changes, 250ms for entrances. Live values transition their number, not their container. `prefers-reduced-motion` respected — and this matters specifically for the energy-flow animation.
 
+### 5.1 Update 3 — dark by default, and the faces are named
+
+The light theme was the shipped default through #89. It is now the *alternate*: the palette's **dark** variant is what `:root` carries, and light lives under `:root[data-theme="light"]`, intact and still validated. Nothing was deleted — the default flipped.
+
+Why: this is an operations product read in a control room and on a phone in sunlight, and the palette's luminous accents (`#6fea77` lime, `#00d3ff` cyan, `#ffbd34` amber, `#ff6c58` coral) only separate properly against a near-black ground. `scripts/validate_palette.js` passes on both themes with the same thresholds; the tightest pair is generation-vs-third at protan ΔE 8.5 against a floor of 5.
+
+**The faces are now named**, replacing "2.0's tight geometric sans":
+- **Archivo** — headings. Tight, slightly wide, industrial.
+- **IBM Plex Sans** — body. Engineered rather than neutral; it belongs to a utility product.
+- **IBM Plex Mono** — every value that came out of the database: a meter serial, a register read, a rupee amount, a JWT claim. `.mono` is the marker for "this is data", `.tabular` remains mandatory for aligned columns.
+
+All three are self-hosted by `next/font` in `app/layout.tsx`, so there is no third-party request at runtime.
+
+**The neutral ladder is four surfaces, not three:** `--color-surface` (page), `--color-surface-raised` (nav rail and header chrome), `--color-surface-card`, `--color-surface-sunken` (the well an input or code block sits in). On a dark ground a drop shadow is nearly invisible, so chrome separates from canvas by *surface step plus hairline*; `--shadow-card` is still what lifts a card on hover.
+
+**Accent fills take dark ink, not white.** The dark accents are all light colours — `text-white` on lime or amber is unreadable. `.on-accent` (`#04140b`) is the ink for any filled chip, badge or primary button.
+
+**Icons are drawn, never typed.** `components/Icon.tsx` is the single stroke-icon set (24-unit grid, 1.6 weight, `currentColor`). Emoji are banned as icons anywhere in the product: they render differently on every platform, cannot take a tint, and sit at the wrong optical weight beside real data.
+
+**Atmosphere stays scoped by P6.** `.grid-backdrop` and `.aurora` are permitted on the marketing and auth surfaces only — the two places DESIGN.md grants air. No dashboard gets either.
+
 ---
 
 ## 6. Panel identity

@@ -61,7 +61,7 @@ export function NetMeteringApplyForm({
             }
             router.refresh();
           }}
-          className="rounded-control px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-control px-4 py-1.5 text-sm font-semibold on-accent disabled:opacity-50"
           style={{ background: "var(--color-categorical-third)" }}
         >
           {busy ? "…" : "Apply for net-metering"}

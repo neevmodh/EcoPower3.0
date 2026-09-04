@@ -1,0 +1,421 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
+      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
+      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
+      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30); --violet:oklch(0.74 0.16 295);
+      --dsp:"Archivo",system-ui,sans-serif; --bdy:"IBM Plex Sans",system-ui,sans-serif; --mno:"IBM Plex Mono",ui-monospace,monospace;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.45;-webkit-font-smoothing:antialiased}
+    h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.025em;line-height:1.1;font-weight:700}
+    p{margin:0}
+    a{color:var(--cyan);text-decoration:none} a:hover{color:#fff}
+    .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
+    .eyebrow{font-family:var(--mno);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3)}
+    .ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+    .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:7px}
+    .navi{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:5px;font-size:12.5px;color:var(--tx3);cursor:pointer;transition:all .15s ease;position:relative}
+    .navi:hover{color:var(--tx2);background:rgba(255,255,255,.03)}
+    .navi.on{color:var(--tx);background:rgba(255,255,255,.055);font-weight:600}
+    .navi.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:2px;border-radius:2px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+    .seg{display:flex;padding:2px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;gap:2px}
+    .seg button{flex:1;height:25px;border:0;border-radius:3px;background:transparent;color:var(--tx3);font-family:var(--mno);font-size:10.5px;cursor:pointer;transition:all .15s ease}
+    .seg button.on{background:var(--pnl);color:var(--tx)}
+    .opt{display:flex;align-items:center;gap:9px;padding:5px 7px;border-radius:4px;cursor:pointer;font-size:12px;color:var(--tx2);transition:all .14s ease;width:100%;text-align:left;background:transparent;border:0;font-family:var(--bdy)}
+    .opt:hover{background:rgba(255,255,255,.03);color:var(--tx)}
+    .box{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--ln2);flex:none;display:grid;place-items:center;transition:all .15s ease}
+    .opt.on .box{background:var(--cyan);border-color:var(--cyan);color:#04140b}
+    input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--ln2);border-radius:2px;outline:none}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 10px oklch(0.80 0.15 220/.6)}
+    input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;background:var(--cyan);cursor:pointer}
+    .dtrow{display:grid;grid-template-columns:76px 1fr 62px 58px 34px;align-items:center;gap:11px;padding:11px 12px;cursor:pointer;border-top:1px solid var(--ln);transition:background .14s ease}
+    .dtrow:hover{background:rgba(255,255,255,.03)}
+    .dtrow.on{background:oklch(0.80 0.15 220/.09);box-shadow:inset 2px 0 0 var(--cyan)}
+    .prio{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:21px;padding:0 8px;border-radius:3px;font-family:var(--mno);font-size:11.5px;font-weight:600}
+    .fade{animation:fade .3s cubic-bezier(.2,.8,.2,1)}
+    @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .stream{animation:sl .38s cubic-bezier(.2,.8,.2,1)}
+    @keyframes sl{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+    .ghost{height:30px;padding:0 12px;border:1px solid var(--ln2);border-radius:5px;background:transparent;color:var(--tx2);font-family:var(--bdy);font-weight:600;font-size:11.5px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .16s ease}
+    .ghost:hover{color:var(--tx);border-color:var(--tx3)}
+    .act{height:30px;padding:0 13px;border:0;border-radius:5px;background:var(--cyan);color:#04121e;font-family:var(--bdy);font-weight:600;font-size:11.5px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .16s ease}
+    .act:hover{box-shadow:0 10px 30px -12px var(--cyan);transform:translateY(-1px)}
+    @media (prefers-reduced-motion:reduce){.fade,.stream{animation:none}}
+  </style>
+</helmet>
+
+<div style="--cyan:{{accent}};display:grid;grid-template-columns:196px 1fr;min-height:100%;background:var(--bg)">
+
+  <aside style="border-right:1px solid var(--ln);background:var(--bg1);display:flex;flex-direction:column;padding:15px 10px">
+    <div style="display:flex;align-items:center;gap:9px;padding:5px 7px 16px">
+      <svg width="21" height="21" viewBox="0 0 24 24" style="stroke:var(--cyan);fill:none;stroke-width:1.9;stroke-linejoin:round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      <span style="font-family:var(--dsp);font-weight:800;font-size:13px">ECOPOWER</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{nav}}" as="n" hint-placeholder-count="7">
+        <div class="navi {{n.cls}}" onClick="{{n.pick}}">
+          <span style="display:flex" dangerouslySetInnerHTML="{{n.icon}}"></span>{{n.label}}
+          <sc-if value="{{n.badge}}" hint-placeholder-val="{{true}}">
+            <span class="mn" style="margin-left:auto;font-size:9px;background:{{n.bc}};color:#04121e;border-radius:8px;padding:1px 6px;font-weight:600">{{n.badge}}</span>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="flex:1"></div>
+    <div class="pnl" style="padding:11px;background:#0c1219">
+      <span class="eyebrow">Session scope</span>
+      <div class="mn" style="font-size:10.5px;color:var(--tx2);margin-top:7px;line-height:1.8">division_ids<br><span style="color:var(--cyan)">[Division A]</span></div>
+      <p style="font-size:9.5px;color:var(--tx3);margin-top:8px;text-wrap:pretty">RLS confines every query below to this claim.</p>
+    </div>
+  </aside>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+    <header style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--ln);background:rgba(11,15,20,.82);backdrop-filter:blur(12px)">
+      <div style="display:flex;align-items:center;gap:13px">
+        <span style="font-family:var(--dsp);font-weight:600;font-size:14px">Loss localisation</span>
+        <span class="mn" style="font-size:10.5px;color:var(--tx3);border-left:1px solid var(--ln);padding-left:13px">Division A · Torrent Ahmedabad</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span class="mn" style="font-size:10.5px;color:var(--tx3)">{{shown}} / {{totalDts}} transformers</span>
+        <span class="mn" style="display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--lime)">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 9px var(--lime)"></span>ingest live
+        </span>
+      </div>
+    </header>
+
+    <div style="display:grid;grid-template-columns:214px 1fr 268px;flex:1;min-height:0">
+
+      <!-- FILTERS -->
+      <div style="border-right:1px solid var(--ln);padding:15px 13px;overflow:auto;background:var(--bg1)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <span style="display:flex;align-items:center;gap:7px;font-family:var(--dsp);font-weight:700;font-size:12px">
+            <svg class="ic" style="stroke:var(--cyan);width:14px;height:14px" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>Filters
+          </span>
+          <sc-if value="{{dirty}}" hint-placeholder-val="{{true}}">
+            <button onClick="{{reset}}" style="border:0;background:none;color:var(--coral);font-family:var(--bdy);font-size:10.5px;cursor:pointer;font-weight:600">Reset</button>
+          </sc-if>
+        </div>
+
+        <div style="padding-bottom:14px;border-bottom:1px solid var(--ln)">
+          <div class="eyebrow" style="margin-bottom:7px">Window</div>
+          <div class="seg">
+            <sc-for list="{{windows}}" as="w" hint-placeholder-count="3">
+              <button class="{{w.cls}}" onClick="{{w.pick}}">{{w.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="padding:14px 0;border-bottom:1px solid var(--ln)">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <span class="eyebrow">Loss above</span>
+            <span class="mn" style="font-size:10.5px;color:var(--cyan)">{{minLoss}}%</span>
+          </div>
+          <input type="range" min="0" max="25" step="1" value="{{minLoss}}" onInput="{{onLoss}}">
+          <div class="mn" style="display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:5px"><span>0%</span><span>RDSS 12–15</span><span>25%</span></div>
+        </div>
+
+        <div style="padding:14px 0;border-bottom:1px solid var(--ln)">
+          <div class="eyebrow" style="margin-bottom:7px">Feeder</div>
+          <sc-for list="{{feeders}}" as="f" hint-placeholder-count="2">
+            <button class="opt {{f.cls}}" onClick="{{f.pick}}">
+              <span class="box"><sc-if value="{{f.on}}" hint-placeholder-val="{{true}}"><svg class="ic" style="width:10px;height:10px;stroke-width:3" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></sc-if></span>
+              <span class="mn" style="flex:1;font-size:11px">{{f.label}}</span>
+              <span class="mn" style="font-size:9.5px;color:var(--tx3)">{{f.n}}</span>
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="padding:14px 0;border-bottom:1px solid var(--ln)">
+          <div class="eyebrow" style="margin-bottom:7px">Signals present</div>
+          <sc-for list="{{signals}}" as="s" hint-placeholder-count="4">
+            <button class="opt {{s.cls}}" onClick="{{s.pick}}">
+              <span class="box"><sc-if value="{{s.on}}" hint-placeholder-val="{{true}}"><svg class="ic" style="width:10px;height:10px;stroke-width:3" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></sc-if></span>
+              <span style="flex:1;font-size:11.5px">{{s.label}}</span>
+              <span class="mn" style="font-size:9.5px;color:{{s.c}}">{{s.n}}</span>
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="padding:14px 0">
+          <div class="eyebrow" style="margin-bottom:7px">Sort by</div>
+          <sc-for list="{{sorts}}" as="s" hint-placeholder-count="3">
+            <button class="opt {{s.cls}}" onClick="{{s.pick}}" style="padding-left:7px">
+              <svg class="ic" style="width:12px;height:12px;stroke:{{s.c}}" viewBox="0 0 24 24"><path d="M7 4v16M7 20l-3-3M17 20V4M17 4l3 3"/></svg>
+              <span style="flex:1;font-size:11.5px;color:{{s.c}}">{{s.label}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- CENTRE -->
+      <div style="overflow:auto;padding:16px 18px">
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px">
+          <sc-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+            <div class="pnl" style="padding:13px">
+              <span class="eyebrow">{{k.k}}</span>
+              <div class="mn" style="font-size:19px;font-weight:600;margin-top:5px;color:{{k.c}}">{{k.v}}</div>
+              <div style="font-size:10px;color:var(--tx3);margin-top:2px">{{k.sub}}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div class="pnl" style="margin-top:14px;overflow:hidden">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 12px 10px">
+            <span class="eyebrow">Transformers · delivered vs metered</span>
+            <span class="mn" style="font-size:9.5px;color:var(--tx3)">MoP FY25 national 16.16%</span>
+          </div>
+          <sc-if value="{{hasDts}}" hint-placeholder-val="{{true}}">
+            <div>
+              <sc-for list="{{dts}}" as="d" hint-placeholder-count="4">
+                <div class="dtrow {{d.cls}}" onClick="{{d.pick}}">
+                  <span class="mn" style="font-size:12px;font-weight:600">{{d.name}}</span>
+                  <div style="height:6px;background:#0c1219;border-radius:2px;overflow:hidden">
+                    <div style="width:{{d.w}};height:100%;background:{{d.c}};box-shadow:0 0 10px {{d.c}}"></div>
+                  </div>
+                  <span class="mn" style="font-size:12px;font-weight:600;color:{{d.c}};text-align:right">{{d.pct}}%</span>
+                  <span class="mn" style="font-size:10.5px;color:var(--tx3);text-align:right">{{d.gap}}</span>
+                  <span style="display:flex;justify-content:flex-end">
+                    <sc-if value="{{d.flag}}" hint-placeholder-val="{{true}}">
+                      <svg class="ic" style="width:13px;height:13px;stroke:var(--coral)" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg>
+                    </sc-if>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{noDts}}" hint-placeholder-val="{{true}}">
+            <div style="padding:40px;text-align:center;color:var(--tx3);font-size:12.5px">No transformer matches these filters.</div>
+          </sc-if>
+        </div>
+
+        <!-- DRILL -->
+        <sc-if value="{{hasSel}}" hint-placeholder-val="{{true}}">
+          <div class="fade" style="margin-top:14px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end">
+              <div>
+                <span class="eyebrow">Drill-down</span>
+                <h2 style="font-size:19px;margin-top:6px">{{sel.name}} · {{sel.consumers}} consumers</h2>
+                <p class="mn" style="font-size:11px;color:var(--tx2);margin-top:6px">
+                  {{sel.delivered}} delivered · {{sel.metered}} metered ·
+                  <span style="color:var(--coral)">{{sel.gapKwh}} unaccounted</span>
+                </p>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="ghost"><svg class="ic" style="width:13px;height:13px" viewBox="0 0 24 24"><path d="M12 3v13M7 11l5 5 5-5"/></svg>Export</button>
+                <button class="act"><svg class="ic" style="width:13px;height:13px" viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Raise inspection</button>
+              </div>
+            </div>
+
+            <div class="pnl" style="margin-top:12px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:1.5fr 76px 1fr 52px;gap:11px;padding:9px 12px;background:#0c1219" class="eyebrow">
+                <span>Consumer</span><span style="text-align:right">Metered</span><span>Signals</span><span style="text-align:right">Priority</span>
+              </div>
+              <sc-for list="{{suspects}}" as="s" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:1.5fr 76px 1fr 52px;gap:11px;padding:11px 12px;border-top:1px solid var(--ln);align-items:center">
+                  <span style="min-width:0">
+                    <span style="display:block;font-size:12.5px;font-weight:600">{{s.id}}</span>
+                    <span class="mn" style="display:block;font-size:10px;color:var(--tx3)">{{s.meter}} · {{s.status}}</span>
+                  </span>
+                  <span class="mn" style="font-size:12px;text-align:right">{{s.kwh}}</span>
+                  <span style="font-size:11.5px;color:{{s.sigc}};text-wrap:pretty">{{s.signal}}</span>
+                  <span style="text-align:right"><span class="prio" style="color:{{s.pc}};background:{{s.pb}}">{{s.prio}}</span></span>
+                </div>
+              </sc-for>
+            </div>
+            <p style="font-size:10.5px;color:var(--tx3);margin-top:9px;text-wrap:pretty">
+              Ranking uses observable meter signals only — tamper bitfield, read quality, reporting gaps and position in this transformer's own consumption cohort. It is an inspection order, not an allegation.
+            </p>
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- AUDIT STREAM -->
+      <div style="border-left:1px solid var(--ln);background:var(--bg1);padding:15px 14px;overflow:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span class="eyebrow">Audit stream</span>
+          <span class="mn" style="font-size:9.5px;color:var(--lime)">append-only</span>
+        </div>
+        <sc-for list="{{audit}}" as="a" hint-placeholder-count="6">
+          <div class="stream" style="padding:10px 0;border-top:1px solid var(--ln)">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:11.5px;font-weight:600;color:{{a.c}}">{{a.what}}</span>
+              <span class="mn" style="font-size:9.5px;color:var(--tx3)">{{a.t}}</span>
+            </div>
+            <div class="mn" style="font-size:10.5px;color:var(--tx2);margin-top:3px">{{a.from}} → <span style="color:var(--tx)">{{a.to}}</span></div>
+            <sc-if value="{{a.note}}" hint-placeholder-val="{{true}}">
+              <div style="font-size:10.5px;color:var(--tx3);margin-top:3px;text-wrap:pretty">{{a.note}}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <div class="pnl" style="margin-top:14px;padding:12px;background:#0c1219">
+          <div style="display:flex;gap:8px">
+            <svg class="ic" style="stroke:var(--lime);width:14px;height:14px;margin-top:1px" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            <p style="font-size:10.5px;color:var(--tx3);text-wrap:pretty">Written by a database trigger. UPDATE and DELETE raise for every role, including the owner.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#5cc4f5","section":"Theme"}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state={ nav:"losses", win:"120d", minLoss:0, feeders:["A-2","B-1"],
+    signals:["tamper","quality","silent","cohort"], sort:"loss", dt:"A-23" }; }
+  set(k,v){ return ()=> this.setState({[k]:v}); }
+  toggleIn(key,v){ return ()=> this.setState(s=>{
+    const cur=s[key]; return { [key]: cur.indexOf(v)>=0 ? cur.filter(x=>x!==v) : cur.concat([v]) };
+  }); }
+
+  ic(n){ const P={
+    home:'<path d="M3 21h18M6 21V9l6-5 6 5v12"/>',
+    grid:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+    loss:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    plug:'<path d="M9 7V3M15 7V3M6 7h12v4a6 6 0 0 1-12 0z"/><path d="M12 17v4"/>',
+    wallet:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/>',
+    map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',
+    check:'<path d="M20 6 9 17l-5-5"/>'
+  }; return { __html:'<svg class="ic" style="width:14px;height:14px" viewBox="0 0 24 24">'+(P[n]||P.home)+'</svg>' }; }
+
+  renderVals(){
+    const L="var(--lime)", C="var(--cyan)", A="var(--amber)", R="var(--coral)";
+    const S=this.state;
+
+    const NAV=[["overview","Overview","home",""],["connections","Connections","grid",""],["losses","AT&C losses","loss","1"],
+               ["netmetering","Net-metering","plug","1"],["prepaid","Prepaid","wallet","1"],["outages","Outages","map",""],
+               ["audit","Audit log","check",""]];
+    const nav=NAV.map(n=>({ label:n[1], cls:S.nav===n[0]?"on":"", pick:this.set("nav",n[0]),
+      icon:this.ic(n[2]), badge:n[3], bc:n[3]?A:"" }));
+
+    // dt data: [name, feeder, loss%, delivered, metered, consumers, signals present]
+    const DT=[
+      ["DT A-23","A-2",19.1,3681,2977,3,["tamper","cohort"]],
+      ["DT A-21","A-2",6.6,6106,5703,6,["quality"]],
+      ["DT A-22","A-2",5.7,3108,2932,3,[]],
+      ["DT A-24","A-2",2.4,1531,1494,6,[]],
+      ["DT B-11","B-1",14.2,4210,3612,5,["silent","quality"]],
+      ["DT B-12","B-1",8.9,2870,2614,4,["quality"]]
+    ];
+    const col=(p)=> p<=8?L : (p<=15?A:R);
+
+    const sel0=DT.filter(d=>
+      d[2]>=S.minLoss &&
+      (S.feeders.length===0 || S.feeders.indexOf(d[1])>=0) &&
+      (S.signals.length===4 || d[6].length===0 || d[6].some(x=>S.signals.indexOf(x)>=0))
+    );
+    const sorted=sel0.slice().sort((a,b)=>{
+      if(S.sort==="loss") return b[2]-a[2];
+      if(S.sort==="gap") return (b[3]-b[4])-(a[3]-a[4]);
+      return b[5]-a[5];
+    });
+
+    const dts=sorted.map(d=>({
+      name:d[0], pct:d[2].toFixed(1), w:Math.min(100,(d[2]/25)*100)+"%", c:col(d[2]),
+      gap:(d[3]-d[4]).toLocaleString("en-IN"), flag:d[6].indexOf("tamper")>=0,
+      cls:S.dt===d[0].replace("DT ","")?"on":"", pick:this.set("dt",d[0].replace("DT ",""))
+    }));
+
+    const curDT=DT.find(d=>d[0]==="DT "+S.dt);
+    const inList=curDT && sorted.indexOf(curDT)>=0;
+
+    const SUS={
+      "A-23":[
+        ["AHD-A-300001","MTR-AHD-A-300001","active","998","tamper flags on 492 readings",R,40,"#fff",R],
+        ["AHD-A-300003","MTR-AHD-A-300003","active","817","consumption per kW in bottom quartile",A,20,A,"oklch(0.84 0.16 80/.16)"],
+        ["AHD-A-300002","MTR-AHD-A-300002","active","1,155","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+      ],
+      "A-21":[
+        ["AHD-A-100003","MTR-AHD-A-100003","active","1,225","silent for 4 days",A,15,A,"oklch(0.84 0.16 80/.16)"],
+        ["AHD-A-100001","MTR-AHD-A-100001","active","1,617","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
+        ["AHD-A-100005","MTR-AHD-A-100005","active","1,212","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+      ],
+      "A-22":[
+        ["AHD-A-200001","MTR-AHD-A-200001","active","1,040","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
+        ["AHD-A-200002","MTR-AHD-A-200002","active","988","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
+        ["AHD-A-200003","MTR-AHD-A-200003","active","897","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+      ],
+      "A-24":[
+        ["SUN-101","MTR-SUN-101","active","273","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
+        ["SUN-103","MTR-SUN-103","active","299","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
+        ["SUN-105","MTR-SUN-105","active","289","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+      ],
+      "B-11":[
+        ["AHD-B-110004","MTR-AHD-B-110004","faulty","0","meter faulty on a live connection",R,25,"#fff",R],
+        ["AHD-B-110002","MTR-AHD-B-110002","active","742","31 suspect or missing reads",A,15,A,"oklch(0.84 0.16 80/.16)"],
+        ["AHD-B-110001","MTR-AHD-B-110001","active","1,088","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+      ],
+      "B-12":[
+        ["AHD-B-120003","MTR-AHD-B-120003","active","655","12 estimated reads",A,15,A,"oklch(0.84 0.16 80/.16)"],
+        ["AHD-B-120001","MTR-AHD-B-120001","active","912","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"],
+        ["AHD-B-120002","MTR-AHD-B-120002","active","880","—","var(--tx3)",0,L,"oklch(0.84 0.19 145/.13)"]
+      ]
+    };
+    const rows=(SUS[S.dt]||[]).map(s=>({ id:s[0], meter:s[1], status:s[2], kwh:s[3], signal:s[4], sigc:s[5],
+      prio:s[6], pc:s[7], pb:s[8] }));
+
+    const totalGap=sorted.reduce((a,d)=>a+(d[3]-d[4]),0);
+    const avg=sorted.length ? sorted.reduce((a,d)=>a+d[2],0)/sorted.length : 0;
+    const flagged=sorted.filter(d=>d[6].indexOf("tamper")>=0).length;
+
+    const SIG=[["tamper","Tamper bits",R],["quality","Suspect reads",A],["silent","Silent meters",A],["cohort","Cohort outlier",C]];
+    const dirty = S.minLoss>0 || S.feeders.length!==2 || S.signals.length!==4 || S.sort!=="loss" || S.win!=="120d";
+
+    return {
+      accent:this.props.accent ?? "#5cc4f5",
+      nav,
+      windows:[["30d","30D"],["120d","120D"],["ytd","YTD"]].map(w=>({ label:w[1], cls:S.win===w[0]?"on":"", pick:this.set("win",w[0]) })),
+      minLoss:S.minLoss, onLoss:(e)=>this.setState({minLoss:Number(e.target.value)}),
+      feeders:[["A-2","Feeder A-2"],["B-1","Feeder B-1"]].map(f=>{
+        const on=S.feeders.indexOf(f[0])>=0;
+        return { label:f[1], on, cls:on?"on":"", pick:this.toggleIn("feeders",f[0]), n:DT.filter(d=>d[1]===f[0]).length };
+      }),
+      signals:SIG.map(s=>{
+        const on=S.signals.indexOf(s[0])>=0;
+        return { label:s[1], on, cls:on?"on":"", c:s[2], pick:this.toggleIn("signals",s[0]),
+                 n:DT.filter(d=>d[6].indexOf(s[0])>=0).length };
+      }),
+      sorts:[["loss","Loss percentage"],["gap","Unaccounted kWh"],["consumers","Consumer count"]].map(s=>({
+        label:s[1], cls:S.sort===s[0]?"on":"", pick:this.set("sort",s[0]),
+        c:S.sort===s[0]?"var(--cyan)":"var(--tx3)" })),
+      dts, hasDts:dts.length>0, noDts:dts.length===0,
+      shown:dts.length, totalDts:DT.length,
+      dirty, reset:()=>this.setState({ minLoss:0, feeders:["A-2","B-1"], signals:["tamper","quality","silent","cohort"], sort:"loss", win:"120d" }),
+      kpis:[
+        { k:"Transformers", v:String(sorted.length), sub:"in filter", c:"var(--tx)" },
+        { k:"Avg AT&C loss", v:avg.toFixed(1)+"%", sub:"weighted equally", c:col(avg) },
+        { k:"Unaccounted", v:totalGap.toLocaleString("en-IN")+" kWh", sub:"delivered minus metered", c:R },
+        { k:"Tamper-flagged", v:String(flagged), sub:"transformers", c:flagged?R:"var(--tx)" }
+      ],
+      hasSel:!!curDT && inList,
+      sel:curDT ? { name:curDT[0], consumers:curDT[5],
+        delivered:curDT[3].toLocaleString("en-IN")+" kWh",
+        metered:curDT[4].toLocaleString("en-IN")+" kWh",
+        gapKwh:(curDT[3]-curDT[4]).toLocaleString("en-IN")+" kWh" } : { name:"", consumers:0, delivered:"", metered:"", gapKwh:"" },
+      suspects:rows,
+      audit:[
+        { what:"Net-metering application", from:"under_review", to:"approved", t:"21:23", c:L, note:"Roof inspection cleared; feasibility OK on DT A-21." },
+        { what:"Work order WO-114", from:"open", to:"in_progress", t:"18:40", c:C, note:"" },
+        { what:"Inspection raised", from:"—", to:"queued", t:"17:02", c:A, note:"AHD-A-300001 · priority 40" },
+        { what:"Prepaid disconnection", from:"queued", to:"withdrawn", t:"14:15", c:L, note:"Balance recharged before the window closed." },
+        { what:"Net-metering application", from:"submitted", to:"under_review", t:"09:12", c:C, note:"" },
+        { what:"Tariff version", from:"v1.0.0", to:"v1.0.0", t:"08:00", c:"var(--tx2)", note:"Daily verification — hash unchanged." }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

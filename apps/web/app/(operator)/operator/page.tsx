@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
+import { PanelIcon, type IconName } from "@/components/Icon";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
-const ASSET_ICON: Record<string, string> = {
-  pv_array: "☀️",
-  inverter: "🔌",
-  battery: "🔋",
-  acdb: "⚡",
+const ASSET_ICON: Record<string, IconName> = {
+  pv_array: "sun",
+  inverter: "plug",
+  battery: "battery",
+  acdb: "bolt",
 };
 
 export default async function OperatorPage() {
@@ -75,7 +76,9 @@ export default async function OperatorPage() {
               return (
                 <tr key={a.id} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
                   <td className="py-2.5 pr-4">
-                    <span aria-hidden="true" className="mr-1.5">{ASSET_ICON[a.asset_type] ?? "•"}</span>
+                    <span className="inline-flex mr-1.5 align-middle" style={{ color: "var(--color-categorical-generation)" }}>
+                      <PanelIcon name={ASSET_ICON[a.asset_type] ?? "box"} size={14} />
+                    </span>
                     {a.asset_type.replace("_", " ")}
                   </td>
                   <td className="py-2.5 pr-4 tabular" style={{ color: "var(--color-text-secondary)" }}>{sc?.consumer_number ?? "—"}</td>
@@ -103,7 +106,7 @@ export default async function OperatorPage() {
               className="rounded-full border px-3 py-1 text-xs font-medium"
               style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
             >
-              {ASSET_ICON[type] ?? "•"} {count} {type.replace("_", " ")}
+              <span className="inline-flex align-middle mr-1.5" style={{ color: "var(--color-categorical-generation)" }}><PanelIcon name={ASSET_ICON[type] ?? "box"} size={13} /></span>{count} {type.replace("_", " ")}
             </span>
           ))}
         </div>

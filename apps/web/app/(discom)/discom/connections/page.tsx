@@ -7,7 +7,7 @@ export default async function DiscomConnectionsPage() {
   const supabase = await createClient();
   const scope = await getScope(supabase);
   if (!scope) redirect("/login");
-  const { user } = scope;
+  const { user, divisionIds } = scope;
 
   const { data: connections } = await supabase
     .from("service_connections")
@@ -19,6 +19,7 @@ export default async function DiscomConnectionsPage() {
 
   return (
     <PanelShell
+      scopeNote={`division_ids · ${divisionIds.length} claim${divisionIds.length === 1 ? "" : "s"}`}
       panel="discom"
       email={user.email ?? ""}
       nav={[

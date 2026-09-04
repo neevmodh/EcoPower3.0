@@ -80,7 +80,7 @@ export default async function FieldPage() {
                       {w.priority}
                     </span>
                     <span
-                      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium text-white"
+                      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium on-accent"
                       style={{ background: STATUS_COLOR[w.status] }}
                     >
                       {w.status.replace("_", " ")}

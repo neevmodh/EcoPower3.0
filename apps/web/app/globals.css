@@ -2,16 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Palette values are the validated set from packages/shared/src/palette.json
-   (#67, guarded by scripts/validate_palette.js in CI). Neutrals below are
-   surfaces/text, not series colours.
+/* ===========================================================================
+   EcoPower 3.0 — "grid control room" design system.
 
-   Light-green-and-white is the deliberate default for every visitor,
-   regardless of OS theme — no auto-dark from prefers-color-scheme. The
-   dark values below stay in place, ready for data-theme="dark", for
-   whenever a theme toggle ships; none exists yet. */
+   Colour values are the validated set from packages/shared/src/palette.json
+   (#67, guarded by scripts/validate_palette.js in CI). Only the accents,
+   status colours and surfaces below are palette-derived; the neutral ladder
+   is chrome, not a data series.
+
+   DARK IS NOW THE DEFAULT for every visitor. An operations product is read
+   in a control room and on a phone in sunlight; the dark ground is what
+   makes a luminous data series legible, and it is what the whole palette's
+   dark variant was validated for. The light theme is kept intact under
+   :root[data-theme="light"] — nothing was deleted, the default flipped.
+   =========================================================================== */
 
 :root {
+  /* Categorical — identity. Generation is amber, consumption cyan, third lime. */
+  --color-categorical-generation: #ffbd34;
+  --color-categorical-consumption: #00d3ff;
+  --color-categorical-third: #6fea77;
+
+  /* Diverging — polarity around a neutral zero. */
+  --color-diverging-export: #6fea77;
+  --color-diverging-zero: #232b35;
+  --color-diverging-import: #ff6c58;
+
+  /* Status — state only, never a series colour. Always paired with an icon
+     and a label (DESIGN.md §3.5) — that pairing, not contrast, is the relief. */
+  --color-status-good: #65db7c;
+  --color-status-warning: #ffbd34;
+  --color-status-serious: #ff6c58;
+  --color-status-critical: #f8495f;
+
+  /* Sequential — magnitude. One ramp, theme-independent. */
+  --color-sequential-0: #cde2fb;
+  --color-sequential-1: #a8c9f5;
+  --color-sequential-2: #86b6ef;
+  --color-sequential-3: #5f96e0;
+  --color-sequential-4: #3a76c9;
+  --color-sequential-5: #1d549e;
+  --color-sequential-6: #0d366b;
+
+  /* Neutral ladder. Four surfaces, not two: the page, the raised chrome
+     (nav rail, header), the card, and the sunken well an input sits in. */
+  --color-surface: #07090c;
+  --color-surface-raised: #0b0f14;
+  --color-surface-card: #101720;
+  --color-surface-sunken: #0c1219;
+  --color-border: #1e2833;
+  --color-border-strong: #2b3846;
+  --color-text-primary: #e8eef6;
+  --color-text-secondary: #8fa0b4;
+  --color-text-tertiary: #5b6b7d;
+
+  /* On a dark ground, elevation reads as a darker cast plus a hairline
+     highlight — a light-theme drop shadow is invisible here. */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 18px 50px -22px rgba(0, 0, 0, 0.9);
+
+  --duration-state: 150ms;
+  --duration-entrance: 250ms;
+}
+
+:root[data-theme="light"] {
   --color-categorical-generation: #eda100;
   --color-categorical-consumption: #2a78d6;
   --color-categorical-third: #1baf7a;
@@ -25,54 +79,41 @@
   --color-status-serious: #eb6834;
   --color-status-critical: #e34948;
 
-  --color-sequential-0: #cde2fb;
-  --color-sequential-1: #a8c9f5;
-  --color-sequential-2: #86b6ef;
-  --color-sequential-3: #5f96e0;
-  --color-sequential-4: #3a76c9;
-  --color-sequential-5: #1d549e;
-  --color-sequential-6: #0d366b;
-
   --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
   --color-surface-card: #ffffff;
+  --color-surface-sunken: #faf9f6;
   --color-border: #e4e2dd;
+  --color-border-strong: #d3d0c8;
   --color-text-primary: #1a1a18;
   --color-text-secondary: #5c5a54;
+  --color-text-tertiary: #86837b;
 
-  /* Real shadow tokens (#89) — reserved for genuine overlay-weight surfaces
-     per DESIGN.md §5: marketing cards on hover, never a resting dashboard
-     tile standing in for missing hierarchy. */
   --shadow-card: 0 1px 2px rgba(20, 20, 18, 0.04), 0 1px 1px rgba(20, 20, 18, 0.03);
-  --shadow-card-hover: 0 16px 40px rgba(20, 20, 18, 0.10);
+  --shadow-card-hover: 0 16px 40px rgba(20, 20, 18, 0.1);
 }
 
-:root[data-theme="dark"] {
-  --color-categorical-generation: #c98500;
-  --color-categorical-consumption: #3987e5;
-  --color-categorical-third: #199e70;
-
-  --color-diverging-export: #199e70;
-  --color-diverging-zero: #383835;
-  --color-diverging-import: #d95926;
-
-  --color-status-good: #008300;
-  --color-status-warning: #c98500;
-  --color-status-serious: #d95926;
-  --color-status-critical: #e66767;
-
-  --color-surface: #121212;
-  --color-surface-card: #1c1c1a;
-  --color-border: #34332f;
-  --color-text-primary: #f2f1ee;
-  --color-text-secondary: #a3a099;
-
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 1px rgba(0, 0, 0, 0.3);
-  --shadow-card-hover: 0 16px 40px rgba(0, 0, 0, 0.55);
+html {
+  color-scheme: dark;
+}
+html[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
   background: var(--color-surface);
   color: var(--color-text-primary);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
 }
 
 /* Tabular figures are non-negotiable in an operations product — columns of
@@ -81,55 +122,339 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Marketing-only wash (#89, DESIGN.md §5/§8): the hero's soft tint,
-   derived from the existing validated palette tokens via color-mix rather
-   than a new hardcoded colour, carried forward from 2.0 for the one
-   surface DESIGN.md P6 grants air. Never applied to a dashboard page —
-   the full-page gradient wash across every surface was the actual mistake
-   §5 documents in 2.0, not per-card elevation (2.0's own dashboards sit on
-   a flat #F8FAFC and only shadow individual cards — verified by reading
-   EcoPower2.0/app/globals.css and DashboardLayout.js directly). */
-.hero-wash {
-  background: linear-gradient(
-    150deg,
-    color-mix(in oklab, var(--color-categorical-third) 8%, var(--color-surface)) 0%,
-    var(--color-surface) 45%,
-    color-mix(in oklab, var(--color-categorical-consumption) 7%, var(--color-surface)) 100%
-  );
+/* Monospace carries every identifier and register read: a meter serial, a
+   consumer number, a reading. It marks "this is a value from the database",
+   not prose. */
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Real hover motion for real cards — nothing here changes on its own; it
-   responds to an actual pointer. Used on marketing cards and, as of #89,
-   dashboard cards too (StatTile, InvoiceCard, the sidebar account card) —
-   every one of them already renders only real, derived data, so lifting
-   them on hover adds no fabricated signal, just depth. */
+/* Section label. Small, tracked-out, mono — the control-room voice. */
+.eyebrow {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+/* ---------------------------------------------------------------------------
+   Surfaces
+   --------------------------------------------------------------------------- */
+
+.panel {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+}
+
+/* Hover-responsive elevation, for standalone tiles. Every card that uses it
+   renders only real, derived data, so lifting it adds depth, not signal. */
 .card-lift {
   box-shadow: var(--shadow-card);
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
 }
 .card-lift:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-border-strong);
 }
 
-/* Resting elevation without the hover motion — for cards inside dense
-   tables/lists where a translateY on hover would jitter adjacent rows. */
+/* Resting elevation without the motion — for cards inside dense tables and
+   lists, where a translateY on hover would jitter adjacent rows. */
 .card-shadow {
   box-shadow: var(--shadow-card);
 }
 
+/* ---------------------------------------------------------------------------
+   Controls
+   --------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 160ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    opacity 160ms ease;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-primary {
+  background: var(--color-categorical-third);
+  color: #04140b;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 34px -14px var(--color-categorical-third);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+.btn-ghost:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--color-text-tertiary);
+  background: var(--color-surface-card);
+}
+.btn-danger {
+  background: transparent;
+  color: var(--color-status-critical);
+  border-color: var(--color-status-critical);
+}
+.btn-danger:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: color-mix(in oklab, var(--color-status-critical) 12%, transparent);
+}
+
+.field {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.field:focus {
+  border-color: var(--color-categorical-third);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-categorical-third) 18%, transparent);
+}
+textarea.field {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+}
+.field::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* Filter / toggle chip. `.chip-on` is the selected state. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-card);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+.chip:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+.chip-on {
+  background: color-mix(in oklab, var(--color-categorical-third) 14%, transparent);
+  border-color: color-mix(in oklab, var(--color-categorical-third) 50%, transparent);
+  color: var(--color-categorical-third);
+}
+
+/* ---------------------------------------------------------------------------
+   Atmosphere — reserved for the marketing and auth surfaces (DESIGN.md P6:
+   "marketing pages get air; operator surfaces get information"). Never
+   applied behind a dashboard.
+   --------------------------------------------------------------------------- */
+
+.grid-backdrop {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.5;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+}
+
+.aurora {
+  position: absolute;
+  inset: -30% -10% auto -10%;
+  height: 820px;
+  filter: blur(90px);
+  opacity: 0.42;
+  pointer-events: none;
+  background:
+    radial-gradient(32% 40% at 20% 30%, color-mix(in oklab, var(--color-categorical-third) 55%, transparent), transparent 70%),
+    radial-gradient(30% 36% at 78% 24%, color-mix(in oklab, var(--color-categorical-consumption) 50%, transparent), transparent 70%),
+    radial-gradient(26% 32% at 55% 70%, color-mix(in oklab, var(--color-categorical-generation) 32%, transparent), transparent 70%);
+  animation: aurora-drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift {
+  from {
+    transform: translate3d(-3%, -2%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(5%, 3%, 0) scale(1.12);
+  }
+}
+
+/* Carried forward from 2.0's landing composition (DESIGN.md §8), restated
+   for the dark ground. */
+.hero-wash {
+  background:
+    radial-gradient(60% 50% at 20% 0%, color-mix(in oklab, var(--color-categorical-third) 10%, transparent), transparent 70%),
+    radial-gradient(50% 45% at 85% 10%, color-mix(in oklab, var(--color-categorical-consumption) 9%, transparent), transparent 70%),
+    var(--color-surface);
+}
+
+/* ---------------------------------------------------------------------------
+   Motion. Entrances only — nothing here loops to imply liveness it doesn't
+   have. The one exception is .pulse-dot, which is only ever rendered next to
+   a genuinely live socket.
+   --------------------------------------------------------------------------- */
+
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 .animate-fade-up {
-  animation: fade-up 500ms ease both;
+  animation: fade-up 600ms cubic-bezier(0.16, 0.84, 0.28, 1) both;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-slide-in {
+  animation: slide-in 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Flowing energy along an SVG path. */
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+.flow-line {
+  stroke-dasharray: 5 9;
+  animation: dash-flow 1.6s linear infinite;
+}
+
+/* A live indicator. Rendered only when the socket is actually connected. */
+.pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-status-good);
+  box-shadow: 0 0 10px var(--color-status-good);
+}
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-status-good);
+  animation: pulse-ring 1.9s ease-out infinite;
+}
+@keyframes pulse-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+
+/* Bars and rings animate to their value — the transition communicates the
+   change, it does not invent one. */
+.animate-bar {
+  transition: height 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.animate-ring {
+  transition: stroke-dashoffset 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Table rows and list rows. */
+.row-hover {
+  transition: background 140ms ease;
+}
+.row-hover:hover {
+  background: color-mix(in oklab, var(--color-text-primary) 3%, transparent);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-categorical-third) 30%, transparent);
+  color: var(--color-text-primary);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-categorical-third);
+  outline-offset: 2px;
+}
+
+/* Scrollbars, so a dark page doesn't ship a bright system scrollbar. */
+* {
+  scrollbar-color: var(--color-border-strong) transparent;
+  scrollbar-width: thin;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 5px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+  background-clip: content-box;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -140,4 +465,19 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Marketing marquee — a slow, non-looping-feeling scroll of real platform
+   facts. Purely typographic; it carries no data that could go stale. */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Ink for anything sitting ON an accent fill. The dark palette's accents are
+   luminous — white text on lime or amber is unreadable, so a filled chip or
+   button takes near-black ink instead. */
+.on-accent {
+  color: #04140b;
 }

@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
+      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
+      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
+      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30);
+      --dsp:"Archivo",system-ui,sans-serif; --bdy:"IBM Plex Sans",system-ui,sans-serif; --mno:"IBM Plex Mono",ui-monospace,monospace;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.5;-webkit-font-smoothing:antialiased}
+    h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.025em;line-height:1.1;font-weight:700}
+    p{margin:0}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
+    .eyebrow{font-family:var(--mno);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tx3)}
+    .ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+    .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:8px}
+    .inv{padding:14px;border:1px solid var(--ln);border-radius:7px;background:#0c1219;cursor:pointer;transition:all .18s cubic-bezier(.2,.7,.2,1);width:100%;text-align:left;font-family:var(--bdy)}
+    .inv:hover{border-color:var(--ln2);transform:translateX(2px)}
+    .inv.on{border-color:var(--lime);background:oklch(0.84 0.19 145/.07);box-shadow:0 0 0 1px var(--lime)}
+    .st{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 8px;border-radius:3px;font-family:var(--mno);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+    .chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:4px;border:1px solid var(--ln);background:#0c1219;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;font-family:var(--bdy);transition:all .15s ease}
+    .chip:hover{border-color:var(--ln2);color:var(--tx)}
+    .chip.on{background:oklch(0.84 0.19 145/.13);border-color:oklch(0.84 0.19 145/.5);color:var(--lime)}
+    .line{cursor:pointer;transition:background .15s ease;border-radius:5px}
+    .line:hover{background:rgba(255,255,255,.025)}
+    .prov{overflow:hidden;transition:max-height .4s cubic-bezier(.2,.7,.2,1),opacity .3s ease}
+    .fade{animation:fade .3s cubic-bezier(.2,.8,.2,1)}
+    @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .trace{position:relative;padding-left:20px}
+    .trace::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:linear-gradient(180deg,var(--lime),var(--cyan))}
+    .tdot{position:absolute;left:0;width:11px;height:11px;border-radius:50%;border:2px solid var(--bg);background:var(--lime)}
+    .cta{height:38px;padding:0 18px;border:0;border-radius:5px;background:var(--lime);color:#04140b;font-family:var(--bdy);font-weight:600;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .18s ease}
+    .cta:hover{box-shadow:0 12px 34px -14px var(--lime);transform:translateY(-1px)}
+    .ghost{height:38px;padding:0 16px;border:1px solid var(--ln2);border-radius:5px;background:transparent;color:var(--tx2);font-family:var(--bdy);font-weight:600;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .16s ease}
+    .ghost:hover{color:var(--tx);border-color:var(--tx3)}
+    @media (prefers-reduced-motion:reduce){.fade{animation:none}}
+  </style>
+</helmet>
+
+<div style="--lime:{{accent}};display:grid;grid-template-columns:214px 1fr;min-height:100%;background:var(--bg)">
+
+  <aside style="border-right:1px solid var(--ln);background:var(--bg1);display:flex;flex-direction:column;padding:16px 11px">
+    <div style="display:flex;align-items:center;gap:10px;padding:5px 8px 18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" style="stroke:var(--lime);fill:none;stroke-width:1.9;stroke-linejoin:round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      <span style="font-family:var(--dsp);font-weight:800;font-size:14px">ECOPOWER</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{nav}}" as="n" hint-placeholder-count="8">
+        <div style="display:flex;align-items:center;gap:11px;padding:8px 11px;border-radius:6px;font-size:13px;cursor:pointer;color:{{n.c}};background:{{n.bg}};font-weight:{{n.w}}">
+          <span style="display:flex" dangerouslySetInnerHTML="{{n.icon}}"></span>{{n.label}}
+        </div>
+      </sc-for>
+    </div>
+    <div style="flex:1"></div>
+    <div class="pnl" style="padding:12px;background:#0c1219">
+      <span class="eyebrow">Year to date</span>
+      <div class="mn" style="font-size:19px;font-weight:600;margin-top:6px">₹8,102.64</div>
+      <div class="mn" style="font-size:10.5px;color:var(--tx3);margin-top:2px">4 invoices · 1,651 kWh</div>
+    </div>
+  </aside>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+    <header style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--ln);background:rgba(11,15,20,.8);backdrop-filter:blur(12px)">
+      <div style="display:flex;align-items:center;gap:14px">
+        <span style="font-family:var(--dsp);font-weight:600;font-size:15px">Bills</span>
+        <span class="mn" style="font-size:11px;color:var(--tx3);border-left:1px solid var(--ln);padding-left:14px">AHD-A-100001</span>
+      </div>
+      <div style="display:flex;gap:9px">
+        <button class="ghost"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v13M7 11l5 5 5-5M4 21h16"/></svg>Export CSV</button>
+        <button class="cta"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>Pay ₹1,339.02</button>
+      </div>
+    </header>
+
+    <div style="display:grid;grid-template-columns:330px 1fr;flex:1;min-height:0">
+
+      <!-- LIST -->
+      <div style="border-right:1px solid var(--ln);padding:18px;overflow:auto">
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">
+          <sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+            <button class="chip {{f.cls}}" onClick="{{f.pick}}">{{f.label}}<span class="mn" style="opacity:.5">{{f.n}}</span></button>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{invoices}}" as="i" hint-placeholder-count="4">
+            <button class="inv {{i.cls}}" onClick="{{i.pick}}">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <span class="st" style="color:{{i.sc}};background:{{i.sb}}">{{i.status}}</span>
+                <span class="mn" style="font-size:15px;font-weight:600">{{i.amt}}</span>
+              </div>
+              <div style="font-size:13px;font-weight:600;margin-top:9px">{{i.period}}</div>
+              <div class="mn" style="font-size:11px;color:var(--tx3);margin-top:3px">{{i.kwh}} kWh · {{i.days}} days</div>
+              <div style="height:4px;border-radius:2px;background:#12181f;margin-top:10px;overflow:hidden;display:flex">
+                <sc-for list="{{i.bars}}" as="b" hint-placeholder-count="3">
+                  <div style="width:{{b.w}};background:{{b.c}}"></div>
+                </sc-for>
+              </div>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- DETAIL -->
+      <div style="padding:22px;overflow:auto" class="fade">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <span class="eyebrow">Invoice</span>
+            <h1 style="font-size:26px;margin-top:8px">{{cur.period}}</h1>
+            <div class="mn" style="font-size:11.5px;color:var(--tx3);margin-top:6px">{{cur.id}} · engine v1.0.0 · issued {{cur.issued}}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="mn" style="font-size:30px;font-weight:600">{{cur.amt}}</div>
+            <span class="st" style="color:{{cur.sc}};background:{{cur.sb}};margin-top:6px">{{cur.status}}</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-top:20px">
+          <sc-for list="{{cur.stats}}" as="s" hint-placeholder-count="4">
+            <div class="pnl" style="padding:13px">
+              <span class="eyebrow">{{s.k}}</span>
+              <div class="mn" style="font-size:17px;font-weight:600;margin-top:5px;color:{{s.c}}">{{s.v}}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div class="pnl" style="margin-top:16px;padding:18px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span class="eyebrow">Charge lines</span>
+            <span class="mn" style="font-size:10.5px;color:var(--tx3)">click a line to trace it</span>
+          </div>
+          <sc-for list="{{lines}}" as="l" hint-placeholder-count="5">
+            <div class="line" onClick="{{l.pick}}" style="padding:11px 8px;border-top:1px solid var(--ln)">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;align-items:center;gap:11px">
+                  <svg class="ic" style="width:13px;height:13px;stroke:var(--tx3);transform:{{l.rot}};transition:transform .25s ease" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+                  <span style="font-size:13.5px;color:{{l.tc}}">{{l.label}}</span>
+                  <sc-if value="{{l.tag}}" hint-placeholder-val="{{true}}">
+                    <span class="mn" style="font-size:9.5px;color:{{l.tagc}};border:1px solid {{l.tagc}};border-radius:2px;padding:1px 6px">{{l.tag}}</span>
+                  </sc-if>
+                </div>
+                <span class="mn" style="font-size:13.5px;font-weight:500;color:{{l.ac}}">{{l.amt}}</span>
+              </div>
+              <div class="prov" style="max-height:{{l.h}};opacity:{{l.o}}">
+                <div class="trace" style="margin:12px 0 6px 24px">
+                  <sc-for list="{{l.trace}}" as="t" hint-placeholder-count="3">
+                    <div style="position:relative;padding-bottom:14px">
+                      <span class="tdot" style="top:3px;background:{{t.c}}"></span>
+                      <div class="mn" style="font-size:11px;color:var(--tx3);letter-spacing:.04em">{{t.k}}</div>
+                      <div class="mn" style="font-size:12.5px;color:{{t.c}};margin-top:2px">{{t.v}}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+          <div style="display:flex;justify-content:space-between;padding:14px 8px 4px;border-top:1px solid var(--ln2);margin-top:4px">
+            <span style="font-size:14px;font-weight:600">Total</span>
+            <span class="mn" style="font-size:18px;font-weight:600">{{cur.amt}}</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px">
+          <div class="pnl" style="padding:18px">
+            <span class="eyebrow">Why this bill moved</span>
+            <div style="margin-top:12px">
+              <sc-for list="{{why}}" as="w" hint-placeholder-count="4">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--ln)">
+                  <span style="font-size:12.5px;color:var(--tx2)">{{w.k}}</span>
+                  <span class="mn" style="font-size:12.5px;color:{{w.c}}">{{w.v}}</span>
+                </div>
+              </sc-for>
+            </div>
+            <p style="font-size:11px;color:var(--tx3);margin-top:12px;text-wrap:pretty">Deterministic attribution — degree-days and days-billed come from the same reads as the charge itself.</p>
+          </div>
+          <div class="pnl" style="padding:18px">
+            <span class="eyebrow">Provenance hash</span>
+            <div class="mn" style="font-size:11px;color:var(--lime);margin-top:11px;word-break:break-all;line-height:1.9">{{cur.hash}}</div>
+            <p style="font-size:11px;color:var(--tx3);margin-top:12px;text-wrap:pretty">Computed over the opening and closing reading IDs, the tariff version and the engine version. Recompute it any time and it must match.</p>
+            <button class="ghost" style="margin-top:13px;width:100%;justify-content:center"><svg class="ic" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg>Download PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#7bf1a8","section":"Theme"}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state={ filter:"all", inv:0, line:0 }; }
+  set(k,v){ return ()=> this.setState({[k]:v}); }
+
+  ic(n){ const P={
+    bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+    receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+    wallet:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/>',
+    trend:'<path d="M3 17 9 11l4 4 8-8"/><path d="M15 7h6v6"/>',
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+    leaf:'<path d="M4 20c0-9 7-15 16-16 1 10-6 17-16 16z"/>',
+    chat:'<path d="M4 5h16v11H8l-4 4z"/>',
+    gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4 6l2 1M18 17l2 1"/>'
+  }; return { __html:'<svg class="ic" style="width:15px;height:15px" viewBox="0 0 24 24">'+(P[n]||P.bolt)+'</svg>' }; }
+
+  renderVals(){
+    const L="var(--lime)", C="var(--cyan)", A="var(--amber)", R="var(--coral)";
+    const paid={ c:L, b:"oklch(0.84 0.19 145/.14)" }, issued={ c:A, b:"oklch(0.84 0.16 80/.14)" };
+
+    const NAV=[["My energy","bolt",0],["Bills","receipt",1],["Plan & prepaid","wallet",0],["Analytics","trend",0],
+               ["Solar","sun",0],["Carbon","leaf",0],["Support","chat",0],["Settings","gear",0]];
+    const nav=NAV.map(n=>({ label:n[0], icon:this.ic(n[1]),
+      c:n[2]?"var(--tx)":"var(--tx3)", bg:n[2]?"rgba(255,255,255,.055)":"transparent", w:n[2]?"600":"500" }));
+
+    const INV=[
+      { period:"31 Jul – 30 Aug 2026", id:"INV-2026-08-0041", issued:"31 Aug", amt:"₹1,339.02", kwh:"288.0", days:"30",
+        status:"issued", sc:issued.c, sb:issued.b, hash:"c4f1 9a02 7be3 5d18 ff40 2a6c 91d7 e035",
+        bars:[{w:"17%",c:L},{w:"52%",c:A},{w:"31%",c:R}],
+        stats:[{k:"Units",v:"288.0 kWh",c:"var(--tx)"},{k:"Avg rate",v:"₹4.14/kWh",c:"var(--tx)"},{k:"Duty",v:"₹121.75",c:"var(--tx2)"},{k:"Due",v:"15 Sep",c:A}] },
+      { period:"1 Jul – 31 Jul 2026", id:"INV-2026-07-0038", issued:"1 Aug", amt:"₹1,378.78", kwh:"295.2", days:"31",
+        status:"paid", sc:paid.c, sb:paid.b, hash:"8b3e 04df 12a9 66c1 7e50 bb28 3f4a d901",
+        bars:[{w:"17%",c:L},{w:"51%",c:A},{w:"32%",c:R}],
+        stats:[{k:"Units",v:"295.2 kWh",c:"var(--tx)"},{k:"Avg rate",v:"₹4.17/kWh",c:"var(--tx)"},{k:"Duty",v:"₹125.34",c:"var(--tx2)"},{k:"Paid",v:"12 Aug",c:L}] },
+      { period:"1 Jun – 1 Jul 2026", id:"INV-2026-06-0034", issued:"2 Jul", amt:"₹2,484.37", kwh:"496.2", days:"31",
+        status:"paid", sc:paid.c, sb:paid.b, hash:"1f7c aa93 40e2 b855 09d6 3c11 7ea4 20bf",
+        bars:[{w:"10%",c:L},{w:"30%",c:A},{w:"60%",c:R}],
+        stats:[{k:"Units",v:"496.2 kWh",c:"var(--tx)"},{k:"Avg rate",v:"₹4.55/kWh",c:R},{k:"Duty",v:"₹225.85",c:"var(--tx2)"},{k:"Paid",v:"9 Jul",c:L}] },
+      { period:"2 May – 1 Jun 2026", id:"INV-2026-05-0029", issued:"2 Jun", amt:"₹2,900.47", kwh:"571.9", days:"31",
+        status:"paid", sc:paid.c, sb:paid.b, hash:"55a0 c7e1 3d94 f620 8b17 e4cc 0a63 91d2",
+        bars:[{w:"9%",c:L},{w:"26%",c:A},{w:"65%",c:R}],
+        stats:[{k:"Units",v:"571.9 kWh",c:"var(--tx)"},{k:"Avg rate",v:"₹4.62/kWh",c:R},{k:"Duty",v:"₹263.68",c:"var(--tx2)"},{k:"Paid",v:"8 Jun",c:L}] }
+    ];
+
+    const fl=this.state.filter;
+    const shown=INV.filter(i=> fl==="all" || i.status===fl);
+    const invoices=shown.map((i)=>({ ...i, cls:INV.indexOf(i)===this.state.inv?"on":"", pick:this.set("inv",INV.indexOf(i)) }));
+    const filters=[["all","All",INV.length],["issued","Unpaid",INV.filter(i=>i.status==="issued").length],["paid","Paid",INV.filter(i=>i.status==="paid").length]]
+      .map(f=>({ label:f[1], n:f[2], cls:fl===f[0]?"on":"", pick:this.set("filter",f[0]) }));
+
+    const cur=INV[this.state.inv] || INV[0];
+
+    const LN=[
+      { label:"Energy · slab 1 · 50 kWh @ ₹3.20", amt:"₹160.00", tag:"", tagc:"", ac:"var(--tx)",
+        trace:[["opening register · 01 Aug 00:00","10,240.000 kWh",L],["reading id","d1f0…a41c · quality good",C],["slab ceiling","50 kWh @ 320 paise",A]] },
+      { label:"Energy · slab 2 · 150 kWh @ ₹3.95", amt:"₹592.50", tag:"", tagc:"", ac:"var(--tx)",
+        trace:[["cumulative at slab entry","50.000 kWh",L],["slab ceiling","200 kWh @ 395 paise",A],["telescopic","fills before spilling forward",C]] },
+      { label:"Energy · slab 3 · 88 kWh @ ₹5.00", amt:"₹440.00", tag:"HIGHEST", tagc:"var(--coral)", ac:"var(--coral)",
+        trace:[["closing register · 30 Aug 23:45","10,528.000 kWh",L],["reading id","9e77…03bb · quality good",C],["unbounded slab","500 paise per kWh",R]] },
+      { label:"Fixed charge · single phase", amt:"₹25.00", tag:"", tagc:"", ac:"var(--tx2)",
+        trace:[["band","≤ 5 kW sanctioned",C],["GERC order","§1.2 fixed charge, single phase",A]] },
+      { label:"Electricity duty · 10%", amt:"₹121.75", tag:"", tagc:"", ac:"var(--tx2)",
+        trace:[["base","energy ₹1,192.50 + fixed ₹25.00",C],["rate","1000 basis points",A],["rounding","half-up to the nearest paise",L]] }
+    ];
+    const lines=LN.map((l,i)=>({ ...l,
+      cls:"", pick:this.set("line", this.state.line===i ? -1 : i),
+      h:this.state.line===i?"210px":"0px", o:this.state.line===i?"1":"0",
+      rot:this.state.line===i?"rotate(90deg)":"rotate(0deg)",
+      tc:this.state.line===i?"var(--tx)":"var(--tx2)",
+      trace:l.trace.map(t=>({ k:t[0], v:t[1], c:t[2] })) }));
+
+    return {
+      accent:this.props.accent ?? "#7bf1a8",
+      nav, filters, invoices, cur, lines,
+      why:[
+        { k:"Days billed", v:"30 vs 31", c:L },
+        { k:"Cooling degree-days", v:"+14% vs Jul", c:R },
+        { k:"Units in the ₹5.00 slab", v:"88 vs 95", c:L },
+        { k:"Net change", v:"−₹39.76", c:L }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

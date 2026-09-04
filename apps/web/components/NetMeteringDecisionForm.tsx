@@ -43,7 +43,7 @@ export function NetMeteringDecisionForm({ applicationId }: { applicationId: stri
           type="button"
           disabled={busy}
           onClick={() => decide("approved")}
-          className="rounded-control px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+          className="rounded-control px-4 py-1.5 text-xs font-semibold on-accent disabled:opacity-50"
           style={{ background: "var(--color-status-good)" }}
         >
           {busy ? "…" : "Approve"}
@@ -52,7 +52,7 @@ export function NetMeteringDecisionForm({ applicationId }: { applicationId: stri
           type="button"
           disabled={busy}
           onClick={() => decide("rejected")}
-          className="rounded-control px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+          className="rounded-control px-4 py-1.5 text-xs font-semibold on-accent disabled:opacity-50"
           style={{ background: "var(--color-status-critical)" }}
         >
           {busy ? "…" : "Reject"}

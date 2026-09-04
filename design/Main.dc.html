@@ -1,0 +1,490 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#07090c; --bg1:#0b0f14; --pnl:#101720; --pnl2:#151d28;
+      --ln:#1e2833; --ln2:#2b3846;
+      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
+      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
+      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30);
+      --violet:oklch(0.74 0.16 295);
+      --dsp:"Archivo",system-ui,sans-serif;
+      --bdy:"IBM Plex Sans",system-ui,sans-serif;
+      --mno:"IBM Plex Mono",ui-monospace,monospace;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.55;-webkit-font-smoothing:antialiased}
+    h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.03em;line-height:1.04;font-weight:700}
+    p{margin:0}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 40px}
+    .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
+    .eyebrow{font-family:var(--mno);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3)}
+    .btn{display:inline-flex;align-items:center;gap:9px;height:46px;padding:0 24px;border-radius:4px;font-family:var(--bdy);font-weight:600;font-size:14px;cursor:pointer;border:1px solid transparent;transition:all .18s cubic-bezier(.2,.7,.2,1)}
+    .btn-p{background:var(--lime);color:#04140b}
+    .btn-p:hover{box-shadow:0 12px 40px -12px var(--lime);transform:translateY(-2px)}
+    .btn-g{background:transparent;color:var(--tx);border-color:var(--ln2)}
+    .btn-g:hover{border-color:var(--tx3);background:var(--pnl);transform:translateY(-2px)}
+    .pnl{background:var(--pnl);border:1px solid var(--ln);border-radius:6px}
+    .glow{transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease}
+    .glow:hover{border-color:var(--ln2);transform:translateY(-3px);box-shadow:0 18px 50px -22px #000}
+    .ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+    .gridbg{position:absolute;inset:0;background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:64px 64px;opacity:.5;
+      -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 75%)}
+    .aurora{position:absolute;inset:-30% -10% auto -10%;height:820px;filter:blur(90px);opacity:.42;pointer-events:none;
+      background:radial-gradient(32% 40% at 20% 30%,oklch(0.84 0.19 145/.55),transparent 70%),
+                 radial-gradient(30% 36% at 78% 24%,oklch(0.80 0.15 220/.5),transparent 70%),
+                 radial-gradient(26% 32% at 55% 70%,oklch(0.74 0.16 295/.35),transparent 70%);
+      animation:drift 26s ease-in-out infinite alternate}
+    @keyframes drift{from{transform:translate3d(-3%,-2%,0) scale(1)}to{transform:translate3d(5%,3%,0) scale(1.12)}}
+    .rv{opacity:0;transform:translateY(18px);animation:rv .8s cubic-bezier(.16,.84,.28,1) forwards}
+    @keyframes rv{to{opacity:1;transform:none}}
+    .flow{stroke-dasharray:5 9;animation:flow 1.6s linear infinite}
+    @keyframes flow{to{stroke-dashoffset:-14}}
+    .nd{animation:nd 2.6s ease-in-out infinite}
+    @keyframes nd{0%,100%{opacity:.4}50%{opacity:.08}}
+    .chip{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:3px;border:1px solid var(--ln);background:var(--pnl);font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;font-family:var(--bdy);transition:all .15s ease;white-space:nowrap}
+    .chip:hover{border-color:var(--ln2);color:var(--tx)}
+    .chip.on{background:oklch(0.84 0.19 145/.13);border-color:oklch(0.84 0.19 145/.5);color:var(--lime)}
+    .marq{display:flex;gap:56px;animation:marq 40s linear infinite;width:max-content}
+    @keyframes marq{to{transform:translateX(-50%)}}
+    .step{cursor:pointer;border-left:2px solid var(--ln);padding:15px 0 15px 22px;transition:border-color .2s ease}
+    .step.on{border-left-color:var(--lime)}
+    .stepv{overflow:hidden;transition:max-height .38s cubic-bezier(.2,.7,.2,1),opacity .28s ease}
+    input::placeholder{color:var(--tx3)}
+    @media (prefers-reduced-motion:reduce){.aurora,.rv,.flow,.nd,.marq{animation:none}.rv{opacity:1;transform:none}}
+  </style>
+</helmet>
+
+<div style="--lime:{{accent}};background:var(--bg);overflow-x:hidden">
+
+  <nav style="position:sticky;top:0;z-index:30;border-bottom:1px solid var(--ln);background:rgba(7,9,12,.74);backdrop-filter:blur(16px)">
+    <div class="wrap" style="height:70px;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:11px">
+        <svg width="26" height="26" viewBox="0 0 24 24" style="stroke:var(--lime);fill:none;stroke-width:1.9;stroke-linejoin:round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+        <span style="font-family:var(--dsp);font-weight:800;font-size:17px;letter-spacing:-.01em">ECOPOWER</span>
+        <span class="mn" style="font-size:10px;color:var(--tx3);border:1px solid var(--ln);padding:2px 6px;border-radius:3px">v3.0</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:30px;font-size:13.5px;color:var(--tx2)">
+        <a href="#proof" style="color:inherit">Proof</a>
+        <a href="#platform" style="color:inherit">Platform</a>
+        <a href="#discom" style="color:inherit">For DISCOMs</a>
+        <a href="#pricing" style="color:inherit">Pricing</a>
+      </div>
+      <a class="btn btn-p" href="#" style="height:38px;padding:0 18px;font-size:13px">Open live demo</a>
+    </div>
+  </nav>
+
+  <section style="position:relative;overflow:hidden">
+    <div class="gridbg"></div>
+    <div class="aurora"></div>
+    <div class="wrap" style="position:relative;z-index:1;padding:104px 40px 96px;display:grid;grid-template-columns:1.02fr .98fr;gap:64px;align-items:center">
+      <div>
+        <div class="rv eyebrow" style="animation-delay:.02s">Energy-as-a-Service · Gujarat</div>
+        <h1 class="rv" style="font-size:68px;margin-top:20px;animation-delay:.08s">
+          Every rupee<br>traced to a<br><span style="background:linear-gradient(96deg,var(--lime),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent">register read.</span>
+        </h1>
+        <p class="rv" style="font-size:18px;color:var(--tx2);max-width:452px;margin-top:24px;animation-delay:.16s;text-wrap:pretty">
+          Subscribe to solar, backup, or a performance guarantee. Open any invoice line and see the two meter reads it was computed from — the whole platform is built so that claim survives an audit.
+        </p>
+        <div class="rv" style="display:flex;gap:12px;margin-top:34px;animation-delay:.24s">
+          <a class="btn btn-p" href="#">Open live demo<svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="btn btn-g" href="#proof">See the proof chain</a>
+        </div>
+        <div class="rv" style="display:flex;gap:30px;margin-top:38px;animation-delay:.32s">
+          <sc-for list="{{heroStats}}" as="h" hint-placeholder-count="3">
+            <div>
+              <div class="mn" style="font-size:23px;font-weight:600;color:var(--tx)">{{h.v}}</div>
+              <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">{{h.l}}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div class="rv" style="animation-delay:.3s">
+        <div class="pnl" style="padding:22px;background:linear-gradient(180deg,var(--pnl),var(--bg1))">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span class="eyebrow">Feeder A-2 · live</span>
+            <span class="mn" style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--lime)">
+              <span style="width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)"></span>{{tick}} ms
+            </span>
+          </div>
+          <svg viewBox="0 0 420 250" style="width:100%;height:auto;display:block">
+            <defs>
+              <linearGradient id="lg" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="oklch(0.80 0.15 220)"/><stop offset="100%" stop-color="oklch(0.84 0.19 145)"/>
+              </linearGradient>
+            </defs>
+            <path d="M40 42 H210 V96 H360" stroke="var(--ln2)" stroke-width="1.5" fill="none"/>
+            <path d="M210 42 V150 H70" stroke="var(--ln2)" stroke-width="1.5" fill="none"/>
+            <path d="M210 150 V206 H360" stroke="var(--ln2)" stroke-width="1.5" fill="none"/>
+            <path class="flow" d="M40 42 H210 V96 H360" stroke="url(#lg)" stroke-width="2" fill="none"/>
+            <path class="flow" d="M210 42 V150 H70" stroke="url(#lg)" stroke-width="2" fill="none" style="animation-delay:.4s"/>
+            <path class="flow" d="M210 150 V206 H360" stroke="oklch(0.72 0.19 30)" stroke-width="2" fill="none" style="animation-delay:.8s"/>
+            <circle class="nd" cx="40" cy="42" r="18" fill="oklch(0.80 0.15 220/.22)"/>
+            <circle cx="40" cy="42" r="7" fill="var(--cyan)"/>
+            <text x="40" y="20" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#5b6b7d">SS-A</text>
+            <sc-for list="{{nodes}}" as="n" hint-placeholder-count="3">
+              <g>
+                <circle cx="{{n.x}}" cy="{{n.y}}" r="6" fill="{{n.c}}"/>
+                <text x="{{n.x}}" y="{{n.ty}}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#5b6b7d">{{n.label}}</text>
+                <text x="{{n.lx}}" y="{{n.ly}}" text-anchor="{{n.anchor}}" font-family="IBM Plex Mono" font-size="10.5" fill="{{n.c}}">{{n.loss}}</text>
+              </g>
+            </sc-for>
+          </svg>
+          <div class="mn" style="display:flex;gap:20px;margin-top:10px;font-size:10.5px;color:var(--tx3)">
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:2px;background:var(--lime)"></span>within RDSS band</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:2px;background:var(--coral)"></span>above 18%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="border-top:1px solid var(--ln);border-bottom:1px solid var(--ln);background:var(--bg1);overflow:hidden;padding:16px 0">
+    <div class="marq">
+      <sc-for list="{{marquee}}" as="m" hint-placeholder-count="20">
+        <span class="mn" style="font-size:11.5px;color:var(--tx3);letter-spacing:.05em;white-space:nowrap">{{m}}</span>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="proof" class="wrap" style="padding:110px 40px">
+    <div style="display:grid;grid-template-columns:.85fr 1.15fr;gap:64px;align-items:start">
+      <div style="position:sticky;top:110px">
+        <div class="eyebrow">The proof chain</div>
+        <h2 style="font-size:42px;margin-top:14px">One rupee,<br>four hops back<br>to the meter.</h2>
+        <p style="color:var(--tx2);font-size:15px;margin-top:18px;max-width:340px;text-wrap:pretty">
+          Most billing systems ask you to trust a total. This one hands you the chain — open a hop.
+        </p>
+      </div>
+      <div>
+        <sc-for list="{{chain}}" as="c" hint-placeholder-count="4">
+          <div class="step {{c.cls}}" onClick="{{c.pick}}">
+            <div style="display:flex;align-items:center;gap:14px">
+              <span class="mn" style="font-size:11px;color:{{c.nc}}">{{c.n}}</span>
+              <span style="font-family:var(--dsp);font-weight:600;font-size:17px;color:{{c.tc}}">{{c.title}}</span>
+            </div>
+            <div class="stepv" style="max-height:{{c.h}};opacity:{{c.o}}">
+              <p style="color:var(--tx2);font-size:14px;margin-top:10px;max-width:470px;text-wrap:pretty">{{c.body}}</p>
+              <div class="pnl" style="margin-top:12px;padding:14px 16px;background:var(--bg1)">
+                <div class="mn" style="font-size:12px;color:var(--lime);white-space:pre-line;line-height:1.75">{{c.code}}</div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="platform" style="border-top:1px solid var(--ln);background:var(--bg1)">
+    <div class="wrap" style="padding:104px 40px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap">
+        <div>
+          <div class="eyebrow">Platform</div>
+          <h2 style="font-size:40px;margin-top:14px">{{capCount}} capabilities.<br>One row-secured spine.</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;align-items:flex-end">
+          <div style="position:relative">
+            <svg class="ic" style="position:absolute;left:12px;top:11px;stroke:var(--tx3);width:16px;height:16px" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input onInput="{{onSearch}}" placeholder="Search capabilities…" style="width:272px;height:38px;padding:0 13px 0 36px;background:var(--pnl);border:1px solid var(--ln);border-radius:4px;color:var(--tx);font-family:var(--bdy);font-size:13px;outline:none">
+          </div>
+          <span class="mn" style="font-size:11px;color:var(--tx3)">{{shown}} of {{capCount}} shown</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:26px;flex-wrap:wrap;align-items:center">
+        <span class="eyebrow" style="width:66px">Domain</span>
+        <sc-for list="{{domTabs}}" as="t" hint-placeholder-count="8">
+          <button class="chip {{t.cls}}" onClick="{{t.pick}}">{{t.label}}<span class="mn" style="opacity:.5">{{t.n}}</span></button>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+        <span class="eyebrow" style="width:66px">Persona</span>
+        <sc-for list="{{perTabs}}" as="t" hint-placeholder-count="5">
+          <button class="chip {{t.cls}}" onClick="{{t.pick}}">{{t.label}}</button>
+        </sc-for>
+        <sc-if value="{{anyFilter}}" hint-placeholder-val="{{true}}">
+          <button class="chip" onClick="{{clearAll}}" style="border-color:var(--coral);color:var(--coral)">
+            <svg class="ic" style="width:13px;height:13px" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Clear
+          </button>
+        </sc-if>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:30px">
+        <sc-for list="{{caps}}" as="f" hint-placeholder-count="12">
+          <div class="pnl glow" style="padding:17px;border-top:2px solid {{f.tint}}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <span style="color:{{f.tint}};display:flex" dangerouslySetInnerHTML="{{f.icon}}"></span>
+              <span class="mn" style="font-size:9.5px;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase">{{f.per}}</span>
+            </div>
+            <h3 style="font-size:14.5px;margin-top:13px;line-height:1.28">{{f.title}}</h3>
+            <p style="font-size:12.5px;color:var(--tx2);margin-top:7px;text-wrap:pretty">{{f.body}}</p>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{empty}}" hint-placeholder-val="{{true}}">
+        <div class="pnl" style="margin-top:30px;padding:48px;text-align:center;color:var(--tx3);font-size:14px">Nothing matches that filter.</div>
+      </sc-if>
+    </div>
+  </section>
+
+  <section id="discom" class="wrap" style="padding:110px 40px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center">
+      <div>
+        <div class="eyebrow">For distribution utilities</div>
+        <h2 style="font-size:40px;margin-top:14px">Loss, localised<br>to a meter.</h2>
+        <p style="color:var(--tx2);font-size:15px;margin-top:18px;text-wrap:pretty">
+          Delivered energy at the DT head against the sum of consumer registers underneath it. Where the gap is real, the drill-down ranks the consumers on that transformer by the signals an inspector actually uses.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:26px">
+          <sc-for list="{{discomPoints}}" as="d" hint-placeholder-count="4">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <svg class="ic" style="stroke:var(--lime);width:16px;height:16px;margin-top:3px" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+              <span style="font-size:14px;color:var(--tx2);text-wrap:pretty">{{d}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div class="pnl" style="padding:20px;background:linear-gradient(180deg,var(--pnl),var(--bg1))">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <span class="eyebrow">Division A · AT&amp;C loss</span>
+          <span class="mn" style="font-size:10.5px;color:var(--tx3)">MoP FY25 avg 16.16%</span>
+        </div>
+        <sc-for list="{{lossRows}}" as="l" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:14px;padding:11px 0;border-top:1px solid var(--ln)">
+            <span class="mn" style="width:56px;font-size:12px;color:var(--tx2)">{{l.dt}}</span>
+            <div style="flex:1;height:6px;background:var(--bg);border-radius:2px;overflow:hidden">
+              <div style="width:{{l.w}};height:100%;background:{{l.c}};box-shadow:0 0 12px {{l.c}}"></div>
+            </div>
+            <span class="mn" style="width:48px;text-align:right;font-size:12.5px;font-weight:600;color:{{l.c}}">{{l.pct}}%</span>
+          </div>
+        </sc-for>
+        <div style="margin-top:16px;padding:13px;border-radius:4px;background:oklch(0.72 0.19 30/.1);border:1px solid oklch(0.72 0.19 30/.32)">
+          <div style="font-size:12.5px;color:var(--coral);font-weight:600">AHD-A-300001 · priority 40</div>
+          <div class="mn" style="font-size:11px;color:var(--tx2);margin-top:4px">tamper flags on 492 readings · 30-day window</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" style="border-top:1px solid var(--ln);background:var(--bg1)">
+    <div class="wrap" style="padding:104px 40px">
+      <div style="text-align:center">
+        <div class="eyebrow">Pricing</div>
+        <h2 style="font-size:40px;margin-top:14px">The rows in the plans table</h2>
+        <p style="color:var(--tx2);font-size:15px;margin-top:14px">Sign in and these numbers match exactly. Marketing cannot drift from what a subscriber sees.</p>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:26px">
+        <sc-for list="{{cycles}}" as="c" hint-placeholder-count="2">
+          <button class="chip {{c.cls}}" onClick="{{c.pick}}" style="height:34px">{{c.label}}</button>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:34px;align-items:start">
+        <sc-for list="{{plans}}" as="p" hint-placeholder-count="4">
+          <div class="pnl glow" style="padding:24px;border-color:{{p.bc}};position:relative">
+            <sc-if value="{{p.badge}}" hint-placeholder-val="{{true}}">
+              <span class="mn" style="position:absolute;top:-9px;left:22px;font-size:9.5px;letter-spacing:.13em;background:var(--lime);color:#04140b;padding:3px 9px;border-radius:2px;font-weight:600">{{p.badge}}</span>
+            </sc-if>
+            <div style="font-family:var(--dsp);font-weight:600;font-size:16px">{{p.name}}</div>
+            <p style="font-size:12.5px;color:var(--tx2);margin-top:7px;min-height:56px;text-wrap:pretty">{{p.desc}}</p>
+            <div class="mn" style="font-size:30px;font-weight:600;margin-top:6px">{{p.price}}<span style="font-size:12px;color:var(--tx3);font-weight:400"> {{p.per}}</span></div>
+            <div style="height:1px;background:var(--ln);margin:18px 0"></div>
+            <sc-for list="{{p.feats}}" as="ft" hint-placeholder-count="3">
+              <div style="display:flex;gap:10px;font-size:12.5px;color:var(--tx2);margin-bottom:9px">
+                <svg class="ic" style="stroke:{{p.bc}};width:15px;height:15px;margin-top:2px" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{{ft}}
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+      <p class="mn" style="text-align:center;font-size:11px;color:var(--tx3);margin-top:24px">
+        Energy beyond the included quantity bills on the GERC RGP telescopic slab — 50 @ ₹3.20 · 150 @ ₹3.95 · rest @ ₹5.00, plus 10% electricity duty.
+      </p>
+    </div>
+  </section>
+
+  <section style="position:relative;overflow:hidden;border-top:1px solid var(--ln)">
+    <div class="aurora" style="opacity:.28"></div>
+    <div class="wrap" style="position:relative;z-index:1;padding:110px 40px;text-align:center;max-width:720px">
+      <h2 style="font-size:44px">Six roles. One click each.</h2>
+      <p style="color:var(--tx2);font-size:16px;margin:18px auto 32px;max-width:490px">
+        Consumer, society, DISCOM, operator, field and support — every panel seeded with real modelled data, in English, हिन्दी or ગુજરાતી.
+      </p>
+      <a class="btn btn-p" href="#" style="height:52px;padding:0 32px">Open live demo<svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </section>
+
+  <footer style="border-top:1px solid var(--ln);background:var(--bg1)">
+    <div class="wrap" style="padding:34px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg width="20" height="20" viewBox="0 0 24 24" style="stroke:var(--lime);fill:none;stroke-width:1.9"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+        <span class="mn" style="font-size:12px;color:var(--tx3)">EcoPower 3.0 · INSTINCT 4.0 · Ahmedabad</span>
+      </div>
+      <span class="mn" style="font-size:11px;color:var(--tx3)">Metering · billing · DISCOM operations</span>
+    </div>
+  </footer>
+</div>
+
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#7bf1a8","section":"Theme"}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state={ dom:"all", per:"all", q:"", chain:0, cycle:"monthly", tick:38 }; }
+  componentDidMount(){ this._t=setInterval(()=>this.setState({tick:32+Math.round(Math.random()*22)}),1900); }
+  componentWillUnmount(){ clearInterval(this._t); }
+
+  ic(n){ const P={
+    radio:'<circle cx="12" cy="12" r="2.5"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4M3.5 3.5a12 12 0 0 0 0 17M20.5 3.5a12 12 0 0 1 0 17"/>',
+    layers:'<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
+    shield:'<path d="M12 3 4 6v6c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+    chip:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/>',
+    receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+    search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    trend:'<path d="M3 17 9 11l4 4 8-8"/><path d="M15 7h6v6"/>',
+    gauge:'<path d="M12 13 16 9"/><path d="M4 20a8 8 0 1 1 16 0"/>',
+    wallet:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14h2"/>',
+    repeat:'<path d="M17 2 21 6l-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22 3 18l4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+    gift:'<rect x="3" y="8" width="18" height="4"/><path d="M5 12v9h14v-9M12 8v13"/>',
+    doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h5M10 17h5"/>',
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2 2M17.8 17.8l2 2M2 12h3M19 12h3M4.2 19.8l2-2M17.8 6.2l2-2"/>',
+    battery:'<rect x="3" y="8" width="16" height="9" rx="2"/><path d="M22 11v3M7 11v3"/>',
+    plug:'<path d="M9 7V3M15 7V3M6 7h12v4a6 6 0 0 1-12 0z"/><path d="M12 17v4"/>',
+    ruler:'<path d="M3 8 8 3l13 13-5 5z"/><path d="M8 8l2 2M11 11l2 2M14 14l2 2"/>',
+    grid:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+    pin:'<path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+    users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M16 5a3.5 3.5 0 0 1 0 7"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    leaf:'<path d="M4 20c0-9 7-15 16-16 1 10-6 17-16 16z"/><path d="M4 20c4-6 8-9 12-11"/>',
+    case:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 12h18"/>',
+    chat:'<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',
+    bell:'<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+    globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
+    check:'<path d="M20 6 9 17l-5-5"/>',
+    lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+    scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/>',
+    box:'<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12 4 7.5M12 12l8-4.5M12 12v9"/>',
+    wrench:'<path d="M15 4a5 5 0 0 0-6.5 6.5L3 16v5h5l5.5-5.5A5 5 0 0 0 20 9l-3 3-2-2 3-3a5 5 0 0 0-3-3z"/>',
+    flame:'<path d="M12 22c4 0 7-2.7 7-6.5 0-4-3.5-6-4.5-9.5-2 1.5-2.5 3.5-2.5 3.5S10 7 8.5 5C7 8 5 10 5 15.5 5 19.3 8 22 12 22z"/>',
+    map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>'
+  }; return { __html:'<svg class="ic" viewBox="0 0 24 24">'+(P[n]||P.check)+'</svg>' }; }
+
+  set(k,v){ return ()=> this.setState({[k]:v}); }
+
+  renderVals(){
+    const L="var(--lime)", C="var(--cyan)", A="var(--amber)", R="var(--coral)", V="var(--violet)";
+    const F=[
+      ["Metering","Consumer","Sub-second live metering","Register reads pushed over Realtime Broadcast, or an honest reason the socket is down.",L,"radio"],
+      ["Metering","Consumer","Load disaggregation","Interval deltas split into base and cooling load against the ambient curve.",C,"layers"],
+      ["Metering","DISCOM","Tamper and event flags","A non-zero IS 15959 event bitfield reaches the consumer and the inspection queue.",R,"shield"],
+      ["Metering","DISCOM","VEE labelling","Every read is measured, estimated or missing — never silently interpolated.",C,"chip"],
+      ["Metering","Operator","HES adapter layer","One interface, vendor stubs behind it: Trilliant today, another head-end tomorrow.",V,"box"],
+      ["Metering","Operator","Monotonic register guard","A register that runs backwards is quarantined, not billed.",A,"scan"],
+      ["Billing","Consumer","Provable invoices","Open a line, see the two bracketing reads. bigint paise throughout — no floats.",L,"receipt"],
+      ["Billing","Consumer","Bill explainer","Deterministic: slab crossings, degree-days, days billed. No model guesses a rupee.",A,"search"],
+      ["Billing","Consumer","Next-bill forecast","Weather-adjusted projection from your own curve, with a stated error band.",C,"trend"],
+      ["Billing","Consumer","Slab-position meter","How deep you are into the ₹5.00 slab, and what the next unit will cost.",A,"gauge"],
+      ["Billing","DISCOM","Golden-file test suite","Twelve invariants and pinned worked examples guard every tariff change.",L,"check"],
+      ["Billing","Operator","Guarantee settlement","Contracted PR and uptime measured against meter data; credits raised automatically.",V,"case"],
+      ["Money","Consumer","Prepaid balance","Drawn down daily at the account vend rate, with a low-balance state before cut-off.",L,"wallet"],
+      ["Money","Consumer","UPI Autopay mandate","Tops the balance up before a disconnection is ever queued.",C,"repeat"],
+      ["Money","Consumer","PM Surya Ghar tracker","Subsidy stage, disbursement and what is still pending, on one timeline.",A,"gift"],
+      ["Money","Consumer","Tax statements","GST invoices and annual statements generated from the ledger, not scanned.",C,"doc"],
+      ["Money","DISCOM","Disconnection queue","Two-person rule, append-only, with the full balance history attached.",R,"lock"],
+      ["Solar","Consumer","Performance ratio","Measured against clear-sky expectation; soiling flagged before it costs a month.",A,"sun"],
+      ["Solar","Consumer","Backup readiness","Hours at present load, and when the pack last completed a full cycle.",L,"battery"],
+      ["Solar","DISCOM","Net-metering and SLA clock","Apply, watch the statutory clock, read the decision and its stated reason.",C,"plug"],
+      ["Solar","Consumer","Roof feasibility","Sizing from roof geometry and bill history — the deposit-free onboarding path.",A,"ruler"],
+      ["Solar","Operator","Predictive maintenance","String-level anomalies ranked by revenue at risk, not by alert count.",V,"wrench"],
+      ["Grid","DISCOM","DT loss localisation","Drill a high-loss transformer to the consumers under it, ranked by real signal.",C,"grid"],
+      ["Grid","DISCOM","Outage map and ETA","What is out, who it affects, and a restoration estimate that keeps updating.",R,"map"],
+      ["Grid","DISCOM","Demand response","Events with meter-verified reduction — the payment follows the measurement.",A,"flame"],
+      ["Grid","Consumer","Peer benchmarking","Your home against similar homes on the same feeder, anonymised.",L,"users"],
+      ["Grid","Consumer","Time-of-use nudges","Shift two hours, save this much — then the meter says whether you did.",A,"clock"],
+      ["Grid","Field","Offline commissioning","Capture in airplane mode; the outbox flushes when the network returns.",V,"pin"],
+      ["Green","Consumer","Carbon accounting","CO₂ avoided at the CEA combined-margin factor, with unit-level provenance.",L,"leaf"],
+      ["Green","Consumer","Portfolio view","Every property you own or manage, aggregated and still row-secured.",C,"case"],
+      ["Care","Consumer","Grounded AI advisor","Answers only from your account data. It narrates numbers; it never invents one.",L,"chat"],
+      ["Care","Consumer","Multi-channel alerts","In-app, WhatsApp, SMS and IVR — DLT-compliant, with anti-scam verification.",C,"bell"],
+      ["Care","Consumer","Three languages","English, हिन्दी, ગુજરાતી — server-rendered, low-literacy mode included.",A,"globe"],
+      ["Care","DISCOM","Append-only audit","Approvals, disconnections and tariff changes, immutable at the database.",R,"lock"]
+    ];
+    const doms=["Metering","Billing","Money","Solar","Grid","Green","Care"];
+    const pers=["Consumer","DISCOM","Operator","Field"];
+    const q=this.state.q.trim().toLowerCase();
+    const sel=F.filter(x=>
+      (this.state.dom==="all"||x[0]===this.state.dom) &&
+      (this.state.per==="all"||x[1]===this.state.per) &&
+      (!q || (x[2]+" "+x[3]).toLowerCase().indexOf(q)>=0));
+    const caps=sel.map(x=>({ title:x[2], body:x[3], tint:x[4], per:x[1], icon:this.ic(x[5]) }));
+
+    const domTabs=[{label:"All",id:"all",n:F.length}].concat(doms.map(d=>({label:d,id:d,n:F.filter(x=>x[0]===d).length})))
+      .map(t=>({ label:t.label, n:t.n, cls:this.state.dom===t.id?"on":"", pick:this.set("dom",t.id) }));
+    const perTabs=[{label:"Everyone",id:"all"}].concat(pers.map(p=>({label:p,id:p})))
+      .map(t=>({ label:t.label, cls:this.state.per===t.id?"on":"", pick:this.set("per",t.id) }));
+
+    const CH=[
+      ["01","The meter reports","A 15-minute interval arrives over MQTT, signed with the device key, and is checked for register monotonicity before anything is written.","reading_ts   2026-08-30T18:30:00Z\nkwh_import   10,528.000   quality=good"],
+      ["02","Two registers bracket the period","The invoice stores the opening and closing reading IDs — not a copied number. The reads themselves are immutable partitioned rows.","opening   10,240.000 · 01 Aug\nclosing   10,528.000 · 30 Aug\ndelta        288.000 kWh"],
+      ["03","Telescopic slabs price it","The GERC RGP order, extracted from the primary PDF. Consumption fills each slab before it spills into the next.","50 @ ₹3.20    =   ₹160.00\n150 @ ₹3.95   =   ₹592.50\n88 @ ₹5.00    =   ₹440.00"],
+      ["04","The line you can audit","Energy, fixed charge and 10% duty compose the invoice. Every component is reproducible from the two reads above.","energy ₹1,192.50 + fixed ₹25.00\nduty 10%          ₹121.75\ntotal          ₹1,339.02"]
+    ];
+    const chain=CH.map((c,i)=>({ n:c[0], title:c[1], body:c[2], code:c[3],
+      cls:this.state.chain===i?"on":"", pick:this.set("chain",i),
+      h:this.state.chain===i?"230px":"0px", o:this.state.chain===i?"1":"0",
+      nc:this.state.chain===i?"var(--lime)":"var(--tx3)",
+      tc:this.state.chain===i?"var(--tx)":"var(--tx2)" }));
+
+    const monthly=[
+      { name:"Solar Pay-As-You-Go", desc:"No base fee. Every generated unit billed at the overage rate — for low, irregular usage.", price:"₹0", per:"base", bc:"var(--ln2)", badge:"", feats:["Prepaid balance at ₹6.50/kWh","UPI Autopay top-up","Live metering and provable bills"] },
+      { name:"Solar Basic", desc:"Solar generation, billed on real meter reads.", price:"₹999", per:"/month", bc:"var(--lime)", badge:"MOST TAKEN", feats:["Managed rooftop array","Net-metering and SLA clock","Soiling and performance alerts"] },
+      { name:"Solar + Backup", desc:"Solar generation plus battery backup with a 98% availability guarantee.", price:"₹2,499", per:"/month", bc:"var(--ln2)", badge:"", feats:["Everything in Basic","98% availability guarantee","Automatic credit when missed"] },
+      { name:"Solar + Comfort", desc:"Solar, backup, cooling and lighting in one subscription.", price:"₹3,999", per:"/month", bc:"var(--ln2)", badge:"", feats:["Everything in Backup","Cooling and lighting included","Portfolio and tax statements"] }
+    ];
+    const annual=[
+      { name:"Solar Pay-As-You-Go", desc:"No base fee. Every generated unit billed at the overage rate — for low, irregular usage.", price:"₹0", per:"base", bc:"var(--ln2)", badge:"", feats:["Prepaid balance at ₹6.50/kWh","UPI Autopay top-up","Live metering and provable bills"] },
+      { name:"Solar Basic (annual)", desc:"Solar generation, billed on real meter reads. Pay yearly, save two months.", price:"₹9,990", per:"/year", bc:"var(--lime)", badge:"SAVE 2 MONTHS", feats:["Managed rooftop array","Net-metering and SLA clock","Soiling and performance alerts"] },
+      { name:"Solar + Backup (annual)", desc:"Solar plus battery backup with a 98% availability guarantee. Pay yearly, save two months.", price:"₹24,990", per:"/year", bc:"var(--ln2)", badge:"", feats:["Everything in Basic","98% availability guarantee","Automatic credit when missed"] },
+      { name:"Solar + Comfort", desc:"Solar, backup, cooling and lighting in one subscription. Monthly only.", price:"₹3,999", per:"/month", bc:"var(--ln2)", badge:"", feats:["Everything in Backup","Cooling and lighting included","Portfolio and tax statements"] }
+    ];
+    const cycles=[["monthly","Monthly"],["annual","Annual"]].map(c=>({ label:c[1], cls:this.state.cycle===c[0]?"on":"", pick:this.set("cycle",c[0]) }));
+
+    const LR=[["DT A-23",19.1,R],["DT A-21",6.6,L],["DT A-22",5.7,L],["DT A-24",2.4,L]];
+
+    return {
+      accent:this.props.accent ?? "#7bf1a8",
+      tick:this.state.tick,
+      heroStats:[{v:"293",l:"tests green in CI"},{v:"9",l:"row-secured roles"},{v:"16.16%",l:"national loss benchmark"}],
+      nodes:[
+        { x:360, y:96, c:L, label:"DT A-21", ty:76, loss:"6.6%", lx:376, ly:100, anchor:"start" },
+        { x:70, y:150, c:L, label:"DT A-22", ty:172, loss:"5.7%", lx:70, ly:188, anchor:"middle" },
+        { x:360, y:206, c:R, label:"DT A-23", ty:230, loss:"19.1%", lx:376, ly:210, anchor:"start" }
+      ],
+      marquee:["OBIS / IS 15959 register model","HMAC-authenticated devices","Partitioned time-series","Row-Level Security on every table","GERC tariff order, cited","CEA combined-margin CO₂","MoP FY25 loss benchmark","pg_cron settlement","Append-only audit ledger","English · हिन्दी · ગુજરાતી","OBIS / IS 15959 register model","HMAC-authenticated devices","Partitioned time-series","Row-Level Security on every table","GERC tariff order, cited","CEA combined-margin CO₂","MoP FY25 loss benchmark","pg_cron settlement","Append-only audit ledger","English · हिन्दी · ગુજરાતી"],
+      chain, caps, domTabs, perTabs, cycles,
+      plans:this.state.cycle==="monthly"?monthly:annual,
+      lossRows:LR.map(r=>({ dt:r[0], pct:r[1].toFixed(1), w:Math.min(100,(r[1]/25)*100)+"%", c:r[2] })),
+      capCount:F.length, shown:sel.length, empty:sel.length===0,
+      anyFilter:this.state.dom!=="all"||this.state.per!=="all",
+      clearAll:()=>this.setState({dom:"all",per:"all"}),
+      onSearch:(e)=>this.setState({q:e.target.value}),
+      discomPoints:[
+        "Delivered versus consumed from real DT-head and consumer registers, not a modelled estimate.",
+        "The signals an inspector uses: tamper bits, suspect reads, silent meters, cohort position.",
+        "Row-Level Security confines every query to the officer's own division, enforced in the database.",
+        "Each decision lands in an append-only ledger a trigger writes, never application code."
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

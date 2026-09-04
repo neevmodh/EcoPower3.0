@@ -20,7 +20,7 @@ export default async function NetMeteringPage() {
   const supabase = await createClient();
   const scope = await getScope(supabase);
   if (!scope) redirect("/login");
-  const { user } = scope;
+  const { user, divisionIds } = scope;
 
   const { data: applications } = await supabase
     .from("netmetering_applications")
@@ -31,6 +31,7 @@ export default async function NetMeteringPage() {
 
   return (
     <PanelShell
+      scopeNote={`division_ids · ${divisionIds.length} claim${divisionIds.length === 1 ? "" : "s"}`}
       panel="discom"
       email={user.email ?? ""}
       nav={[
@@ -76,7 +77,7 @@ export default async function NetMeteringPage() {
                     </div>
                   </div>
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium text-white shrink-0"
+                    className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium on-accent shrink-0"
                     style={{ background: STATUS_COLOR[a.status] }}
                   >
                     {a.status.replace("_", " ")}

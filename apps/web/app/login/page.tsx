@@ -4,17 +4,70 @@ import { getLocale, getT } from "@/lib/i18n.server";
 import { landingFor } from "@/lib/landing";
 import { createClient } from "@/lib/supabase/server";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
-import { Logo } from "@/components/Logo";
+import { LoginCard, type DemoRole } from "@/components/login/LoginCard";
 
 const DEMO_PASSWORD = "EcoPower!2026";
 
-const DEMO_ACCOUNTS = [
-  { key: "login.role.consumer", email: "consumer@ecopower.demo", accent: "var(--color-categorical-third)", icon: "🏠" },
-  { key: "login.role.society", email: "society@ecopower.demo", accent: "#7c5cd6", icon: "🏢" },
-  { key: "login.role.discom", email: "discom@ecopower.demo", accent: "var(--color-categorical-consumption)", icon: "⚡" },
-  { key: "login.role.operator", email: "operator@ecopower.demo", accent: "#5c6470", icon: "🛠️" },
-  { key: "login.role.field", email: "field@ecopower.demo", accent: "var(--color-categorical-generation)", icon: "📶" },
-  { key: "login.role.support", email: "support@ecopower.demo", accent: "#0d9488", icon: "🎧" },
+// What each role's session actually resolves to. The `claims` strings are not
+// marketing copy — they are the shape of the JWT the custom access-token hook
+// (#4) mints for that account, which is what Row-Level Security reads in the
+// database. Showing it on the sign-in screen is the argument: the confinement
+// is in Postgres, not in this UI.
+const ROLES: Array<Omit<DemoRole, "label"> & { labelKey: string }> = [
+  {
+    id: "consumer",
+    email: "consumer@ecopower.demo",
+    accent: "var(--color-categorical-third)",
+    icon: "home",
+    labelKey: "login.role.consumer",
+    summary: "Your own connection and your own register reads. Nothing else exists for this session.",
+    claims: 'roles        ["consumer"]\nconnections  owner_user_id = you\ndivisions    —',
+  },
+  {
+    id: "society",
+    email: "society@ecopower.demo",
+    accent: "#b394ff",
+    icon: "building",
+    labelKey: "login.role.society",
+    summary: "Sunrise Residency: six units on one society main meter, with an editable cost allocation.",
+    claims: 'roles        ["society_admin"]\nsociety_org  Sunrise Residency\nunits        6',
+  },
+  {
+    id: "discom",
+    email: "discom@ecopower.demo",
+    accent: "var(--color-categorical-consumption)",
+    icon: "grid",
+    labelKey: "login.role.discom",
+    summary: "Division A only. Query anything you like — the database returns nothing from Division B.",
+    claims: 'roles        ["discom_officer"]\ndivision_ids ["Division A"]\norg_ids      ["Torrent · AHD"]',
+  },
+  {
+    id: "operator",
+    email: "operator@ecopower.demo",
+    accent: "#8fa0b4",
+    icon: "gauge",
+    labelKey: "login.role.operator",
+    summary: "RESCO-owned assets across every division served — scoped by ownership, not by grid topology.",
+    claims: 'roles        ["resco_ops"]\nresco_org_id RESCO Gujarat\nassets       owned only',
+  },
+  {
+    id: "field",
+    email: "field@ecopower.demo",
+    accent: "var(--color-categorical-generation)",
+    icon: "pin",
+    labelKey: "login.role.field",
+    summary: "The work orders assigned to you, plus the ones nobody has claimed yet.",
+    claims: 'roles        ["field_technician"]\nassigned_to  you, or unclaimed\nwrites       status transitions',
+  },
+  {
+    id: "support",
+    email: "support@ecopower.demo",
+    accent: "#4fd6c4",
+    icon: "chat",
+    labelKey: "login.role.support",
+    summary: "Every open ticket, with the consumer's real bill and meter history attached.",
+    claims: 'roles        ["support_agent"]\nscope        all tickets\nbilling      read-only',
+  },
 ];
 
 export default async function LoginPage({
@@ -50,140 +103,89 @@ export default async function LoginPage({
     redirect(landingFor(roles));
   }
 
+  const roles: DemoRole[] = ROLES.map(({ labelKey, ...rest }) => ({ ...rest, label: t(labelKey) }));
+
   return (
-    <main className="min-h-screen flex" style={{ background: "var(--color-surface)" }}>
-      {/* Brand panel — hidden on small screens, sets the tone on desktop. */}
+    <main
+      className="min-h-screen relative flex items-center justify-center p-10 overflow-hidden"
+      style={{ background: "var(--color-surface)" }}
+    >
       <div
-        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden"
+        className="grid-backdrop"
         style={{
-          background:
-            "linear-gradient(135deg, var(--color-categorical-third) 0%, #0f8a5c 100%)",
+          WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 45%, #000 10%, transparent 72%)",
+          maskImage: "radial-gradient(ellipse 70% 70% at 50% 45%, #000 10%, transparent 72%)",
         }}
+      />
+      <div className="aurora" style={{ inset: "-25%", height: "auto", opacity: 0.5 }} />
+
+      {/* The grid this product meters, drawn as the backdrop it is. Purely
+          decorative — it carries no figures, so there is nothing here that can
+          outlive its data. */}
+      <svg
+        viewBox="0 0 1400 800"
+        preserveAspectRatio="xMidYMid slice"
+        className="absolute inset-0 w-full h-full"
+        style={{ opacity: 0.45 }}
+        aria-hidden="true"
       >
-        <div className="flex items-center gap-2.5 text-white text-xl font-semibold tracking-tight">
-          <Logo size={32} />
-          EcoPower
-        </div>
-
-        <div className="text-white">
-          <h1 className="text-4xl font-semibold leading-tight mb-4">{t("login.tagline.title")}</h1>
-          <p className="text-lg opacity-90 max-w-md">{t("login.tagline.body")}</p>
-        </div>
-
-        <div className="text-white/70 text-sm">Ahmedabad · INSTINCT 4.0</div>
-
-        {/* Decorative, purely visual — a soft radial glow, no data implied. */}
-        <div
-          aria-hidden="true"
-          className="absolute -right-24 -bottom-24 rounded-full"
-          style={{ width: 420, height: 420, background: "rgba(255,255,255,0.08)" }}
+        <defs>
+          <linearGradient id="login-feed" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="var(--color-categorical-consumption)" stopOpacity="0" />
+            <stop offset="50%" stopColor="var(--color-categorical-third)" />
+            <stop offset="100%" stopColor="var(--color-categorical-consumption)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path className="flow-line" d="M-20 160 H320 V330 H540" stroke="url(#login-feed)" strokeWidth="1.6" fill="none" />
+        <path
+          className="flow-line"
+          d="M1420 210 H1080 V420 H900"
+          stroke="url(#login-feed)"
+          strokeWidth="1.6"
+          fill="none"
+          style={{ animationDelay: "500ms" }}
         />
-        <div
-          aria-hidden="true"
-          className="absolute -left-16 top-1/3 rounded-full"
-          style={{ width: 200, height: 200, background: "rgba(255,255,255,0.06)" }}
+        <path
+          className="flow-line"
+          d="M-20 640 H260 V500 H520"
+          stroke="url(#login-feed)"
+          strokeWidth="1.6"
+          fill="none"
+          style={{ animationDelay: "900ms" }}
         />
-      </div>
+        <path
+          className="flow-line"
+          d="M1420 690 H1000 V560"
+          stroke="url(#login-feed)"
+          strokeWidth="1.6"
+          fill="none"
+          style={{ animationDelay: "1300ms" }}
+        />
+        <circle cx="320" cy="160" r="4" fill="var(--color-categorical-consumption)" />
+        <circle cx="1080" cy="210" r="4" fill="var(--color-categorical-consumption)" />
+        <circle cx="260" cy="640" r="4" fill="var(--color-categorical-third)" />
+        <circle cx="1000" cy="690" r="4" fill="var(--color-categorical-third)" />
+      </svg>
 
-      {/* Sign-in panel */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm">
-          <div className="flex justify-end mb-4">
-            <LocaleSwitcher current={locale} />
-          </div>
-          <h2 className="text-2xl font-semibold mb-1">{t("login.heading")}</h2>
-          <p className="text-sm mb-8" style={{ color: "var(--color-text-secondary)" }}>
-            {t("login.subheading")}
-          </p>
-
-          {params.error && (
-            <p
-              className="text-sm mb-4 rounded-control p-3"
-              style={{ color: "var(--color-status-critical)", border: "1px solid var(--color-status-critical)" }}
-            >
-              {params.error}
-            </p>
-          )}
-
-          <form action={signIn}>
-            <label className="block text-sm mb-1" htmlFor="email">
-              {t("login.email")}
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              className="w-full rounded-control border px-3 py-2 mb-4 bg-transparent"
-              style={{ borderColor: "var(--color-border)" }}
-            />
-
-            <label className="block text-sm mb-1" htmlFor="password">
-              {t("login.password")}
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="w-full rounded-control border px-3 py-2 mb-6 bg-transparent"
-              style={{ borderColor: "var(--color-border)" }}
-            />
-
-            <button
-              type="submit"
-              className="w-full rounded-control py-2 text-sm font-medium transition-colors duration-state"
-              style={{ background: "var(--color-categorical-third)", color: "#fff" }}
-            >
-              {t("login.submit")}
-            </button>
-          </form>
-
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px" style={{ background: "var(--color-border)" }} />
-            <span className="text-xs uppercase tracking-wide" style={{ color: "var(--color-text-secondary)" }}>
-              {t("login.demoAccounts")}
-            </span>
-            <div className="flex-1 h-px" style={{ background: "var(--color-border)" }} />
-          </div>
-
-          <p className="text-xs mb-3" style={{ color: "var(--color-text-secondary)" }}>
-            {t("login.demoHint")}
-          </p>
-
-          <div className="grid grid-cols-1 gap-2">
-            {DEMO_ACCOUNTS.map((account) => (
-              <form key={account.email} action={signIn}>
-                <input type="hidden" name="email" value={account.email} />
-                <input type="hidden" name="password" value={DEMO_PASSWORD} />
-                <button
-                  type="submit"
-                  className="w-full flex items-center gap-3 rounded-control border px-3 py-2 text-sm text-left transition-colors duration-state hover:opacity-80"
-                  style={{ borderColor: "var(--color-border)", background: "var(--color-surface-card)" }}
-                >
-                  <span
-                    className="inline-flex items-center justify-center rounded-full shrink-0"
-                    style={{ width: 28, height: 28, background: account.accent, fontSize: 14 }}
-                  >
-                    {account.icon}
-                  </span>
-                  <span className="flex-1">
-                    <span className="block font-medium">{t(account.key)}</span>
-                    <span className="block text-xs tabular" style={{ color: "var(--color-text-secondary)" }}>
-                      {account.email}
-                    </span>
-                  </span>
-                  <span aria-hidden="true" style={{ color: "var(--color-text-secondary)" }}>
-                    →
-                  </span>
-                </button>
-              </form>
-            ))}
-          </div>
-        </div>
-      </div>
+      <LoginCard
+        roles={roles}
+        password={DEMO_PASSWORD}
+        error={params.error}
+        signIn={signIn}
+        localeSwitcher={<LocaleSwitcher current={locale} />}
+        strings={{
+          heading: t("login.heading"),
+          subheading: t("login.subheading"),
+          email: t("login.email"),
+          password: t("login.password"),
+          submit: t("login.submit"),
+          demoAccounts: t("login.demoAccounts"),
+          demoHint: t("login.demoHint"),
+          preview: t("login.preview"),
+          scope: t("login.scope"),
+          rls: t("login.rls"),
+        }}
+      />
     </main>
   );
 }

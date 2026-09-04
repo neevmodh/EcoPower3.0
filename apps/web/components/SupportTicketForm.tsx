@@ -79,7 +79,7 @@ export function SupportTicketForm({ serviceConnectionId }: { serviceConnectionId
       <button
         type="submit"
         disabled={busy}
-        className="rounded-control px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        className="rounded-control px-4 py-2 text-sm font-semibold on-accent disabled:opacity-50"
         style={{ background: "var(--color-categorical-third)" }}
       >
         {busy ? "Submitting…" : "Submit ticket"}

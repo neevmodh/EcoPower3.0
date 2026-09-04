@@ -2,6 +2,7 @@
 
 import { useLiveMeter, type LiveMeterReading } from "@/lib/useLiveMeter";
 import { StatTile } from "./StatTile";
+import { PanelIcon } from "./Icon";
 import { ConnectionIndicator } from "./ConnectionIndicator";
 
 export function LiveMeterTile({
@@ -21,7 +22,7 @@ export function LiveMeterTile({
         <ConnectionIndicator state={connectionState} />
       </div>
       <StatTile
-        icon="⚡"
+        icon={<PanelIcon name="radio" />}
         label={label}
         value={reading?.kwhImport ?? null}
         unit="kWh"

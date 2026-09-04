@@ -1,0 +1,321 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#07090c; --pnl:#101720; --ln:#1e2833; --ln2:#2b3846;
+      --tx:#e8eef6; --tx2:#8fa0b4; --tx3:#5b6b7d;
+      --lime:oklch(0.84 0.19 145); --cyan:oklch(0.80 0.15 220);
+      --amber:oklch(0.84 0.16 80); --coral:oklch(0.72 0.19 30); --violet:oklch(0.74 0.16 295);
+      --dsp:"Archivo",system-ui,sans-serif;
+      --bdy:"IBM Plex Sans",system-ui,sans-serif;
+      --mno:"IBM Plex Mono",ui-monospace,monospace;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--bdy);line-height:1.55;-webkit-font-smoothing:antialiased}
+    h1,h2,h3{font-family:var(--dsp);margin:0;letter-spacing:-.03em;line-height:1.05;font-weight:700}
+    p{margin:0}
+    a{color:var(--lime);text-decoration:none} a:hover{color:#fff}
+    .mn{font-family:var(--mno);font-variant-numeric:tabular-nums}
+    .eyebrow{font-family:var(--mno);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--tx3)}
+    .ic{width:17px;height:17px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+    .gridbg{position:absolute;inset:0;background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:56px 56px;opacity:.42;
+      -webkit-mask-image:radial-gradient(ellipse 70% 70% at 50% 45%,#000 10%,transparent 72%);mask-image:radial-gradient(ellipse 70% 70% at 50% 45%,#000 10%,transparent 72%)}
+    .aurora{position:absolute;inset:-25%;filter:blur(100px);opacity:.5;pointer-events:none;
+      background:radial-gradient(28% 34% at 22% 32%,oklch(0.84 0.19 145/.5),transparent 70%),
+                 radial-gradient(26% 32% at 78% 30%,oklch(0.80 0.15 220/.45),transparent 70%),
+                 radial-gradient(24% 30% at 52% 78%,oklch(0.74 0.16 295/.4),transparent 70%);
+      animation:drift 24s ease-in-out infinite alternate}
+    @keyframes drift{from{transform:translate3d(-2%,-2%,0) scale(1)}to{transform:translate3d(4%,3%,0) scale(1.14)}}
+    .flow{stroke-dasharray:4 10;animation:flow 1.7s linear infinite}
+    @keyframes flow{to{stroke-dashoffset:-14}}
+    .rv{opacity:0;transform:translateY(16px);animation:rv .75s cubic-bezier(.16,.84,.28,1) forwards}
+    @keyframes rv{to{opacity:1;transform:none}}
+    .glass{background:rgba(16,23,32,.72);backdrop-filter:blur(22px);border:1px solid var(--ln2);border-radius:10px;box-shadow:0 40px 120px -40px #000,inset 0 1px 0 rgba(255,255,255,.05)}
+    .seg{display:flex;padding:3px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;gap:3px}
+    .seg button{flex:1;height:32px;border:0;border-radius:3px;background:transparent;color:var(--tx3);font-family:var(--bdy);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .16s ease;display:flex;align-items:center;justify-content:center;gap:6px}
+    .seg button:hover{color:var(--tx2)}
+    .seg button.on{background:var(--pnl);color:var(--tx);box-shadow:0 1px 0 rgba(255,255,255,.05)}
+    .fld{width:100%;height:44px;padding:0 14px;background:#0c1219;border:1px solid var(--ln);border-radius:5px;color:var(--tx);font-family:var(--bdy);font-size:14px;outline:none;transition:border-color .16s ease,box-shadow .16s ease}
+    .fld:focus{border-color:var(--lime);box-shadow:0 0 0 3px oklch(0.84 0.19 145/.16)}
+    .fld.mono{font-family:var(--mno);letter-spacing:.4em;text-align:center;font-size:19px}
+    .cta{width:100%;height:46px;border:0;border-radius:5px;background:var(--lime);color:#04140b;font-family:var(--bdy);font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .18s cubic-bezier(.2,.7,.2,1)}
+    .cta:hover{box-shadow:0 14px 40px -12px var(--lime);transform:translateY(-1px)}
+    .role{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--ln);border-radius:5px;background:#0c1219;cursor:pointer;text-align:left;font-family:var(--bdy);transition:all .17s ease;width:100%}
+    .role:hover{border-color:var(--ln2)}
+    .role.on{border-color:var(--rc);background:rgba(255,255,255,.03);box-shadow:0 0 0 1px var(--rc),0 8px 26px -14px var(--rc)}
+    .lang{background:none;border:0;font-family:var(--bdy);font-size:12px;cursor:pointer;color:var(--tx3);padding:3px 2px;transition:color .15s ease}
+    .lang:hover{color:var(--tx2)}
+    .lang.on{color:var(--tx);font-weight:600}
+    .prevrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--ln)}
+    .otp{animation:pop .3s cubic-bezier(.2,.8,.2,1)}
+    @keyframes pop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+    @media (prefers-reduced-motion:reduce){.aurora,.flow,.rv,.otp{animation:none}.rv{opacity:1;transform:none}}
+  </style>
+</helmet>
+
+<div style="--lime:{{accent}};position:relative;min-height:100%;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:40px;overflow:hidden">
+  <div class="gridbg"></div>
+  <div class="aurora"></div>
+
+  <svg viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;opacity:.5">
+    <defs><linearGradient id="lgl" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="oklch(0.80 0.15 220/0)"/><stop offset="50%" stop-color="oklch(0.84 0.19 145)"/><stop offset="100%" stop-color="oklch(0.80 0.15 220/0)"/></linearGradient></defs>
+    <path class="flow" d="M-20 160 H320 V330 H540" stroke="url(#lgl)" stroke-width="1.6" fill="none"/>
+    <path class="flow" d="M1420 210 H1080 V420 H900" stroke="url(#lgl)" stroke-width="1.6" fill="none" style="animation-delay:.5s"/>
+    <path class="flow" d="M-20 640 H260 V500 H520" stroke="url(#lgl)" stroke-width="1.6" fill="none" style="animation-delay:.9s"/>
+    <path class="flow" d="M1420 690 H1000 V560" stroke="url(#lgl)" stroke-width="1.6" fill="none" style="animation-delay:1.3s"/>
+    <circle cx="320" cy="160" r="4" fill="oklch(0.80 0.15 220)"/>
+    <circle cx="1080" cy="210" r="4" fill="oklch(0.80 0.15 220)"/>
+    <circle cx="260" cy="640" r="4" fill="oklch(0.84 0.19 145)"/>
+    <circle cx="1000" cy="690" r="4" fill="oklch(0.84 0.19 145)"/>
+  </svg>
+
+  <div class="glass rv" style="position:relative;z-index:2;width:100%;max-width:940px;display:grid;grid-template-columns:1.05fr .95fr;overflow:hidden">
+
+    <!-- FORM -->
+    <div style="padding:36px 38px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:26px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg width="24" height="24" viewBox="0 0 24 24" style="stroke:var(--lime);fill:none;stroke-width:1.9;stroke-linejoin:round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+          <span style="font-family:var(--dsp);font-weight:800;font-size:15px">ECOPOWER</span>
+        </div>
+        <div style="display:flex;gap:9px">
+          <sc-for list="{{langs}}" as="l" hint-placeholder-count="3">
+            <button class="lang {{l.cls}}" onClick="{{l.pick}}">{{l.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <h1 style="font-size:29px">{{t_head}}</h1>
+      <p style="color:var(--tx2);font-size:13.5px;margin-top:7px">{{t_sub}}</p>
+
+      <div class="seg" style="margin-top:24px">
+        <sc-for list="{{methods}}" as="m" hint-placeholder-count="3">
+          <button class="{{m.cls}}" onClick="{{m.pick}}"><span style="display:flex" dangerouslySetInnerHTML="{{m.icon}}"></span>{{m.label}}</button>
+        </sc-for>
+      </div>
+
+      <div style="margin-top:20px">
+        <sc-if value="{{isPassword}}" hint-placeholder-val="{{true}}">
+          <div>
+            <label class="eyebrow" style="display:block;margin-bottom:7px">{{t_email}}</label>
+            <input class="fld" type="email" value="consumer@ecopower.demo" style="margin-bottom:15px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px">
+              <label class="eyebrow">{{t_pass}}</label>
+              <a href="#" style="font-size:11.5px">{{t_forgot}}</a>
+            </div>
+            <div style="position:relative">
+              <input class="fld" type="{{pwType}}" value="EcoPower!2026" style="padding-right:44px">
+              <button onClick="{{togglePw}}" style="position:absolute;right:6px;top:6px;width:32px;height:32px;border:0;border-radius:4px;background:none;cursor:pointer;color:var(--tx3);display:grid;place-items:center" dangerouslySetInnerHTML="{{eye}}"></button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isOtp}}" hint-placeholder-val="{{true}}">
+          <div class="otp">
+            <label class="eyebrow" style="display:block;margin-bottom:7px">{{t_mobile}}</label>
+            <div style="display:flex;gap:9px;margin-bottom:15px">
+              <span class="fld mn" style="width:62px;display:flex;align-items:center;justify-content:center;letter-spacing:0;font-size:14px;color:var(--tx2)">+91</span>
+              <input class="fld mn" style="letter-spacing:.12em;text-align:left;font-size:14px" value="98250 41xxx">
+            </div>
+            <label class="eyebrow" style="display:block;margin-bottom:7px">{{t_otp}}</label>
+            <input class="fld mono" maxlength="6" value="418290">
+            <div style="display:flex;justify-content:space-between;margin-top:9px">
+              <span class="mn" style="font-size:11px;color:var(--tx3)">DLT-registered sender · EPWR3</span>
+              <span class="mn" style="font-size:11px;color:var(--amber)">{{t_resend}} 0:{{resend}}</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{isPasskey}}" hint-placeholder-val="{{true}}">
+          <div class="otp" style="border:1px dashed var(--ln2);border-radius:6px;padding:24px;text-align:center">
+            <div style="width:46px;height:46px;margin:0 auto;border-radius:50%;border:1px solid var(--ln2);display:grid;place-items:center;color:var(--lime)">
+              <svg class="ic" style="width:22px;height:22px" viewBox="0 0 24 24"><path d="M12 11a4 4 0 1 0-4-4M8 11v7l2 2 2-2-1.5-1.5L12 15l-1.5-1.5L12 12"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div style="font-size:14px;font-weight:600;margin-top:13px">{{t_pkTitle}}</div>
+            <p style="font-size:12.5px;color:var(--tx2);margin-top:6px;max-width:270px;margin-left:auto;margin-right:auto;text-wrap:pretty">{{t_pkBody}}</p>
+          </div>
+        </sc-if>
+      </div>
+
+      <button class="cta" style="margin-top:20px">{{t_cta}}<svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+
+      <div style="display:flex;align-items:center;gap:12px;margin:22px 0 14px">
+        <div style="flex:1;height:1px;background:var(--ln)"></div>
+        <span class="eyebrow">{{t_or}}</span>
+        <div style="flex:1;height:1px;background:var(--ln)"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <sc-for list="{{roles}}" as="r" hint-placeholder-count="6">
+          <button class="role {{r.cls}}" style="--rc:{{r.c}}" onClick="{{r.pick}}">
+            <span style="width:26px;height:26px;border-radius:5px;display:grid;place-items:center;background:{{r.bg}};color:{{r.c}};flex:none" dangerouslySetInnerHTML="{{r.icon}}"></span>
+            <span style="min-width:0">
+              <span style="display:block;font-size:12.5px;font-weight:600;color:var(--tx)">{{r.label}}</span>
+              <span class="mn" style="display:block;font-size:9.5px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{r.email}}</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- ROLE PREVIEW -->
+    <div style="padding:36px 34px;background:linear-gradient(160deg,rgba(255,255,255,.035),transparent 60%);border-left:1px solid var(--ln)">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span class="eyebrow">{{t_preview}}</span>
+        <span class="mn" style="display:flex;align-items:center;gap:7px;font-size:10.5px;color:{{sel.c}}">
+          <span style="width:6px;height:6px;border-radius:50%;background:{{sel.c}};box-shadow:0 0 9px {{sel.c}}"></span>{{sel.label}}
+        </span>
+      </div>
+
+      <h2 style="font-size:22px;margin-top:16px;color:{{sel.c}}">{{sel.title}}</h2>
+      <p style="font-size:13px;color:var(--tx2);margin-top:8px;text-wrap:pretty">{{sel.blurb}}</p>
+
+      <div style="margin-top:22px">
+        <span class="eyebrow">{{t_lands}}</span>
+        <div style="margin-top:8px">
+          <sc-for list="{{sel.rows}}" as="rw" hint-placeholder-count="4">
+            <div class="prevrow">
+              <span style="font-size:12.5px;color:var(--tx2)">{{rw.k}}</span>
+              <span class="mn" style="font-size:12.5px;font-weight:500;color:{{rw.c}}">{{rw.v}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="margin-top:22px">
+        <span class="eyebrow">{{t_scope}}</span>
+        <div style="margin-top:9px;padding:13px;border-radius:5px;background:#0c1219;border:1px solid var(--ln)">
+          <div class="mn" style="font-size:11px;color:var(--tx2);line-height:1.85;white-space:pre-line">{{sel.claims}}</div>
+        </div>
+        <p style="font-size:11px;color:var(--tx3);margin-top:9px;text-wrap:pretty">{{t_rls}}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#7bf1a8","section":"Theme"}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state={ lang:"en", method:"password", role:"consumer", pw:false, resend:42 }; }
+  componentDidMount(){ this._t=setInterval(()=>this.setState(s=>({resend:s.resend<=1?45:s.resend-1})),1000); }
+  componentWillUnmount(){ clearInterval(this._t); }
+  set(k,v){ return ()=> this.setState({[k]:v}); }
+
+  ic(n,st){ const P={
+    key:'<path d="M12 11a4 4 0 1 0-4-4"/><circle cx="12" cy="7" r="4"/><path d="M8 11v7l2 2 2-2"/>',
+    lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+    phone:'<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>',
+    wallet:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14h2"/>',
+    users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M16 5a3.5 3.5 0 0 1 0 7"/>',
+    grid:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+    gauge:'<path d="M12 13 16 9"/><path d="M4 20a8 8 0 1 1 16 0"/>',
+    pin:'<path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+    chat:'<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8"/>'
+  }; return { __html:'<svg class="ic" style="'+(st||"")+'" viewBox="0 0 24 24">'+(P[n]||P.lock)+'</svg>' }; }
+
+  renderVals(){
+    const L="oklch(0.84 0.19 145)", C="oklch(0.80 0.15 220)", A="oklch(0.84 0.16 80)",
+          R="oklch(0.72 0.19 30)", V="oklch(0.74 0.16 295)", S="#7f8ea1";
+
+    const T={
+      en:{ head:"Sign in", sub:"Six roles, one row-secured spine.", email:"Work email", pass:"Password", forgot:"Forgot?",
+           mobile:"Mobile number", otp:"6-digit code", resend:"Resend in", or:"or continue as",
+           cta:"Sign in", preview:"Role preview", lands:"What loads first", scope:"Session scope",
+           pkTitle:"Use a passkey", pkBody:"Touch ID, Face ID or a security key. Nothing to type, nothing to phish.",
+           rls:"These claims ride in the access token. Row-Level Security reads them in the database — the UI never decides what you can see.",
+           methods:["Password","OTP","Passkey"],
+           roles:["Consumer","Society admin","DISCOM officer","Operator","Field technician","Support agent"] },
+      hi:{ head:"साइन इन करें", sub:"छह भूमिकाएँ, एक सुरक्षित आधार।", email:"ईमेल", pass:"पासवर्ड", forgot:"भूल गए?",
+           mobile:"मोबाइल नंबर", otp:"6 अंकों का कोड", resend:"पुनः भेजें", or:"या इस रूप में जारी रखें",
+           cta:"साइन इन करें", preview:"भूमिका पूर्वावलोकन", lands:"पहले क्या दिखेगा", scope:"सत्र का दायरा",
+           pkTitle:"पासकी का उपयोग करें", pkBody:"टच आईडी, फेस आईडी या सुरक्षा कुंजी। कुछ भी टाइप नहीं करना।",
+           rls:"ये दावे एक्सेस टोकन में जाते हैं। डेटाबेस में रो-लेवल सुरक्षा इन्हें पढ़ती है — UI तय नहीं करता।",
+           methods:["पासवर्ड","ओटीपी","पासकी"],
+           roles:["उपभोक्ता","सोसायटी एडमिन","डिस्कॉम अधिकारी","ऑपरेटर","फ़ील्ड तकनीशियन","सहायता एजेंट"] },
+      gu:{ head:"સાઇન ઇન કરો", sub:"છ ભૂમિકા, એક સુરક્ષિત આધાર.", email:"ઇમેઇલ", pass:"પાસવર્ડ", forgot:"ભૂલી ગયા?",
+           mobile:"મોબાઇલ નંબર", otp:"6 અંકનો કોડ", resend:"ફરી મોકલો", or:"અથવા આ રીતે ચાલુ રાખો",
+           cta:"સાઇન ઇન કરો", preview:"ભૂમિકા પૂર્વાવલોકન", lands:"પહેલાં શું દેખાશે", scope:"સત્રનો વ્યાપ",
+           pkTitle:"પાસકી વાપરો", pkBody:"ટચ આઈડી, ફેસ આઈડી કે સિક્યોરિટી કી. કંઈ ટાઇપ કરવાનું નહીં.",
+           rls:"આ દાવા એક્સેસ ટોકનમાં જાય છે. ડેટાબેઝમાં રો-લેવલ સુરક્ષા તે વાંચે છે — UI નક્કી કરતું નથી.",
+           methods:["પાસવર્ડ","ઓટીપી","પાસકી"],
+           roles:["ગ્રાહક","સોસાયટી એડમિન","ડિસ્કોમ અધિકારી","ઓપરેટર","ફિલ્ડ ટેકનિશિયન","સપોર્ટ એજન્ટ"] }
+    };
+    const tr=T[this.state.lang];
+
+    const RM=[
+      ["consumer","consumer@ecopower.demo",L,"wallet",
+        "Consumer","Your own connection, your own reads. Nothing else exists for this session.",
+        [["Live import","1,631.5 kWh",L],["Prepaid balance","₹280.00",A],["This month","₹1,339.02","var(--tx)"],["CO₂ avoided","4,883 kg",L]],
+        "roles        [\"consumer\"]\nconnections  1 (owner_user_id = you)\ndivisions    —"],
+      ["society","society@ecopower.demo",V,"users",
+        "Society admin","Sunrise Residency: six units, one main meter, an editable cost allocation.",
+        [["Units","6","var(--tx)"],["Allocation total","100%",L],["Society main","DTM-SUN","var(--tx)"],["In-society loss","2.4%",L]],
+        "roles        [\"society_admin\"]\nsociety_org  Sunrise Residency\nunits        6"],
+      ["discom","discom@ecopower.demo",C,"grid",
+        "DISCOM officer","Division A only. Query anything you like — the database returns nothing from Division B.",
+        [["Connections","17","var(--tx)"],["Transformers","4","var(--tx)"],["Avg AT&C loss","8.5%",L],["On watch list","1",R]],
+        "roles        [\"discom_officer\"]\ndivision_ids [\"…-00000000000a\"]\norg_ids      [\"Torrent · AHD\"]"],
+      ["operator","operator@ecopower.demo",S,"gauge",
+        "Operator","RESCO-owned assets across every division you serve — ownership, not topology.",
+        [["Assets","10","var(--tx)"],["Arrays online","10",L],["Open work orders","1",A],["Guarantee breaches","0",L]],
+        "roles        [\"resco_ops\"]\nresco_org_id RESCO Gujarat\nassets       10"],
+      ["field","field@ecopower.demo",A,"pin",
+        "Field technician","The queue assigned to you, and the ones nobody has claimed. Works offline.",
+        [["Assigned","1","var(--tx)"],["Unclaimed","0","var(--tx)"],["Outbox","empty",L],["Last sync","2 min ago","var(--tx2)"]],
+        "roles        [\"field_technician\"]\nassigned_to  you or unclaimed\noffline      outbox enabled"],
+      ["support","support@ecopower.demo","oklch(0.78 0.13 190)","chat",
+        "Support agent","Every open ticket, with the consumer's real bill and meter history attached.",
+        [["Open tickets","1",A],["Awaiting reply","1",A],["Resolved 7d","0","var(--tx2)"],["Median first reply","—","var(--tx3)"]],
+        "roles        [\"support_agent\"]\nscope        all tickets\nbilling      read-only"]
+    ];
+
+    const roles=RM.map((r,i)=>({
+      id:r[0], email:r[1], c:r[2], bg:"rgba(255,255,255,.05)",
+      label:tr.roles[i], cls:this.state.role===r[0]?"on":"",
+      pick:this.set("role",r[0]), icon:this.ic(r[3])
+    }));
+    const s=RM.find(r=>r[0]===this.state.role) || RM[0];
+    const selIdx=RM.indexOf(s);
+
+    const M=[["password","lock"],["otp","phone"],["passkey","key"]];
+    const methods=M.map((m,i)=>({
+      label:tr.methods[i], cls:this.state.method===m[0]?"on":"",
+      pick:this.set("method",m[0]),
+      icon:this.ic(m[1],"width:14px;height:14px")
+    }));
+
+    const eyeOn='<svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const eyeOff='<svg class="ic" viewBox="0 0 24 24"><path d="M4 4l16 16"/><path d="M9.5 5.4A10 10 0 0 1 22 12a17 17 0 0 1-2.2 2.9M6.3 6.3A17 17 0 0 0 2 12s4 7 10 7a10 10 0 0 0 4-.9"/></svg>';
+
+    return {
+      accent:this.props.accent ?? "#7bf1a8",
+      langs:[["en","English"],["hi","हिन्दी"],["gu","ગુજરાતી"]].map(l=>({ label:l[1], cls:this.state.lang===l[0]?"on":"", pick:this.set("lang",l[0]) })),
+      methods, roles,
+      isPassword:this.state.method==="password",
+      isOtp:this.state.method==="otp",
+      isPasskey:this.state.method==="passkey",
+      pwType:this.state.pw?"text":"password",
+      togglePw:()=>this.setState(st=>({pw:!st.pw})),
+      eye:{ __html:this.state.pw?eyeOff:eyeOn },
+      resend:String(this.state.resend).padStart(2,"0"),
+      t_head:tr.head, t_sub:tr.sub, t_email:tr.email, t_pass:tr.pass, t_forgot:tr.forgot,
+      t_mobile:tr.mobile, t_otp:tr.otp, t_resend:tr.resend, t_or:tr.or, t_cta:tr.cta,
+      t_preview:tr.preview, t_lands:tr.lands, t_scope:tr.scope, t_rls:tr.rls,
+      t_pkTitle:tr.pkTitle, t_pkBody:tr.pkBody,
+      sel:{ c:s[2], label:tr.roles[selIdx], title:s[4], blurb:s[5],
+            rows:s[6].map(r=>({k:r[0],v:r[1],c:r[2]})), claims:s[7] }
+    };
+  }
+}
+</script>
+</body>
+</html>

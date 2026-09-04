@@ -42,7 +42,7 @@ export function TicketThread({
   return (
     <div>
       <span
-        className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold text-white mb-3"
+        className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold on-accent mb-3"
         style={{ background: STATUS_COLOR[status] ?? "var(--color-text-secondary)" }}
       >
         {status.replace("_", " ")}
@@ -80,7 +80,7 @@ export function TicketThread({
         <button
           type="submit"
           disabled={busy}
-          className="rounded-control px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-control px-4 py-2 text-sm font-semibold on-accent disabled:opacity-50"
           style={{ background: "var(--color-categorical-third)" }}
         >
           Send

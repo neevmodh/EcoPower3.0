@@ -14,14 +14,12 @@
   "login.role.operator": "Operator",
   "login.role.field": "Field technician",
   "login.role.support": "Support agent",
-
   "nav.myEnergy": "My energy",
   "nav.bills": "Bills",
   "nav.plan": "Plan",
   "nav.analytics": "Analytics",
   "nav.support": "Support",
   "nav.signOut": "Sign out",
-
   "consumer.panelName": "Consumer panel",
   "consumer.stat.connections": "Connections",
   "consumer.stat.liveImport": "Live import",
@@ -31,17 +29,17 @@
   "consumer.connections.none": "No connection linked to this account yet.",
   "consumer.connections.sanctioned": "{kw} kW sanctioned",
   "consumer.noMeter": "No meter commissioned yet.",
-
   "prepaid.balance": "Prepaid balance",
   "prepaid.balance.low": "Prepaid balance · low",
   "prepaid.belowThreshold": "Below the disconnection threshold — recharge to stay connected.",
   "prepaid.recharge": "Recharge",
-
   "conn.connecting": "Connecting…",
   "conn.live": "Live",
   "conn.reconnecting": "Reconnecting…",
   "conn.polling": "Polling (5s)",
-
   "common.asOf": "as of {time}",
-  "common.loading": "Loading…"
+  "common.loading": "Loading…",
+  "login.preview": "Session preview",
+  "login.scope": "Session scope",
+  "login.rls": "These claims ride in the access token. Row-Level Security reads them inside the database — the UI never decides what you can see."
 }
