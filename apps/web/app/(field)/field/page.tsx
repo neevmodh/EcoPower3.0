@@ -111,6 +111,7 @@ export default async function FieldPage() {
       nav={[
         { href: "/field", label: "My jobs", active: true },
         { href: "/field/readings", label: "Meter reviews" },
+        { href: "/field/inspections", label: "Inspections" },
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Work orders</h1>

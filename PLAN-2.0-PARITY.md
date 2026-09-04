@@ -161,7 +161,7 @@ Wikipedia: [DGVCL](https://en.wikipedia.org/wiki/Dakshin_Gujarat_Vij_Company), [
 | Society depth | overview + `/society/common` — common-area/DG cost split by allocation share + notice board (migration 0034) | ☑ |
 | DISCOM depth | load curve (0031) + `/discom/outages` console — log/update/restore, timeline, predicted risk (migration 0035) | ☑ |
 | Operator depth | `/operator/guarantee` + fleet generation (0032) + `/operator/esg` report (coverage-stated, metered-only) | ☑ (sites-detail still shallow) |
-| Field depth | work-order queue: KPI strip, priority sort, active/done split | ☑ (queue done; route/inspection/OCR pending) |
+| Field depth | work-order queue + `/field/readings` self-read review + `/field/inspections` structured checklist (migration 0036) | ☑ (route map still a stub) |
 | Support depth | queue, consumer 360, knowledge base | ◐ |
 | Payment wizard | multi-step `PaymentWizard` on `/consumer/bills` | ☐ |
 | New-feature panels | P2P / EV / ESG card (needs 0027) | ☐ |
