@@ -105,7 +105,14 @@ export default async function FieldPage() {
   const urgent = active.filter((w) => w.priority === "urgent").length;
 
   return (
-    <PanelShell panel="field" email={user.email ?? ""} nav={[{ href: "/field", label: "My jobs", active: true }]}>
+    <PanelShell
+      panel="field"
+      email={user.email ?? ""}
+      nav={[
+        { href: "/field", label: "My jobs", active: true },
+        { href: "/field/readings", label: "Meter reviews" },
+      ]}
+    >
       <h1 className="text-2xl font-semibold mb-1">Work orders</h1>
       <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
         Assigned to you or unclaimed in your RESCO org. Direct consumer data (billing, other meters) stays out of reach
