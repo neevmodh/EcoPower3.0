@@ -147,3 +147,21 @@ Sources: [PFC/MoP DISCOM performance (Power Line)](https://powerline.net.in/2025
 [GERC tariff schedule 01.04.2025](https://gercin.org/wp-content/uploads/2025/04/Tariff-Schedule-of-DGVCL-MGVCL-PGVCL-UGVCL-w.e.f.-01.04.2025.pdf) ·
 [GUVNL introduction](https://www.guvnl.com/introduction.html) ·
 Wikipedia: [DGVCL](https://en.wikipedia.org/wiki/Dakshin_Gujarat_Vij_Company), [Madhya Gujarat Vij](https://en.wikipedia.org/wiki/Madhya_Gujarat_Vij), [Paschim Gujarat Vij](https://en.wikipedia.org/wiki/Paschim_Gujarat_Vij)
+
+---
+
+## UI implementation log (building the 36-screen canvas into apps/web)
+
+| Slice | Screens | Status |
+|---|---|---|
+| Consumer read-only | `/consumer/notifications`, `/consumer/carbon`, `/consumer/settings` + `lib/panelNav.ts` | ☑ `ca9ab7a` — build + lint green |
+| Marketing | `/pricing`, `/how-it-works` + shared marketing nav | ☐ |
+| Consumer mobile / PWA responsive | consumer panel @ 390px, meter self-read (needs 0026 + tesseract) | ☐ |
+| Five-states demo | `/kitchen-sink` addition or `StatTile` state gallery | ☐ |
+| Society depth | units register + allocation editor pages | ◐ (units/allocation pages exist, shallow) |
+| DISCOM depth | connections, prepaid watch, outages, command-centre buildout | ◐ (routes exist, shallow) |
+| Operator depth | sites & devices, ESG report, maintenance | ◐ (devices exists, shallow) |
+| Field depth | work-order queue UI, route, inspection, OCR capture | ◐ |
+| Support depth | queue, consumer 360, knowledge base | ◐ |
+| Payment wizard | multi-step `PaymentWizard` on `/consumer/bills` | ☐ |
+| New-feature panels | P2P / EV / ESG card (needs 0027) | ☐ |
