@@ -10,6 +10,7 @@
 import Link from "next/link";
 import { NotificationBell } from "./NotificationBell";
 import { AIAdvisor } from "./AIAdvisor";
+import { SyntheticDataChip } from "./SyntheticDataChip";
 import { PanelIcon, type IconName } from "./Icon";
 
 export type PanelKey = "consumer" | "society" | "discom" | "operator" | "field" | "support" | "admin";
@@ -173,6 +174,9 @@ export function PanelShell({
             >
               <PanelIcon name={ICONS[panel]} size={13} />
               {panelLabel ?? `${LABELS[panel]} panel`}
+            </span>
+            <span className="hidden lg:inline-flex">
+              <SyntheticDataChip />
             </span>
           </span>
           <div className="flex items-center gap-3 md:gap-4">
