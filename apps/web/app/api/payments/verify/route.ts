@@ -62,7 +62,14 @@ export async function POST(request: Request) {
     return Response.json({ error: "payment order not found" }, { status: 404 });
   }
 
-  await supabase.from("payment_orders").update({ status: "attempted" }).eq("id", paymentOrder.id);
+  // Only nudge the order forward from a pre-payment state. The webhook owns
+  // the terminal transition to "paid"/"failed"; without this guard a late or
+  // retried verify call would drag a already-paid order back to "attempted".
+  await supabase
+    .from("payment_orders")
+    .update({ status: "attempted" })
+    .eq("id", paymentOrder.id)
+    .in("status", ["created", "attempted"]);
 
   const { error: paymentInsertError } = await supabase.from("payments").insert({
     payment_order_id: paymentOrder.id,
@@ -72,7 +79,10 @@ export async function POST(request: Request) {
     amount_paise: paymentOrder.amount_paise,
   });
 
-  if (paymentInsertError) {
+  // 23505 = unique_violation on razorpay_payment_id: this payment was already
+  // recorded (double-submit, retry, or the webhook beat us here). Idempotent
+  // success, not an error.
+  if (paymentInsertError && paymentInsertError.code !== "23505") {
     return Response.json({ error: "failed to record payment" }, { status: 500 });
   }
 
