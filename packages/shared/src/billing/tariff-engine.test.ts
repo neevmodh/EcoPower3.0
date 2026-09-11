@@ -160,3 +160,35 @@ describe("composeInvoice", () => {
     expect(invoice.totalPaise).toBe(rupeesToPaise(1430.48 + 70 + 150.05 - 200));
   });
 });
+
+describe("ascending-bounds guard (#19)", () => {
+  it("slabEngine rejects an unsorted slab list instead of silently mispricing", () => {
+    const unsorted = [
+      { uptoKwh: 200, ratePaisePerKwh: rupeesToPaise(3.95) },
+      { uptoKwh: 50, ratePaisePerKwh: rupeesToPaise(3.2) },
+      { uptoKwh: null, ratePaisePerKwh: rupeesToPaise(5.0) },
+    ];
+    expect(() => slabEngine(kwhToMilli(100), unsorted)).toThrow(/ascending/);
+  });
+
+  it("slabEngine rejects an unbounded slab that isn't last", () => {
+    const bad = [
+      { uptoKwh: null, ratePaisePerKwh: rupeesToPaise(5.0) },
+      { uptoKwh: 50, ratePaisePerKwh: rupeesToPaise(3.2) },
+    ];
+    expect(() => slabEngine(kwhToMilli(100), bad)).toThrow(/must be last/);
+  });
+
+  it("fixedCharge rejects unsorted bands", () => {
+    const bands = [
+      { maxSanctionedKw: 10, ratePaise: rupeesToPaise(120) },
+      { maxSanctionedKw: 2, ratePaise: rupeesToPaise(70) },
+      { maxSanctionedKw: null, ratePaise: rupeesToPaise(200) },
+    ];
+    expect(() => fixedCharge(3, bands)).toThrow(/ascending/);
+  });
+
+  it("still prices a correctly-sorted list", () => {
+    expect(slabEngine(kwhToMilli(342.4), RGP_SLABS).totalPaise).toBe(rupeesToPaise(1464.5));
+  });
+});

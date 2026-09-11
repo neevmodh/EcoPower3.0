@@ -36,7 +36,31 @@ export interface SlabResult {
   totalPaise: Paise;
 }
 
+// Slabs and bands must be non-decreasing with a single unbounded (null)
+// entry last — the telescopic walk and the first-match band lookup both
+// silently produce wrong money on an out-of-order list, and a pure function
+// shouldn't trust caller ordering it can check in one pass. Equal
+// consecutive bounds are fine (a zero-capacity slab is just skipped, and
+// re-basing thresholds for a split bill can legitimately collapse two to
+// the same value); only a decrease is a real ordering bug.
+function assertAscendingBounds(bounds: Array<number | null>, what: string): void {
+  let prev = -Infinity;
+  for (let i = 0; i < bounds.length; i++) {
+    const b = bounds[i];
+    if (b == null) {
+      if (i !== bounds.length - 1) throw new Error(`${what}: the unbounded entry must be last`);
+      return;
+    }
+    if (b < prev) throw new Error(`${what}: bounds must be ascending (got ${b} after ${prev})`);
+    prev = b;
+  }
+}
+
 export function slabEngine(totalMilliKwh: MilliKwh, slabs: TariffSlab[]): SlabResult {
+  assertAscendingBounds(
+    slabs.map((s) => s.uptoKwh),
+    "slabEngine",
+  );
   const lines: SlabLine[] = [];
   let remaining = totalMilliKwh;
   let consumedSoFarMilli = 0n;
@@ -101,6 +125,10 @@ export interface FixedChargeBand {
 }
 
 export function fixedCharge(sanctionedLoadKw: number, bands: FixedChargeBand[]): Paise {
+  assertAscendingBounds(
+    bands.map((b) => b.maxSanctionedKw),
+    "fixedCharge",
+  );
   for (const band of bands) {
     if (band.maxSanctionedKw == null || sanctionedLoadKw <= band.maxSanctionedKw) {
       return band.ratePaise;
