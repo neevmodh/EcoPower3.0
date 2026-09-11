@@ -55,9 +55,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const updatePayload: Record<string, unknown> = { status: NEXT_STATUS[action] };
   if (action === "claim") updatePayload.assigned_user_id = userData.user.id;
 
-  const { error: updateError } = await supabase.from("work_orders").update(updatePayload).eq("id", id);
+  // Re-assert the allowed pre-states in the UPDATE filter so two technicians
+  // acting on the same work order can't both win the transition.
+  const { data: updated, error: updateError } = await supabase
+    .from("work_orders")
+    .update(updatePayload)
+    .eq("id", id)
+    .in("status", VALID_TRANSITIONS[action])
+    .select("id");
   if (updateError) {
     return Response.json({ error: "failed to update work order" }, { status: 500 });
+  }
+  if (!updated || updated.length === 0) {
+    return Response.json({ error: "work order status changed under you — reload" }, { status: 409 });
   }
 
   return Response.json({ ok: true });

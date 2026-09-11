@@ -35,11 +35,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (fetchError || !application) {
     return Response.json({ error: "application not found" }, { status: 404 });
   }
-  if (application.status !== "submitted" && application.status !== "under_review") {
+  const DECIDABLE = ["submitted", "under_review"];
+  if (!DECIDABLE.includes(application.status)) {
     return Response.json({ error: `application already ${application.status}` }, { status: 409 });
   }
 
-  const { error: updateError } = await supabase
+  // Re-assert the pre-state inside the UPDATE filter, not just in the read
+  // above — two officers deciding the same application concurrently would
+  // otherwise both pass the check and the second would silently overwrite
+  // the first. A zero-row result means someone else got there first.
+  const { data: updated, error: updateError } = await supabase
     .from("netmetering_applications")
     .update({
       status: body.decision,
@@ -47,9 +52,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       decided_by_user_id: userData.user.id,
       decided_at: new Date().toISOString(),
     })
-    .eq("id", id);
+    .eq("id", id)
+    .in("status", DECIDABLE)
+    .select("id");
   if (updateError) {
     return Response.json({ error: "failed to record decision" }, { status: 500 });
+  }
+  if (!updated || updated.length === 0) {
+    return Response.json({ error: "application was already decided by someone else" }, { status: 409 });
   }
 
   return Response.json({ ok: true });

@@ -91,9 +91,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   }
 
-  const { error: updateError } = await supabase.from("subscriptions").update(updatePayload).eq("id", id);
+  // Re-assert the allowed source states in the filter — a double-submit or a
+  // concurrent action on the same subscription must not both apply.
+  const { data: updatedRows, error: updateError } = await supabase
+    .from("subscriptions")
+    .update(updatePayload)
+    .eq("id", id)
+    .in("status", VALID_TRANSITIONS[action])
+    .select("id");
   if (updateError) {
     return Response.json({ error: "failed to update subscription" }, { status: 500 });
+  }
+  if (!updatedRows || updatedRows.length === 0) {
+    return Response.json({ error: `subscription is no longer ${VALID_TRANSITIONS[action].join(" or ")}` }, { status: 409 });
   }
 
   const { error: eventError } = await supabase.from("subscription_events").insert({
