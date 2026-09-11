@@ -8,10 +8,12 @@
 -- row." Not a code bug that needs a new deploy to trigger — the calendar
 -- triggers it.
 --
--- Fix: a monthly pg_cron job that keeps three months of partitions
--- (current + 2 ahead) always present. create_monthly_partition() is
--- already idempotent (`create table if not exists`), so re-running it for
--- months that already exist is a no-op.
+-- Fix: extend the horizon by one more month now (0005 already has current +
+-- next), and a monthly pg_cron job that keeps the same 3-month horizon
+-- going forward. create_monthly_partition() is already idempotent
+-- (`create table if not exists`), so this mirrors the exact call form 0005
+-- itself uses at the top level — no wrapper function, no extra
+-- search_path/security-definer surface to get wrong.
 --
 -- Deliberately NOT included: dropping/detaching old partitions. invoices
 -- and invoice_lines hold a composite FK into meter_readings for billing
@@ -20,20 +22,10 @@
 -- historical bills. Retention is a real product decision (how long does a
 -- provable bill need to stay provable?), not something to default here.
 
-create function ensure_future_partitions() returns void
-  language plpgsql
-  security definer
-  set search_path = ''
-as $$
-begin
-  perform public.create_monthly_partition((date_trunc('month', now()))::date);
-  perform public.create_monthly_partition((date_trunc('month', now()) + interval '1 month')::date);
-  perform public.create_monthly_partition((date_trunc('month', now()) + interval '2 months')::date);
-end;
-$$;
+select create_monthly_partition((date_trunc('month', now()) + interval '2 months')::date);
 
--- Run once now (idempotent — the current/next month already exist from
--- 0005; this only adds the +2 month partition) and then monthly on the 1st.
-select ensure_future_partitions();
-
-select cron.schedule('ensure-future-partitions', '0 0 1 * *', $$select public.ensure_future_partitions()$$);
+select cron.schedule(
+  'ensure-future-partitions',
+  '0 0 1 * *',
+  $$select create_monthly_partition((date_trunc('month', now()) + interval '2 months')::date)$$
+);
