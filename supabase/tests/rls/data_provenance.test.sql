@@ -18,9 +18,11 @@ select isnt_empty(
   'anon (no session) can read data_provenance — this is a public disclosure page, not a scoped one'
 );
 
+-- 2-arg throws_ok matches the SECOND arg against the real error message,
+-- not a free-text label (confirmed the hard way in CI) — use the plain
+-- 1-arg form: "this throws something," regardless of exact wording.
 select throws_ok(
-  $$ insert into data_provenance (entity, kind, description) values ('x', 'real_cited', 'x') $$,
-  'anon cannot write to data_provenance (no insert policy exists)'
+  $$ insert into data_provenance (entity, kind, description) values ('x', 'real_cited', 'x') $$
 );
 
 select * from finish();
