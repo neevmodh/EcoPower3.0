@@ -50,11 +50,37 @@ const deviceSecrets = loadDeviceSecrets();
 // stored without a delta, matching evaluateRegister's contract.
 const registerStates = new Map<string, RegisterState>();
 
+// serial -> meter uuid. meters.serial is immutable once commissioned, so this
+// never needs invalidation; it turns a per-message SELECT into a one-time
+// lookup per meter.
+const meterIdCache = new Map<string, string>();
+
+// A batch that fails to COPY must not vanish — the register state for those
+// meters has already advanced, so the rows can never be re-derived from a
+// later reading. Land them in quarantine_readings instead; VEE (#23) is where
+// the gap gets reconstructed and re-billed if it matters.
+async function quarantineFailedBatch(err: unknown, rows: MeterReadingRow[]) {
+  console.error(`[ingest] batch flush failed (${rows.length} rows) — quarantining:`, err);
+  for (const r of rows) {
+    try {
+      await pool.query(
+        `insert into quarantine_readings (meter_id, reading_ts, raw_payload, reason)
+         values ($1, $2, $3, $4) on conflict do nothing`,
+        [r.meterId, r.readingTs, JSON.stringify(r), "batch_copy_failed"],
+      );
+    } catch (qErr) {
+      console.error(`[ingest] FAILED to quarantine reading meter=${r.meterId} ts=${r.readingTs} — DATA LOST:`, qErr);
+    }
+  }
+}
+
 const readingsBatcher = new Batcher<MeterReadingRow>({
   maxRows: 500,
   maxWaitMs: 200,
   flush: (rows) => copyMeterReadings(pool, rows),
-  onError: (err, rows) => console.error(`[ingest] batch flush failed (${rows.length} rows):`, err),
+  onError: (err, rows) => {
+    void quarantineFailedBatch(err, rows);
+  },
 });
 
 async function quarantine(meterSerial: string, meterId: string, readingTs: string, rawPayload: unknown, reason: string) {
@@ -169,13 +195,18 @@ async function handleMessage(topic: string, payloadBuf: Buffer) {
     return;
   }
 
-  // Resolve the meter's internal uuid. meters.serial is unique (#1).
-  const { data: meterRow } = await supabase.from("meters").select("id").eq("serial", serial).single();
-  if (!meterRow) {
-    console.error(`[ingest] ${serial} not found in meters table, dropping`);
-    return;
+  // Resolve the meter's internal uuid (cached — meters.serial is unique and
+  // immutable, #1).
+  let meterId = meterIdCache.get(serial);
+  if (!meterId) {
+    const { data: meterRow } = await supabase.from("meters").select("id").eq("serial", serial).single();
+    if (!meterRow) {
+      console.error(`[ingest] ${serial} not found in meters table, dropping`);
+      return;
+    }
+    meterId = meterRow.id as string;
+    meterIdCache.set(serial, meterId);
   }
-  const meterId = meterRow.id as string;
 
   if (isFromTheFuture(payload.reading.timestamp)) {
     await quarantine(serial, meterId, payload.reading.timestamp, payload, "reading_ts more than 5 minutes in the future");
@@ -249,11 +280,21 @@ function main() {
     clientId: `ingest-${Math.random().toString(16).slice(2)}`,
   });
 
+  // With MQTT_SHARED_GROUP set, multiple worker instances load-balance the
+  // stream via an EMQX shared subscription ($share/<group>/...) instead of
+  // every worker receiving every message. The received topic is still the
+  // real one, so the handler's topic parsing is unchanged. Single-worker
+  // deployments leave it unset.
+  const sharedGroup = process.env.MQTT_SHARED_GROUP;
+  const subTopic = sharedGroup
+    ? `$share/${sharedGroup}/ecopower/v1/+/readings`
+    : "ecopower/v1/+/readings";
+
   client.on("connect", () => {
     console.log("[mqtt] ingest worker connected");
-    client.subscribe("ecopower/v1/+/readings", { qos: 0 }, (err) => {
+    client.subscribe(subTopic, { qos: 0 }, (err) => {
       if (err) console.error("[mqtt] subscribe failed:", err.message);
-      else console.log("[mqtt] subscribed to ecopower/v1/+/readings");
+      else console.log(`[mqtt] subscribed to ${subTopic}`);
     });
   });
 
