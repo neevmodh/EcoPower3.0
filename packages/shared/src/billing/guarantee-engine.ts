@@ -49,7 +49,10 @@ export interface ShortfallCreditInput {
   metric: GuaranteeMetric;
   contractedValue: number; // same unit as achievedValue: a fraction for cuf/pr/availability, kWh for dmge
   achievedValue: number;
-  ratePaisePerUnitShortfall: Paise; // paise credited per unit of shortfall (e.g. per 0.01 CUF point, or per kWh for dmge)
+  // Paise credited per 1.0 of shortfall in that same unit — i.e. per whole
+  // fraction for cuf/pr/availability (so "₹X per 0.01 CUF point" means passing
+  // X * 100 here), and per kWh for dmge. The math below is shortfall * rate.
+  ratePaisePerUnitShortfall: Paise;
   capPaise: Paise | null;
 }
 
