@@ -25,6 +25,12 @@ create policy data_provenance_public_read on data_provenance
 
 grant select on data_provenance to anon, authenticated;
 
+-- Explicit, not just RLS-implicit — Supabase's baseline grants are broad
+-- enough that relying on "no INSERT policy exists" alone left this
+-- writable by anon in CI. Belt and suspenders: no role but the migration
+-- owner can write this table at all.
+revoke insert, update, delete on data_provenance from anon, authenticated;
+
 insert into data_provenance (entity, kind, generator_version, calibrated_to, description, source_document_url) values
 
 ('meter_readings — solar generation', 'synthetic_series', 'v1.2',
