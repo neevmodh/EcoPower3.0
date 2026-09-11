@@ -26,7 +26,7 @@ Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 | 10 | OBIS constants + IS 15959 Pt2 payload schema | M1 | ingest | high | 1 | ☑ | 1 |
 | 11 | HESAdapter interface + Trilliant stub | M1 | ingest | high | 1 | ☑ | 10 |
 | 12 | AMI simulator with a physical model | M1 | ingest | critical | 1 | ☑ | 10 |
-| 13 | Simulator scenario control API | M1 | demo | critical | — | ☐ | 12 |
+| 13 | Simulator scenario control API | M1 | demo | critical | — | ☑ | 12 |
 | 14 | MQTT broker on Railway | M1 | infra | critical | — | ☑ | [#62](../../issues/62) |
 | 15 | Ingest worker (HMAC, monotonicity, batch COPY) | M1 | ingest | critical | 1 | ☑ | 14, 16 |
 | 16 | Partitioned time-series schema | M1 | db | critical | — | ☑ | 3 |
@@ -71,7 +71,7 @@ Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 | 53 | Forecasting service | M6 | ml | normal | — | ☐ | 17 |
 | 54 | Asset anomaly detection | M6 | ml | high | 3 | ☐ | 27 |
 | 55 | LLM copilot — one day, hard budget | M6 | ml | low | — | ◐ | 6 |
-| 56 | Uptime monitoring from day one | M7 | infra | high | — | ◐ | 8 |
+| 56 | Uptime monitoring from day one | M7 | infra | high | — | ☑ | 8 |
 | 57 | k6 load test + honest extrapolation | M7 | test | high | — | ☐ | 15, 58 |
 | 58 | Seed 10M+ readings | M7 | db | normal | — | ◐ | 16 |
 | 59 | Plant findable defects in demo seed | M7 | demo | critical | — | ☐ | 58, 27 |
@@ -85,7 +85,7 @@ Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 | 72 | Ingest Tier-1 real datasets (NSRDB, PVGIS, Open-Meteo, OSM) | M1 | data | high | — | ◐ | 1 |
 | 73 | Encode real GERC tariffs, IS 1180 / IS 15959, PM Surya Ghar | M2 | data | high | 1 | ◐ | 20 |
 | 74 | Calibrate synthetic population to published AT&C losses | M3 | data | critical | — | ◐ | 72, 12 |
-| 75 | Data provenance table + visible synthetic-data disclosure | M7 | data | high | — | ☐ | 74 |
+| 75 | Data provenance table + visible synthetic-data disclosure | M7 | data | high | — | ☑ | 74 |
 | 76 | Performance & uptime guarantee engine (meter-verified) | M2 | commercial | critical | 1 | ☑ | 19, 21 |
 | 77 | Multi-service catalog — solar, backup, cooling, lighting | M2 | commercial | high | 1 | ☑ | 19 |
 | 78 | Subscription lifecycle: transfer, pause, upgrade, buyout | M2 | commercial | high | 1 | ☑ (trimmed — see #78 closing comment) | 19, 77 |
@@ -99,7 +99,7 @@ Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 | 88 | Seed remote/prod Supabase with demo data for migrations 0014–0038 | M7 | db | high | — | ☐ | — |
 | 89 | Update Razorpay webhook URL from the placeholder | M4 | payments | normal | 1 | ☐ | 39 |
 | 90 | Verify the Gemini API key actually authenticates | M4 | ml | high | — | ☐ | [#65](../../issues/65) |
-| 91 | Reconcile P2P trading + EV panels against §7 "out of scope" | M7 | docs | normal | — | ☐ | — |
+| 91 | Reconcile P2P trading + EV panels against §7 "out of scope" | M7 | docs | normal | — | ☑ | — |
 | 92 | Platform superadmin panel — cross-tenant admin surface | M2 | web | normal | — | ☑ | — |
 | 93 | Ingest: batch-flush failure silently drops readings + desyncs delta state | M1 | ingest | high | — | ☑ | — |
 | 94 | TOCTOU on decision/action write routes — re-assert state in the UPDATE | M3 | web | normal | — | ☑ | — |
@@ -477,6 +477,8 @@ Do **not** click through five nav bars. One causal chain, driven live by the sim
 
 **Why AMI and billing land before UI polish and payments:** at 60% done you have AMI + billing + DISCOM — exactly the 60% these judges care about. The conventional order (auth → consumer UI → payments → "IoT later") leaves you at 60% looking like EcoPower 2.0. Every milestone boundary is a coherent pitch on its own.
 
-**Was explicitly out of scope:** blockchain, P2P energy trading, EV charging — 2.0 had all three as static mockups. Blockchain stayed cut. **P2P trading and EV charging were later built as real DB-backed features** (`0027_p2p_ev.sql`, `/consumer/trade`, `/consumer/ev`, `/discom/p2p` market oversight) — the "deliberately out of scope" pitch line no longer applies to them and this section is superseded on that point. See [#91](../../issues/91) for the keep-or-cut decision and the doc reconciliation it needs.
+**Was explicitly out of scope:** blockchain, P2P energy trading, EV charging — 2.0 had all three as static mockups. Blockchain stayed cut. **P2P trading and EV charging were later built as real DB-backed features** (`0027_p2p_ev.sql`, `/consumer/trade`, `/consumer/ev`, `/discom/p2p` market oversight).
+
+**Resolved (#91), 2026-09-11:** keep the code, cut it from the pitch. The competition is **PS1 only** — this team is not being judged on PS2–5, and P2P trading / EV charging aren't PS1 requirements either; they're 2.0-era carryovers. Ripping out real, tested, RLS-correct code for a demo-only concern would be pure churn. So: leave `/consumer/trade`, `/consumer/ev`, `/discom/p2p` in the app (they cost nothing to keep, and hurt nothing), but the 5-minute runbook (`DEMO-RUNBOOK.md`) and the pitch narrative do not lead with them — mention only if a judge asks what else exists. Every pitch beat is Energy-as-a-Service.
 
 **Deliberately starved:** #55, the LLM copilot — one day, bottom of the list. 2.0 had five chat surfaces. Every team will have a chatbot; none of these six judges will be moved by one.
