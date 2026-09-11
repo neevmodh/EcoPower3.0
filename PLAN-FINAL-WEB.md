@@ -1,5 +1,8 @@
 # PLAN — Final Web App ("make it the best 3.0, finished")
 
+> **Historical — superseded 2026-09-11.** This pass landed. The task list inside is done or folded into GitHub issues.
+> Kept for the reasoning it records. Current status: **[HANDOFF.md](HANDOFF.md)**; live backlog: GitHub issues.
+
 Goal: take the 3.0 web app from "5 real panels, demo-grade" to **a finished product** — the polish and completeness 2.0 projected, but without violating DESIGN.md P1 (*no component may outlive its data*). Web app only. No mobile, no new ML services.
 
 **What this explicitly does NOT do** (2.0 had these; they contradict 3.0's thesis or need infra/decisions):

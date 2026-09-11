@@ -1,6 +1,6 @@
 # HANDOFF — read this first
 
-Written for whichever AI assistant (or human) picks this project up next. The author (Claude, Anthropic) ran out of usable session budget on this account — this file exists so nothing has to be re-discovered from scratch. Everything in here was true and verified as of **2026-08-31**.
+Written for whichever AI assistant (or human) picks this project up next. This file exists so nothing has to be re-discovered from scratch. Reality-checked and reconciled against the code tree and the GitHub issue state on **2026-09-11**.
 
 If you only read one section, read [Reality check](#reality-check-what-actually-works) and [How to run this locally](#how-to-run-this-locally).
 
@@ -16,7 +16,7 @@ Repo root: `/Users/neev/Downloads/Ecopower/EcoPower3.0`. Monorepo, pnpm workspac
 
 ## Reality check: what actually works
 
-The docs in this repo (`README.md`, `ROADMAP.md`, `BUILD-ORDER.md`) describe an ambitious five-problem-statement, multi-service architecture (web + mobile + ML anomaly detection + OCR + load testing). **Most of that is aspirational scaffolding, not built code.** Don't take the README's architecture table at face value — here's what's actually real as of this handoff:
+The docs in this repo (`README.md`, `ROADMAP.md`, `BUILD-ORDER.md`) still gesture at a multi-service architecture (native mobile + Python ML + BullMQ worker + k6). **Those four dirs are still empty scaffolding.** Don't take the README's architecture table at face value — here's what's actually real as of this handoff:
 
 | Path | Status |
 |---|---|
@@ -24,15 +24,17 @@ The docs in this repo (`README.md`, `ROADMAP.md`, `BUILD-ORDER.md`) describe an 
 | `apps/simulator` | **Real.** Publishes physically-modelled AMI readings (solar yield + household load models) over MQTT. |
 | `services/ingest` | **Real.** MQTT subscriber → validates HMAC + register monotonicity → writes to partitioned Postgres. |
 | `packages/shared` | **Real.** Tariff engine, OBIS helpers, validated colour palette. Zero-dependency TS, imported by web + scripts. |
-| `supabase/` | **Real.** 21 migrations, RLS on every table, a pgTAP suite (103 assertions, all passing) run in CI. |
-| `apps/mobile` | **Empty.** Just a `.gitkeep`. No Expo app exists despite what README's table implies. |
-| `services/ml` | **Empty.** No FastAPI/forecasting/OCR/anomaly-detection service exists. |
+| `supabase/` | **Real.** 38 migrations, RLS + FORCE on every table, a pgTAP suite (24 files / 160 assertions) run in CI. |
+| `apps/mobile` | **Empty.** Just a `.gitkeep`. No Expo app — the mobile channel is a real installable PWA in `apps/web` (`app/manifest.ts`, `next/og` icon, pass-through service worker). |
+| `services/ml` | **Empty.** No FastAPI service. Bill/meter OCR runs **client-side** via `tesseract.js`; the AI advisor/bill-explainer are Next.js route handlers calling Gemini. No forecasting or anomaly-detection service. |
 | `services/worker` | **Empty.** No BullMQ job runner exists. |
 | `tools/loadtest` | **Empty.** No k6 scripts exist. |
 
-So in practice: **this is a Next.js web app with a real Postgres/RLS backend and a real MQTT telemetry pipeline feeding it.** Five *panels* exist inside that one web app (Consumer, Society, DISCOM, Operator, Field), gated by role via middleware + enforced for real by RLS — not five separate apps. There is no mobile app, no ML service, no background job worker. If asked to "add OCR" or "build the mobile app," that's new work from zero, not wiring up something half-built.
+So in practice: **this is a Next.js web app with a real Postgres/RLS backend and a real MQTT telemetry pipeline feeding it.** Seven *panels* exist inside that one web app — Consumer, Housing Society, DISCOM, Operator, Field Technician, **Support agent**, **Platform admin** — gated by role via middleware + enforced for real by RLS. There is no native mobile app, no ML service, no background job worker (scheduled work is `pg_cron`). If asked to "build the mobile app" or "add the ML forecasting service," that's new work from zero.
 
-GitHub issue tracker: 85 issues total, **31 closed, 56 still open** (`gh issue list --state open`). The closed ones are the real, verified work; the open ones are the aspirational remainder (mobile, ML, i18n, WhatsApp/SMS delivery, k6 load testing, etc.) — see `ROADMAP.md` for the full tracker table, it's the single source of truth for what's tracked as an issue.
+Built beyond the original five panels: prepaid billing, DISCOM DT-loss map + theft localization + net-metering queue + audit ledger + outage console + P2P market oversight, Society allocation, Support Consumer-360 + KB, P2P solar trading + EV charging on the consumer side, i18n (EN/HI/GU), a platform-admin cross-tenant surface. **Note:** P2P trading + EV contradict `ROADMAP.md §7` ("out of scope") — tracked in #91.
+
+GitHub issue tracker: **92 filed, 45 closed, 47 open** (`gh issue list`). Closed = verified shipped. Open = the remainder — native mobile, ML services, k6 load testing, WhatsApp/SMS delivery, VEE, demo hardening, plus the ops items #88–#90. `ROADMAP.md`'s table is a snapshot reconciled 2026-09-11; **GitHub is the source of truth** if they disagree.
 
 ---
 
@@ -44,7 +46,7 @@ pnpm install                      # from repo root, installs all workspaces
 
 # Local Supabase (Postgres + Auth + Realtime), via Docker
 supabase start                    # first time; supabase status if already running
-supabase db reset                 # applies all 21 migrations + resets to clean state
+supabase db reset                 # applies all 38 migrations + resets to clean state
 
 # Seed demo data (run in this order — each is additive/idempotent)
 SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SERVICE_ROLE_KEY=<local anon/service key from `supabase status`> \
@@ -60,7 +62,7 @@ pnpm dev                          # http://localhost:3000
 
 # Run the RLS test suite (do this after any migration change)
 cd /Users/neev/Downloads/Ecopower/EcoPower3.0
-supabase test db                  # expect 103/103 passing
+supabase test db                  # expect 160/160 passing (24 files)
 
 # Typecheck (there's no configured lint — `next lint` prompts interactively and was never set up)
 cd apps/web && pnpm exec tsc --noEmit -p .
@@ -140,9 +142,9 @@ All of the above: 103 pgTAP assertions passing, CI green on every push, migratio
   ```
   **If you're an AI agent with a permission classifier**: piping a pulled production service-role key through a script is exactly the kind of action such a classifier is built to block, and it did, correctly, in the prior session. Don't try to route around a block like that — surface the exact commands to the human instead, like this section does.
 - **Supabase project ref**: `vdjzhvlwwzxelckrjbuj` (remote/production). Local dev uses Docker via `supabase start`, entirely separate.
-- **Gemini API key gotcha** (flagged, unresolved as of last check): the configured key's format didn't match standard Gemini keys (`AIza...`) — verify it actually authenticates before building anything new against it. Get a fresh one at aistudio.google.com/apikey if it doesn't.
+- **Gemini API key gotcha** (flagged in #65/#90, unresolved): the configured key's format didn't match standard Gemini keys (`AIza...`) — verify it actually authenticates before building anything new against it. Get a fresh one at aistudio.google.com/apikey if it doesn't.
 - **Gemini model gotcha**: `gemini-3.6-flash` is a reasoning model that silently burns hundreds of "thinking" tokens against `maxOutputTokens`, truncating short answers to fragments. The AI features in this app (`apps/web/lib/ai/`) use `gemini-3.5-flash-lite` instead — deliberately, not by oversight. Don't "upgrade" the model without checking output actually completes.
-- **Razorpay**: test-mode keys only. Webhook URL in Razorpay's dashboard was still the placeholder `https://example.com/webhook` as of last check — needs updating to the real deployed `/api/webhooks/razorpay` endpoint for webhook-driven payment confirmation to work end-to-end in production.
+- **Razorpay**: test-mode keys only. Webhook URL in Razorpay's dashboard is still the placeholder `https://example.com/webhook` (#89) — needs updating to the real deployed `/api/webhooks/razorpay` endpoint for webhook-driven payment confirmation to work end-to-end in production.
 
 ### Identity gotcha
 
@@ -157,7 +159,7 @@ Three GitHub-adjacent accounts have been in play this project. Use the **`neevmo
 3. **Razorpay webhook URL** — update from the placeholder once there's a stable production URL to point it at.
 4. **Confirm the Gemini API key actually authenticates** before building anything else on top of it (issues #35/#47 in the tracker depend on this).
 5. **Issue #66 ("BLOCKER: Confirm final-round timeline")** — open, marked `blocker`, needs a human answer about the actual competition schedule, not something to resolve in code.
-6. Beyond that: `ROADMAP.md`'s tracker table is the prioritized backlog (Tier A/B/C ship order) — 56 open issues, spanning i18n, WhatsApp/SMS delivery, the ML anomaly/forecast/OCR services, k6 load testing, and the demo runbook. Read `BUILD-ORDER.md` before picking one — it explicitly sequences AMI spine + billing correctness *before* UI polish and payments, on the reasoning that "at 60% complete the project should have the 60% the jury cares about."
+6. Beyond that: `ROADMAP.md`'s tracker table is the prioritized backlog (Tier A/B/C ship order) — 47 open issues, spanning WhatsApp/SMS delivery, the ML anomaly/forecast services, native mobile, k6 load testing, and the demo runbook. Read `BUILD-ORDER.md` before picking one — it explicitly sequences AMI spine + billing correctness *before* UI polish and payments, on the reasoning that "at 60% complete the project should have the 60% the jury cares about."
 
 ---
 
@@ -166,7 +168,7 @@ Three GitHub-adjacent accounts have been in play this project. Use the **`neevmo
 | File | What's in it |
 |---|---|
 | `WORKLOG.md` | Full chronological log of every session, every bug found and fixed, every verification step taken. Exhaustive — read this if you need the *why* behind a specific decision that this handoff compressed away. |
-| `ROADMAP.md` | The 85-issue tracker table, milestone-by-milestone, matches GitHub issue numbers exactly. |
+| `ROADMAP.md` | Tracker snapshot (reconciled 2026-09-11), milestone-by-milestone. GitHub is source of truth if they diverge. |
 | `BUILD-ORDER.md` | The sequencing plan — start here for "what should I work on next and why in this order." |
 | `DESIGN.md` | Full design system spec: palette math, chart rules, component states, accessibility, panel identity. Has dated "Update" notes where rules were later revised — read those, not just the original text, for the current rule. |
 | `DATA.md` | What data is real vs. synthetic, and the citation for every synthetic parameter (AT&C loss rates, tariff structure, seasonal solar/load shape, etc.) — the honesty discipline this whole project is built around. |

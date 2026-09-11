@@ -2,15 +2,15 @@
 
 **Competition:** INSTINCT 4.0 — IntelliSmart Infra + The Energy Society, IIT Delhi · **Live target:** Vercel
 
-Every row in the tracker below is a GitHub issue in this repo. Update the Status column as you go — this table is the single record.
+Every row in the tracker below is a GitHub issue in this repo. **GitHub is the source of truth** — this table is a periodically-reconciled snapshot. Last reconciled **2026-09-11** against the closed/open issue state and the actual code tree.
 
-**[BUILD-ORDER.md](BUILD-ORDER.md)** is the sequence to solve these in — start there. Visual design is governed by **[DESIGN.md](DESIGN.md)**. Where every number comes from is governed by **[DATA.md](DATA.md)**. Read both before building.
+**[HANDOFF.md](HANDOFF.md)** is where to start for current reality. **[BUILD-ORDER.md](BUILD-ORDER.md)** is the original sequencing rationale (historical). Visual design is governed by **[DESIGN.md](DESIGN.md)**; every number by **[DATA.md](DATA.md)**.
 
----
+> **Where the project stands (2026-09-11):** the web app is deployed and working on Vercel with a real Supabase RLS backend and a live MQTT telemetry pipeline. 45 closed / 50 open (95 filed) — includes the 2026-09-11 code-review findings #93–#95. All of M0–M2 and most of M3 (DISCOM) plus the PS1 consumer loop, Society, Support, and a platform-admin panel are shipped. Not built: native mobile (Expo), the ML services (`services/ml`), the BullMQ worker, k6 load testing, and demo hardening. P2P trading + EV panels were built despite §7 calling them out of scope — see [#91](../../issues/91).
 
 ## 1. Tracker
 
-Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
+Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 
 | # | Issue | M | Area | Pri | PS | Status | Blocked by |
 |---|---|---|---|---|---|---|---|
@@ -19,10 +19,10 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 3 | Denormalized scope keys + maintenance triggers | M0 | db | critical | — | ☑ | 2 |
 | 4 | Custom access token hook — scope in the JWT | M0 | db | critical | — | ☑ | 2 |
 | 5 | RLS policies for all five roles | M0 | db | critical | — | ☑ | 3, 4 |
-| 6 | Writes via SECURITY DEFINER RPCs | M0 | db | critical | — | ☐ | 5 |
+| 6 | Writes via SECURITY DEFINER RPCs | M0 | db | critical | — | ◐ | 5 |
 | 7 | pgTAP RLS test suite | M0 | test | critical | — | ☑ | 5 |
 | 8 | Next.js shell + five panels + Vercel deploy | M0 | web | critical | — | ☑ | 1, 4 |
-| 9 | CI: fail build if secrets reach client bundle | M0 | security | high | — | ☐ | 8 |
+| 9 | CI: fail build if secrets reach client bundle | M0 | security | high | — | ☑ | 8 |
 | 10 | OBIS constants + IS 15959 Pt2 payload schema | M1 | ingest | high | 1 | ☑ | 1 |
 | 11 | HESAdapter interface + Trilliant stub | M1 | ingest | high | 1 | ☑ | 10 |
 | 12 | AMI simulator with a physical model | M1 | ingest | critical | 1 | ☑ | 10 |
@@ -30,24 +30,24 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 14 | MQTT broker on Railway | M1 | infra | critical | — | ☑ | [#62](../../issues/62) |
 | 15 | Ingest worker (HMAC, monotonicity, batch COPY) | M1 | ingest | critical | 1 | ☑ | 14, 16 |
 | 16 | Partitioned time-series schema | M1 | db | critical | — | ☑ | 3 |
-| 17 | Continuous aggregates + pg_cron jobs | M1 | db | high | — | ☐ | 16 |
+| 17 | Continuous aggregates + pg_cron jobs | M1 | db | high | — | ◐ | 16 |
 | 18 | Live consumer dashboard on Realtime | M1 | web | high | 2 | ☑ | 15, 8 |
 | 19 | Pure tariff engine | M2 | billing | critical | 1 | ☑ | 1 |
 | 20 | Real GERC / Torrent tariff seed | M2 | billing | high | 1 | ☑ | 19 |
 | 21 | Invoice schema with provenance | M2 | billing | critical | 1 | ☑ | 16, 19 |
-| 22 | Prepaid as a first-class commercial model | M2 | billing | high | 1 | ☐ | 19 |
+| 22 | Prepaid as a first-class commercial model | M2 | billing | high | 1 | ☑ | 19 |
 | 23 | VEE pipeline | M2 | billing | normal | 1 | ☐ | 16 |
-| 24 | Golden-file billing tests | M2 | test | critical | — | ☐ | 19, 20 |
-| 25 | Property tests — 12 properties | M2 | test | high | — | ☐ | 21, 7 |
-| 26 | DT energy accounting + AT&C loss map | M3 | discom | critical | 1 | ☐ | 17 |
-| 27 | Theft / loss localization model | M3 | ml | critical | 3 | ☐ | 26 |
-| 28 | Net-metering application state machine | M3 | discom | high | 1 | ☐ | 5 |
+| 24 | Golden-file billing tests | M2 | test | critical | — | ☑ | 19, 20 |
+| 25 | Property tests — 12 properties | M2 | test | high | — | ☑ | 21, 7 |
+| 26 | DT energy accounting + AT&C loss map | M3 | discom | critical | 1 | ☑ | 17 |
+| 27 | Theft / loss localization model | M3 | ml | critical | 3 | ☑ | 26 |
+| 28 | Net-metering application state machine | M3 | discom | high | 1 | ☑ | 5 |
 | 29 | SLA clocks per CEA/GERC norms | M3 | discom | normal | 1 | ☐ | 28 |
 | 30 | DT feasibility check | M3 | discom | normal | 1 | ☐ | 28 |
 | 31 | PM Surya Ghar subsidy workflow | M3 | discom | normal | 1 | ☐ | 28 |
-| 32 | Prepaid oversight + disconnect queue (two-person) | M3 | security | high | 1 | ☐ | 22 |
+| 32 | Prepaid oversight + disconnect queue (two-person) | M3 | security | high | 1 | ◐ | 22 |
 | 33 | Demand response | M3 | discom | high | 1 | ☐ | 26 |
-| 34 | Append-only audit ledger + UI | M3 | security | normal | — | ☐ | 5 |
+| 34 | Append-only audit ledger + UI | M3 | security | normal | — | ☑ | 5 |
 | 35 | Bill OCR service | M4 | ml | critical | 1 | ☐ | [#65](../../issues/65) |
 | 36 | OCR confirmation UI (never auto-commit) | M4 | web | high | 1 | ☐ | 35 |
 | 37 | OCR eval set + measured accuracy | M4 | test | high | 4 | ☐ | 35 |
@@ -65,26 +65,26 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 47 | Meter reading OCR from field photographs | M5 | ml | critical | 4 | ☐ | 35 |
 | 48 | Commissioning flow with fraud controls | M5 | mobile | high | 5 | ☐ | 45, 46 |
 | 49 | EAS build → APK distribution | M5 | infra | critical | 2 | ☐ | 43 |
-| 50 | Society schema + allocation engine | M6 | billing | high | 1 | ☐ | 19 |
-| 51 | Allocation conservation property | M6 | test | high | — | ☐ | 50 |
-| 52 | Society panel UI | M6 | web | normal | 1 | ☐ | 50 |
+| 50 | Society schema + allocation engine | M6 | billing | high | 1 | ☑ | 19 |
+| 51 | Allocation conservation property | M6 | test | high | — | ◐ | 50 |
+| 52 | Society panel UI | M6 | web | normal | 1 | ☑ | 50 |
 | 53 | Forecasting service | M6 | ml | normal | — | ☐ | 17 |
 | 54 | Asset anomaly detection | M6 | ml | high | 3 | ☐ | 27 |
-| 55 | LLM copilot — one day, hard budget | M6 | ml | low | — | ☐ | 6 |
-| 56 | Uptime monitoring from day one | M7 | infra | high | — | ☐ | 8 |
+| 55 | LLM copilot — one day, hard budget | M6 | ml | low | — | ◐ | 6 |
+| 56 | Uptime monitoring from day one | M7 | infra | high | — | ◐ | 8 |
 | 57 | k6 load test + honest extrapolation | M7 | test | high | — | ☐ | 15, 58 |
-| 58 | Seed 10M+ readings | M7 | db | normal | — | ☐ | 16 |
+| 58 | Seed 10M+ readings | M7 | db | normal | — | ◐ | 16 |
 | 59 | Plant findable defects in demo seed | M7 | demo | critical | — | ☐ | 58, 27 |
 | 60 | SPOF diagram + architecture slide | M7 | docs | normal | — | ☐ | — |
-| 61 | Demo runbook + fallback video | M7 | demo | critical | — | ☐ | 59, 49 |
+| 61 | Demo runbook + fallback video | M7 | demo | critical | — | ◐ | 59, 49 |
 | 67 | Design tokens + validated colour system | M0 | design | high | — | ☑ | 1 |
 | 68 | Stat tile — no badge without a basis | M0 | design | critical | — | ☑ | 67 |
 | 69 | Five states for every data component | M0 | design | critical | — | ☑ | 67 |
-| 70 | Single honest ConnectionState indicator | M1 | design | high | — | ☐ | 18 |
+| 70 | Single honest ConnectionState indicator | M1 | design | high | — | ☑ | 18 |
 | 71 | No-data drill (regression for 2.0's failure) | M7 | design | critical | — | ☐ | 68, 69 |
-| 72 | Ingest Tier-1 real datasets (NSRDB, PVGIS, Open-Meteo, OSM) | M1 | data | high | — | ☐ | 1 |
-| 73 | Encode real GERC tariffs, IS 1180 / IS 15959, PM Surya Ghar | M2 | data | high | 1 | ☐ | 20 |
-| 74 | Calibrate synthetic population to published AT&C losses | M3 | data | critical | — | ☐ | 72, 12 |
+| 72 | Ingest Tier-1 real datasets (NSRDB, PVGIS, Open-Meteo, OSM) | M1 | data | high | — | ◐ | 1 |
+| 73 | Encode real GERC tariffs, IS 1180 / IS 15959, PM Surya Ghar | M2 | data | high | 1 | ◐ | 20 |
+| 74 | Calibrate synthetic population to published AT&C losses | M3 | data | critical | — | ◐ | 72, 12 |
 | 75 | Data provenance table + visible synthetic-data disclosure | M7 | data | high | — | ☐ | 74 |
 | 76 | Performance & uptime guarantee engine (meter-verified) | M2 | commercial | critical | 1 | ☑ | 19, 21 |
 | 77 | Multi-service catalog — solar, backup, cooling, lighting | M2 | commercial | high | 1 | ☑ | 19 |
@@ -93,9 +93,21 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 | 80 | Carbon tracking — lightweight first pass, I-REC provenance deferred | M2 | commercial | normal | 1 | ☑ | 15 |
 | 81 | Multi-channel: WhatsApp, SMS, IVR (DLT-compliant) | M6 | consumer | high | 1,2 | ☐ | 34 |
 | 82 | Verified communication — anti-scam message checker | M6 | consumer | high | 1 | ☐ | 81 |
-| 83 | Real i18n — English, Hindi, Gujarati + low-literacy | M4 | consumer | high | 1,2 | ☐ | 8 |
-| 84 | "Why is my bill high?" — deterministic bill explainer | M2 | consumer | high | 1 | ☐ | 21 |
+| 83 | Real i18n — English, Hindi, Gujarati + low-literacy | M4 | consumer | high | 1,2 | ☑ | 8 |
+| 84 | "Why is my bill high?" — deterministic bill explainer | M2 | consumer | high | 1 | ☑ | 21 |
 | 85 | Unit economics + 90-day pilot proposal (docs) | M7 | docs | high | — | ☐ | — |
+| 88 | Seed remote/prod Supabase with demo data for migrations 0014–0038 | M7 | db | high | — | ☐ | — |
+| 89 | Update Razorpay webhook URL from the placeholder | M4 | payments | normal | 1 | ☐ | 39 |
+| 90 | Verify the Gemini API key actually authenticates | M4 | ml | high | — | ☐ | [#65](../../issues/65) |
+| 91 | Reconcile P2P trading + EV panels against §7 "out of scope" | M7 | docs | normal | — | ☐ | — |
+| 92 | Platform superadmin panel — cross-tenant admin surface | M2 | web | normal | — | ☑ | — |
+| 93 | Ingest: batch-flush failure silently drops readings + desyncs delta state | M1 | ingest | high | — | ☐ | — |
+| 94 | TOCTOU on decision/action write routes — re-assert state in the UPDATE | M3 | web | normal | — | ☐ | — |
+| 95 | payments/verify: order-status regression + no insert idempotency | M4 | payments | normal | 1 | ☐ | — |
+
+> **Code-review findings (2026-09-11):** #93–#95 came out of the review of the 45 closed issues. All closed issues carry the `code-reviewed` label. Softer notes (not tracked as issues): #76 comment says "per 0.01 CUF point" but the math is per 1.0; #19 slab/band arrays assumed pre-sorted without asserting.
+
+> **Beyond the original plan (2026-09):** #92 (platform admin), plus P2P solar trading (`/consumer/trade`, `/discom/p2p`), EV charging (`/consumer/ev`), outage management console (`/discom/outages`), site inspections (`/field/inspections`), knowledge base + canned responses (`/support/kb`), ESG report and fleet generation curve (`/operator`), and a common-area notice board (`/society/common`) all shipped without a pre-existing tracker row. P2P + EV contradict §7 — see [#91](../../issues/91).
 
 ### Blockers — do these first (issues #62–#66)
 
@@ -128,7 +140,7 @@ Status key: `☐` todo · `◐` in progress · `☑` done · `⊘` cut
 
 ## 1b. Ship order — read this before starting
 
-**85 issues will not all ship. That is fine, and it is planned for.** The tiers below exist so that when you fall behind — you will — you cut from the bottom without deliberating.
+**Not all 92 issues will ship. That is fine, and it was planned for.** The tiers below exist so that when you fall behind you cut from the bottom without deliberating. As of 2026-09-11 all of Tier A is done except #13 (scenario API), #59 (planted defects), and the mobile items #43/#45/#47/#49 (PWA shipped instead of native).
 
 ### Tier A — the demo does not exist without these (35)
 
@@ -465,6 +477,6 @@ Do **not** click through five nav bars. One causal chain, driven live by the sim
 
 **Why AMI and billing land before UI polish and payments:** at 60% done you have AMI + billing + DISCOM — exactly the 60% these judges care about. The conventional order (auth → consumer UI → payments → "IoT later") leaves you at 60% looking like EcoPower 2.0. Every milestone boundary is a coherent pitch on its own.
 
-**Explicitly out of scope:** blockchain, P2P energy trading, EV charging. 2.0 had all three as static mockups. To this jury they read as buzzword padding. **Say "deliberately out of scope" in the pitch and you gain credibility.**
+**Was explicitly out of scope:** blockchain, P2P energy trading, EV charging — 2.0 had all three as static mockups. Blockchain stayed cut. **P2P trading and EV charging were later built as real DB-backed features** (`0027_p2p_ev.sql`, `/consumer/trade`, `/consumer/ev`, `/discom/p2p` market oversight) — the "deliberately out of scope" pitch line no longer applies to them and this section is superseded on that point. See [#91](../../issues/91) for the keep-or-cut decision and the doc reconciliation it needs.
 
 **Deliberately starved:** #55, the LLM copilot — one day, bottom of the list. 2.0 had five chat surfaces. Every team will have a chatbot; none of these six judges will be moved by one.

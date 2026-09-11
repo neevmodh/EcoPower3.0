@@ -1,5 +1,7 @@
 # EcoPower 3.0 — Build Order
 
+> **Historical — superseded 2026-09-11.** This was the sprint sequence, not the record. M0 through M2 and most of M3 shipped, plus Society, Support, platform-admin, P2P and EV panels. The dependency graph and ordering rationale still hold; the "what to do next" is now the open GitHub issues. Current status: **[HANDOFF.md](HANDOFF.md)**.
+
 The sequence to actually solve the issues in. Companion to [ROADMAP.md](ROADMAP.md), which holds the tracker and the reasoning; this file holds only **what to do next**.
 
 Topologically verified — no issue appears before something it depends on. Tier A is dependency-closed.
