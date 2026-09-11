@@ -269,13 +269,82 @@ Chronological record of work done in this session. Times in IST (UTC+5:30).
 - **Second real bug found live**: Overview/Units originally summed raw `meter_readings` client-side after `.select().in()` — silently hit PostgREST's 1000-row cap once the society had more than one meter's history (5 of 6 units showed 0 kWh, only caught by actually looking at the rendered numbers). Fixed with a real SQL aggregate RPC (`society_unit_consumption`, 0021), the same class of fix `dt_loss_summary()` already established.
 - 9 new pgTAP assertions (103 total), CI green, migrations pushed to remote Supabase, code pushed (`6f4f8a1`).
 
+---
+
+## 2026-09 — extended build-out (compressed; see `git log` for the blow-by-blow)
+
+Work continued well past the checkpoint above. ~75 commits between `6f4f8a1` and `13c8d97`. What landed, by area:
+
+**Billing / correctness**
+- Golden-file + property tests for the tariff engine (#24, #25) — `tariff-engine.golden.test.ts` / `.properties.test.ts`.
+- Prepaid as a first-class model (#22) — `0024_prepaid.sql`, `prepaid_accounts` + `prepaid_ledger`, `pg_cron` interval debit, low-balance flag, consumer balance UI + `/discom/prepaid` watch list.
+
+**DISCOM panel (M3)**
+- DT loss map + connections + enriched overview (#26) — `0017`, `0022`, `dt_loss_summary()`.
+- Loss localization drill-down (#27) — `/discom/losses/[dtId]`, per-consumer load-profile decorrelation + tamper flags.
+- Net-metering approval state machine (#28) — `0019_workflows.sql`, `/discom/netmetering`, `/api/netmetering/[id]/decide`.
+- Append-only audit ledger + UI (#34) — `0023_audit_log.sql`, `/discom/audit`.
+- Outage management console — `0035_outages.sql`, `/discom/outages`.
+- Division load curve on the overview — `0031`.
+- P2P solar market oversight — `/discom/p2p`.
+
+**Consumer**
+- Real i18n EN/HI/GU (#83) — `lib/i18n.ts` / `i18n.server.ts`.
+- Bill explainer (#84) + energy advisor — `/api/ai/bill-explainer`, `/api/ai/advisor`, Gemini-grounded on real account data. Model pinned to `gemini-3.5-flash-lite` (the `3.6` reasoning model silently truncated short answers).
+- Meter self-read + review queue (#47 partial) — `0026_self_reads.sql`, `tesseract.js` client-side OCR-assist, `/consumer/meter-read` + `/field/readings` review queue.
+- Notifications centre, Carbon impact, Settings, Analytics (month-over-month grid import), Bills.
+- P2P solar trading (`/consumer/trade`) + EV charging (`/consumer/ev`) — `0027_p2p_ev.sql`. **These contradict ROADMAP §7's "out of scope" — see #91.**
+
+**Society (M6)**
+- Full panel (#50, #52) — `0020`/`0021`/`0034`, unit ownership model, admin/member visibility split, per-unit consumption breakdown, editable allocation, common-area cost split + notice board.
+
+**Operator**
+- Performance-guarantee exposure page — `0029`.
+- Fleet generation curve — `0032`.
+- ESG report page.
+
+**Field**
+- Work-order queue depth pass; site inspections — `0036_site_inspections.sql`.
+
+**Support**
+- Consumer 360 lookup — `0030`, `/support/lookup`.
+- Knowledge base + canned responses — `0033_kb.sql`, `/support/kb`.
+
+**Platform admin (new, no prior issue — filed retroactively as #92)**
+- `0038_platform_admin.sql` — cross-tenant `platform_admin` role + RLS, `/admin` with tenants / users / consumers / billing / analytics / tickets.
+
+**Infra / perf / design**
+- CI secret-leak guard (#9) — `scripts/check_client_bundle.mjs`, replaced unconfigured `next lint` with Biome.
+- Honest ConnectionState indicator (#70).
+- Grid-control-room design system applied app-wide; light blue/green/white theme; Gujarat utilities model (`0028`); real charts across every panel; responsive panel shell for mobile.
+- Vercel functions pinned to `bom1`, parallelised panel queries, instant-nav skeletons, local JWT verification.
+- Self-seeding demo telemetry (`0037_demo_readings.sql`) — ~45 days, capped ~20k rows (demo-sized, not the 10M scale seed #58 wants).
+- `DEMO-RUNBOOK.md`, `EcoPower-2.0-vs-3.0.md` written.
+
+**Test / migration totals now:** 38 migrations, 24 pgTAP files / 160 assertions, 17 shared+simulator test files, 46 web pages.
+
+**Tracker reconciled 2026-09-11:** closed 13 issues verified shipped (#9 #22 #24 #25 #26 #27 #28 #34 #50 #52 #70 #83 #84), commented partial-status on 12 kept open (#6 #13 #17 #32 #43 #51 #55 #56 #58 #61 #72 #73), filed #88–#92. README / ROADMAP / HANDOFF rewritten to match reality; the 4 planning docs carry a dated "superseded" note.
+
+**(2026-09-11, code-review pass)** — Full review of all 45 closed issues as the review person. Ran the runnable gate (web build ✓, `tsc --noEmit` exit 0, 141 shared + 19 ingest + 8 simulator tests ✓, palette validator ✓, client-bundle secret scan ✓; latest `main` CI green incl. 160-assertion pgTAP). Read the high-risk code paths directly: `tariff-engine.ts` / `money.ts` (round-half-up correct for odd + even denominators, bigint paise throughout — clean), `auth.ts` + `middleware.ts` (`getClaims()` verifies ES256 locally, middleware honest that RLS is the real gate — no bypass, `?role=` genuinely gone), `services/ingest` (hmac / monotonicity / index), the netmetering + payment routes, RLS policy patterns in `0003`/`0004`/`0019`.
+
+Verdict: closed issues are genuinely done; no build/test/type errors. Every closed issue got a `**Review (2026-09-11)**` comment, the `code-reviewed` + `reviewer:neevmodh` labels, and assignee `neevmodh`.
+
+Five findings filed as comments; three promoted to tracked issues:
+- **#93** (from #15, medium) — ingest batch-flush failure silently drops readings and desyncs `registerStates` delta state; also uncached per-message `meters` SELECT and a plain wildcard sub (not `$share/`) that undercuts the #57 multi-worker story.
+- **#94** (from #28, low-med) — TOCTOU in `netmetering/[id]/decide`: status checked in the SELECT, not re-asserted in the UPDATE filter; audit the sibling action routes.
+- **#95** (from #39, low) — `payments/verify` resets a webhook-confirmed `paid` order to `attempted`; no idempotency on the `payments` insert. Webhook receiver itself clean.
+- #76 (doc) — `shortfallCredit` comment says "per 0.01 CUF point" but the math is per 1.0.
+- #19 (precondition) — `slabEngine`/`fixedCharge` assume pre-sorted input arrays without asserting it.
+
+Caveats noted on two "done" issues: #83 (low-literacy UX in the title never built — only EN/HI/GU translation) and #84 (bill explainer depends on the unverified Gemini key, #90).
+
 ## Open threads / next steps
 
-- [ ] **Remote demo seed data for #89/#90's new tables** (`work_orders`, `netmetering_applications`, `support_tickets`, and now the 6 society units) — schema and RLS are live on remote Supabase, but the demo rows only exist locally; the service-role key wasn't available to this session's shell (blocked by the auto-mode classifier, correctly). Run `vercel env pull apps/web/.env.production.local --environment=production`, then `SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY node scripts/seed_demo_users.mjs` (and the fleet/society seed scripts) against it yourself.
-- [ ] **Mobile app scope undecided** (PS1-PRIORITY-PLAN.md §4) — a PWA now exists (#89) as the practical middle ground; still no decision on a thin native shell or full Expo app.
-- [ ] **`supabase config push` pushes the whole auth config, not just what you changed** — always diff before/after pushing to remote; local dev defaults (email confirmation off, MFA off, short OTP frequency) are not safe to carry to the live project.
-- [ ] Webhook URL is a placeholder (`https://example.com/webhook`) — update once #39's real endpoint is deployed.
-- [ ] **Verify Gemini API keys actually authenticate** before building #35/#47 against them — format doesn't match standard Gemini keys (`AIza...`). If they fail, get a real key at aistudio.google.com/apikey.
-- [ ] Issue #66 (confirm final-round timeline) — not started.
-- [ ] Issue #65 (Vision API key) — not started.
-- [ ] Issue #66 (confirm final-round timeline) — not started.
+- [ ] **#93 / #94 / #95** — review findings, not yet fixed (see above).
+- [ ] **#88 — seed remote/prod Supabase** with demo rows for `0014`–`0038` (work orders, net-metering, tickets, society units, prepaid, P2P/EV, outages, inspections, KB, admin fixtures). Schema + RLS are live; rows are local-only. Needs the production service-role key run by a human — commands in the issue and in HANDOFF.
+- [ ] **#43 — mobile scope decision** (PS1-PRIORITY-PLAN §4). PWA exists as the middle ground; native Expo undecided. `apps/mobile` is empty by choice.
+- [ ] **#89 — Razorpay webhook URL** still `https://example.com/webhook`; point it at the deployed `/api/webhooks/razorpay`.
+- [ ] **#90 — verify the Gemini key authenticates** (`AQ.` prefix, not `AIza...`); blocks bill OCR (#35) and meter OCR eval (#47).
+- [ ] **#91 — reconcile P2P/EV** against ROADMAP §7 (keep and own them, or cut).
+- [ ] **#66 — confirm final-round timeline** (human answer needed).
+- [ ] `supabase config push` pushes the *whole* auth config — always diff before/after pushing to remote.

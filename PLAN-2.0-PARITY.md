@@ -1,5 +1,8 @@
 # PLAN — 2.0 Feature Parity + Meter-Read OCR
 
+> **Historical — superseded 2026-09-11.** 2.0 parity was reached and exceeded. Progress notes inside are point-in-time.
+> Kept for the reasoning it records. Current status: **[HANDOFF.md](HANDOFF.md)**; live backlog: GitHub issues.
+
 Goal (per your call, 2026-09-04): bring the 3.0 web app to **2.0's feature density** —
 every role panel gets **5+ real features/tools** — and add **meter-reading OCR** so a
 consumer can photograph their meter and self-submit a reading for billing, the way

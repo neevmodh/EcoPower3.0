@@ -1,5 +1,8 @@
 # PS1 re-prioritization plan
 
+> **Historical — superseded 2026-09-11.** The PS1 core loop is built. §4 (mobile scope: Expo vs PWA) is the one open decision — PWA shipped, native undecided (#43).
+> Kept for the reasoning it records. Current status: **[HANDOFF.md](HANDOFF.md)**; live backlog: GitHub issues.
+
 **Update (2026-08-30, later same day):** tightened further — PS1 gets
 finished *completely* before anything else starts, not just reordered ahead
 of it. Sprint 4 (DISCOM), Sprint 5 (OCR onboarding — that's PS4, not PS1),
