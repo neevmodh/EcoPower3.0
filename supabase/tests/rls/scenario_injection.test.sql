@@ -5,6 +5,10 @@
 begin;
 select plan(6);
 
+insert into auth.users (id, email) values
+  ('91000000-0000-0000-0000-0000000000f1', 'scenario.officer@test.local'),
+  ('91000000-0000-0000-0000-0000000000f2', 'scenario.admin@test.local');
+
 insert into orgs (id, name, type) values ('91000000-0000-0000-0000-000000000001', 'Test DISCOM', 'discom');
 insert into discom_divisions (id, discom_org_id, name, level) values
   ('91000000-0000-0000-0000-00000000000a', '91000000-0000-0000-0000-000000000001', 'Division A', 'division');
