@@ -101,9 +101,9 @@ Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 | 90 | Verify the Gemini API key actually authenticates | M4 | ml | high | — | ☐ | [#65](../../issues/65) |
 | 91 | Reconcile P2P trading + EV panels against §7 "out of scope" | M7 | docs | normal | — | ☐ | — |
 | 92 | Platform superadmin panel — cross-tenant admin surface | M2 | web | normal | — | ☑ | — |
-| 93 | Ingest: batch-flush failure silently drops readings + desyncs delta state | M1 | ingest | high | — | ☐ | — |
-| 94 | TOCTOU on decision/action write routes — re-assert state in the UPDATE | M3 | web | normal | — | ☐ | — |
-| 95 | payments/verify: order-status regression + no insert idempotency | M4 | payments | normal | 1 | ☐ | — |
+| 93 | Ingest: batch-flush failure silently drops readings + desyncs delta state | M1 | ingest | high | — | ☑ | — |
+| 94 | TOCTOU on decision/action write routes — re-assert state in the UPDATE | M3 | web | normal | — | ☑ | — |
+| 95 | payments/verify: order-status regression + no insert idempotency | M4 | payments | normal | 1 | ☑ | — |
 
 > **Code-review findings (2026-09-11):** #93–#95 came out of the review of the 45 closed issues. All closed issues carry the `code-reviewed` label. Softer notes (not tracked as issues): #76 comment says "per 0.01 CUF point" but the math is per 1.0; #19 slab/band arrays assumed pre-sorted without asserting.
 

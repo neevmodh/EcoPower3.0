@@ -338,9 +338,17 @@ Five findings filed as comments; three promoted to tracked issues:
 
 Caveats noted on two "done" issues: #83 (low-literacy UX in the title never built — only EN/HI/GU translation) and #84 (bill explainer depends on the unverified Gemini key, #90).
 
+**(2026-09-11, fix pass)** — Cleared the review findings, one branch per domain:
+- **#94 → PR #97** — TOCTOU on `netmetering/decide`, `work-orders/status`, `subscriptions/actions`: re-assert the allowed pre-states in the UPDATE filter, 409 on zero rows.
+- **#95 → PR #98** — `payments/verify`: guard the order update to non-terminal states, treat 23505 as idempotent success.
+- **#93 → PR #99** — ingest batch-flush failure now quarantines instead of dropping; serial→uuid cache; opt-in `MQTT_SHARED_GROUP` shared subscription (untested against the live broker).
+- **#19 / #76 → PR #100** — `slabEngine`/`fixedCharge` throw on out-of-order bounds; guarantee-engine credit-unit comment corrected. 4 new tests.
+
+All four merged to `main`, green: 145 shared + 19 ingest + 8 simulator tests, web `tsc` clean, build clean.
+
 ## Open threads / next steps
 
-- [ ] **#93 / #94 / #95** — review findings, not yet fixed (see above).
+- [ ] **#93 shared-subscription path** — `MQTT_SHARED_GROUP` is untested against the live EMQX broker; smoke-test before relying on multi-worker.
 - [ ] **#88 — seed remote/prod Supabase** with demo rows for `0014`–`0038` (work orders, net-metering, tickets, society units, prepaid, P2P/EV, outages, inspections, KB, admin fixtures). Schema + RLS are live; rows are local-only. Needs the production service-role key run by a human — commands in the issue and in HANDOFF.
 - [ ] **#43 — mobile scope decision** (PS1-PRIORITY-PLAN §4). PWA exists as the middle ground; native Expo undecided. `apps/mobile` is empty by choice.
 - [ ] **#89 — Razorpay webhook URL** still `https://example.com/webhook`; point it at the deployed `/api/webhooks/razorpay`.
