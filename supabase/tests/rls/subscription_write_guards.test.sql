@@ -6,7 +6,7 @@
 -- PostgREST calls that never touch the app's actual business logic.
 
 begin;
-select plan(9);
+select plan(15);
 
 insert into orgs (id, name, type) values ('93000000-0000-0000-0000-000000000001', 'Test DISCOM', 'discom');
 insert into discom_divisions (id, discom_org_id, name, level) values
@@ -20,7 +20,13 @@ insert into auth.users (id, email) values
   ('93000000-0000-0000-0000-0000000000e2', 'subguard.y@test.local');
 
 insert into service_connections (id, consumer_number, dt_id, owner_user_id, tariff_category, phase, connection_type) values
-  ('93000000-0000-0000-0000-0000000000c1', 'CN-X-SUBG', '93000000-0000-0000-0000-0000000000a3', '93000000-0000-0000-0000-0000000000e1', 'RGP', 'single', 'postpaid');
+  ('93000000-0000-0000-0000-0000000000c1', 'CN-X-SUBG', '93000000-0000-0000-0000-0000000000a3', '93000000-0000-0000-0000-0000000000e1', 'RGP', 'single', 'postpaid'),
+  -- c3/c4 are dedicated to the upgrade_subscription() RPC tests below —
+  -- separate connections from c1 so their fixture subscriptions don't
+  -- collide with subscriptions_one_active_per_connection (0012), the same
+  -- bug this suite already hit once with a same-plan_id no-op.
+  ('93000000-0000-0000-0000-0000000000c3', 'CN-X2-SUBG', '93000000-0000-0000-0000-0000000000a3', '93000000-0000-0000-0000-0000000000e1', 'RGP', 'single', 'postpaid'),
+  ('93000000-0000-0000-0000-0000000000c4', 'CN-Y-SUBG', '93000000-0000-0000-0000-0000000000a3', '93000000-0000-0000-0000-0000000000e2', 'RGP', 'single', 'postpaid');
 
 insert into service_types (id, code, name, unit, meter_source, billing_basis) values
   ('93000000-0000-0000-0000-0000000000d1', 'solar_kwh_guard', 'Solar', 'kwh', 'meter_readings', 'included_plus_overage');
@@ -31,6 +37,13 @@ insert into plans (id, code, name, description, price_paise_per_month) values
 
 insert into plan_services (plan_id, service_type_id, included_quantity, overage_rate_paise_per_unit, guarantee_metric, guarantee_contracted_value, guarantee_rate_paise_per_unit_shortfall, guarantee_cap_paise) values
   ('93000000-0000-0000-0000-0000000000b1', '93000000-0000-0000-0000-0000000000d1', 300, 500, 'availability_pct', 0.98, 100000, 50000);
+
+-- Two more subscriptions, set up directly (fixture, not a test of the
+-- insert guard) — one per consumer, dedicated to the upgrade_subscription()
+-- RPC tests so they don't get entangled with the direct-write tests' state.
+insert into subscriptions (id, service_connection_id, plan_id) values
+  ('93000000-0000-0000-0000-000000000060', '93000000-0000-0000-0000-0000000000c3', '93000000-0000-0000-0000-0000000000b1'),
+  ('93000000-0000-0000-0000-000000000061', '93000000-0000-0000-0000-0000000000c4', '93000000-0000-0000-0000-0000000000b1');
 
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"93000000-0000-0000-0000-0000000000e1","role":"authenticated","app_metadata":{"roles":["consumer"],"org_ids":[],"division_ids":[]}}';
@@ -56,6 +69,20 @@ select throws_ok(
   '42501',
   null,
   'a consumer cannot change plan_id and status in the same write'
+);
+
+-- The bare case: plan_id alone, status left untouched at 'active'. This is
+-- the exact gap a code review caught in the first version of this guard —
+-- changing plan_id while remaining active looked like "the legitimate
+-- upgrade path" to the trigger, but a direct client write and the real
+-- app's upgrade action are indistinguishable at this layer. Fixed in 0045
+-- by moving upgrades to upgrade_subscription() and rejecting every direct
+-- plan_id change outright.
+select throws_ok(
+  $$ update subscriptions set plan_id = '93000000-0000-0000-0000-0000000000b2' where id = '93000000-0000-0000-0000-00000000005f' $$,
+  '42501',
+  null,
+  'a consumer cannot change plan_id alone via a direct update, even while staying active'
 );
 
 -- The legitimate active -> paused transition still works.
@@ -97,6 +124,38 @@ select lives_ok(
   $$ insert into service_guarantees (service_connection_id, subscription_id, metric, contracted_value, measurement_window, rate_paise_per_unit_shortfall, cap_paise, effective_from)
      values ('93000000-0000-0000-0000-0000000000c1', '93000000-0000-0000-0000-00000000005f', 'availability_pct', 0.98, 'monthly', 100000, 50000, current_date) $$,
   'inserting the plan''s real catalog terms verbatim (what /api/subscriptions actually does) still works'
+);
+
+-- upgrade_subscription() (0045) — the RPC that replaces the direct write
+-- for plan changes.
+select lives_ok(
+  $$ select upgrade_subscription('93000000-0000-0000-0000-000000000060', '93000000-0000-0000-0000-0000000000b2') $$,
+  'the subscription owner can upgrade via the RPC'
+);
+
+select ok(
+  (select plan_id from subscriptions where id = '93000000-0000-0000-0000-000000000060') = '93000000-0000-0000-0000-0000000000b2',
+  'the upgrade actually changed plan_id'
+);
+
+select ok(
+  (select from_plan_id from subscription_events where subscription_id = '93000000-0000-0000-0000-000000000060' and event_type = 'upgraded')
+    = '93000000-0000-0000-0000-0000000000b1',
+  'the audit event records the correct pre-upgrade plan, not the already-updated one'
+);
+
+select throws_ok(
+  $$ select upgrade_subscription('93000000-0000-0000-0000-000000000061', '93000000-0000-0000-0000-0000000000b2') $$,
+  '42501',
+  null,
+  'consumer X cannot upgrade consumer Y''s subscription via the RPC'
+);
+
+select throws_ok(
+  $$ select upgrade_subscription('93000000-0000-0000-0000-00000000005f', '93000000-0000-0000-0000-0000000000b1') $$,
+  '42501',
+  null,
+  'the RPC refuses to upgrade a subscription that is not active (this one is paused from the direct-write tests above)'
 );
 
 select * from finish();

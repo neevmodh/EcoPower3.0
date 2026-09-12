@@ -2,6 +2,7 @@
 // {status:'ok'} regardless of whether anything downstream actually worked.
 // Point external uptime monitoring at this: a measured 99.x% over weeks
 // beats a claimed 99.99%, and elapsed time can't be manufactured later.
+import { GEMINI_MODEL } from "@/lib/ai/gemini";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -9,10 +10,19 @@ export const dynamic = "force-dynamic";
 const TIMEOUT_MS = 4000;
 
 async function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(`${label} timed out after ${TIMEOUT_MS}ms`)), TIMEOUT_MS),
-  );
-  return Promise.race([promise, timeout]);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${TIMEOUT_MS}ms`)), TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    // Without this, every request that resolves before the timeout still
+    // leaves the timer running — it fires later and rejects a promise
+    // nothing is awaiting, an unhandled rejection on every single healthy
+    // check. On a route meant to be polled continuously, that's not rare.
+    if (timer) clearTimeout(timer);
+  }
 }
 
 async function checkDatabase(): Promise<{ ok: boolean; detail?: string }> {
@@ -40,7 +50,7 @@ async function checkGemini(): Promise<{ ok: boolean; detail?: string }> {
     // authenticates (the open question in #90) without spending generation
     // tokens on every health-check tick.
     const res = await withTimeout(
-      fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite?key=${apiKey}`),
+      fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}?key=${apiKey}`),
       "gemini",
     );
     if (!res.ok) return { ok: false, detail: `HTTP ${res.status}` };
