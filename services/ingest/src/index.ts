@@ -280,15 +280,23 @@ function main() {
     clientId: `ingest-${Math.random().toString(16).slice(2)}`,
   });
 
-  // With MQTT_SHARED_GROUP set, multiple worker instances load-balance the
-  // stream via an EMQX shared subscription ($share/<group>/...) instead of
-  // every worker receiving every message. The received topic is still the
-  // real one, so the handler's topic parsing is unchanged. Single-worker
-  // deployments leave it unset.
-  const sharedGroup = process.env.MQTT_SHARED_GROUP;
-  const subTopic = sharedGroup
-    ? `$share/${sharedGroup}/ecopower/v1/+/readings`
-    : "ecopower/v1/+/readings";
+  // MQTT_SHARED_GROUP is NOT yet safe to use — registerStates and
+  // meterIdCache above are per-process in-memory maps. With an EMQX shared
+  // subscription load-balancing readings across multiple worker instances,
+  // a meter's consecutive readings can land on different workers; the
+  // second worker has no entry for that meter, evaluateRegister() treats
+  // it as a cold "first-reading," and the real delta is silently lost —
+  // corrupting billing-relevant data with no error logged. Refuse to start
+  // rather than run in a mode that quietly corrupts data; multi-worker
+  // scaling needs the register-state lookup backed by something shared
+  // (the DB, or a shared cache) before this flag is safe to set.
+  if (process.env.MQTT_SHARED_GROUP) {
+    throw new Error(
+      "MQTT_SHARED_GROUP is set, but registerStates/meterIdCache are per-process — running more than one " +
+        "worker with it would silently corrupt delta computation. Not safe yet; see the comment here before enabling.",
+    );
+  }
+  const subTopic = "ecopower/v1/+/readings";
 
   client.on("connect", () => {
     console.log("[mqtt] ingest worker connected");
