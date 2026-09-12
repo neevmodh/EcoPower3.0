@@ -29,16 +29,26 @@ export default async function DiscomPage() {
   if (!scope) redirect("/login");
   const { user, divisionIds } = scope;
 
-  // All independent — one parallel round trip instead of five serial ones.
-  const [{ data: connections }, { data: dts }, { data: meters }, { data: lossRows }, loadResult] = await Promise.all([
-    supabase.from("service_connections").select("id, dt_id"),
-    supabase.from("distribution_transformers").select("id, name, capacity_kva"),
-    supabase.from("meters").select("id, status, dt_id, service_connection_id"),
-    supabase.rpc("dt_loss_summary"),
-    // Division load curve — hourly import vs behind-meter solar, last 48h;
-    // RLS on meter_readings (via the 0031 rollup) scopes it to this division.
-    supabase.rpc("division_load_profile", { p_hours: 48 }),
-  ]);
+  // All independent — one parallel round trip instead of six serial ones.
+  const [{ data: connections }, { data: dts }, { data: meters }, { data: lossRows }, loadResult, quarantineResult] =
+    await Promise.all([
+      supabase.from("service_connections").select("id, dt_id"),
+      supabase.from("distribution_transformers").select("id, name, capacity_kva"),
+      supabase.from("meters").select("id, status, dt_id, service_connection_id"),
+      supabase.rpc("dt_loss_summary"),
+      // Division load curve — hourly import vs behind-meter solar, last 48h;
+      // RLS on meter_readings (via the 0031 rollup) scopes it to this division.
+      supabase.rpc("division_load_profile", { p_hours: 48 }),
+      // Readings the ingest worker refused to silently drop (#15) — clock
+      // skew, a reading dated in the future. A real zero here is honest
+      // (nothing's gone wrong); this is a genuine count, not a comparison
+      // badge, so there's no null-vs-zero ambiguity to guard against.
+      supabase
+        .from("quarantine_readings")
+        .select("id", { count: "exact", head: true })
+        .gte("received_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+    ]);
+  const quarantineCount = quarantineResult.count ?? 0;
   const { data: loadRaw } = loadResult as {
     data: Array<{ bucket: string; import_kwh: number; export_kwh: number; meters: number }> | null;
   };
@@ -126,6 +136,20 @@ export default async function DiscomPage() {
         <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Active meters</div>
           <div className="text-2xl font-semibold tabular">{activeMeters}</div>
+        </div>
+        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
+          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Quarantined readings · 7d</div>
+          <div
+            className="text-2xl font-semibold tabular"
+            style={{ color: quarantineCount > 0 ? "var(--color-status-warning)" : "var(--color-status-good)" }}
+          >
+            {quarantineCount}
+          </div>
+          {quarantineCount > 0 && (
+            <div className="text-xs mt-1" style={{ color: "var(--color-text-tertiary)" }}>
+              Clock-skewed readings the ingest worker refused to drop silently
+            </div>
+          )}
         </div>
         <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
           <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Avg. AT&C loss</div>
