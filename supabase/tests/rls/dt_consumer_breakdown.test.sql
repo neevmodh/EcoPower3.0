@@ -5,7 +5,7 @@
 -- even when they pass a valid DT id.
 
 begin;
-select plan(6);
+select plan(8);
 
 select create_monthly_partition(date_trunc('month', now())::date);
 
@@ -19,11 +19,19 @@ insert into distribution_transformers (id, feeder_id, name) values ('c0000000-00
 
 insert into service_connections (id, consumer_number, dt_id, tariff_category, phase, connection_type, sanctioned_load_kw) values
   ('c0000000-0000-0000-0000-0000000000c1', 'CN-CLEAN', 'c0000000-0000-0000-0000-0000000000a3', 'RGP', 'single', 'postpaid', 4),
-  ('c0000000-0000-0000-0000-0000000000c2', 'CN-TAMPER', 'c0000000-0000-0000-0000-0000000000a3', 'RGP', 'single', 'postpaid', 4);
+  ('c0000000-0000-0000-0000-0000000000c2', 'CN-TAMPER', 'c0000000-0000-0000-0000-0000000000a3', 'RGP', 'single', 'postpaid', 4),
+  ('c0000000-0000-0000-0000-0000000000c3', 'CN-OFFLINE', 'c0000000-0000-0000-0000-0000000000a3', 'RGP', 'single', 'postpaid', 4);
 
-insert into meters (id, serial, service_connection_id) values
-  ('c0000000-0000-0000-0000-0000000000d1', 'MTR-CLEAN', 'c0000000-0000-0000-0000-0000000000c1'),
-  ('c0000000-0000-0000-0000-0000000000d2', 'MTR-TAMPER', 'c0000000-0000-0000-0000-0000000000c2');
+insert into meters (id, serial, service_connection_id, status) values
+  ('c0000000-0000-0000-0000-0000000000d1', 'MTR-CLEAN', 'c0000000-0000-0000-0000-0000000000c1', 'active'),
+  ('c0000000-0000-0000-0000-0000000000d2', 'MTR-TAMPER', 'c0000000-0000-0000-0000-0000000000c2', 'active'),
+  ('c0000000-0000-0000-0000-0000000000d3', 'MTR-OFFLINE', 'c0000000-0000-0000-0000-0000000000c3', 'offline');
+
+-- The offline meter (0048's sweeper) has a recent-ish reading, so it's the
+-- 'offline' status specifically that must contribute the +25, not the
+-- separate ">3 days silent" signal (which this reading is too fresh for).
+insert into meter_readings (meter_id, reading_ts, delta_import_kwh, tamper_flags) values
+  ('c0000000-0000-0000-0000-0000000000d3', now() - interval '20 minutes', 5, 0);
 
 -- Clean consumer: healthy consumption, no tamper flags.
 insert into meter_readings (meter_id, reading_ts, delta_import_kwh, tamper_flags) values
@@ -61,8 +69,21 @@ select is(
 
 select is(
   (select count(*)::int from dt_consumer_breakdown('c0000000-0000-0000-0000-0000000000a3')),
-  2,
-  'both consumers on the DT are listed'
+  3,
+  'all three consumers on the DT are listed'
+);
+
+-- 0049: an 'offline' meter (0048's sweeper) on a live connection scores
+-- the same +25 as faulty/inactive — unmetered draw by definition, same
+-- reasoning 0022 already applies to those two statuses.
+select ok(
+  (select suspicion_score from dt_consumer_breakdown('c0000000-0000-0000-0000-0000000000a3') where consumer_number = 'CN-OFFLINE') >= 25,
+  'an offline meter contributes at least 25 to the suspicion score'
+);
+
+select ok(
+  (select 'meter offline on a live connection' = any(suspicion_reasons) from dt_consumer_breakdown('c0000000-0000-0000-0000-0000000000a3') where consumer_number = 'CN-OFFLINE'),
+  'the offline reason names the status explicitly'
 );
 
 -- Officer of Division B: the function is security invoker, so RLS on
