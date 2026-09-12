@@ -6,6 +6,19 @@ If you only read one section, read [Reality check](#reality-check-what-actually-
 
 ---
 
+## ⚠️ Action needed: Railway service paths changed (2026-09-12)
+
+`apps/simulator` and `services/ingest` were folded into `apps/web/workers/{simulator,ingest}` — one codebase, one `package.json` — per a request to consolidate everything into the Next.js app as far as technically possible. **They still run as persistent Node processes on Railway, not as Next.js routes** — a serverless request/response function can't hold the open MQTT connection this needs. That part didn't change; only where the source code lives did.
+
+**This session had no access to the Railway account these services are deployed under** (`neev3377` — see [Identity gotcha](#identity-gotcha)), so the two Railway service configs were **not** updated and need a manual fix before their next deploy/restart, or they'll fail to find `src/index.ts` at the old path:
+
+- **ingest service** — root directory → `apps/web`, start command → `pnpm worker:ingest`
+- **simulator service** — root directory → `apps/web`, start command → `pnpm worker:simulator`
+
+Both now need `apps/web`'s full `pnpm install` (they share its `package.json`/lockfile), not a standalone package install.
+
+---
+
 ## What this is
 
 **EcoPower 3.0** — an Energy-as-a-Service platform for Indian DISCOMs (electricity distribution utilities), built for the final round of **INSTINCT 4.0** (a hackathon run by IntelliSmart Infra / EESL+NIIF, with The Energy Society, IIT Delhi). It's a from-scratch rewrite of a prior entry (`EcoPower2.0`, at `/Users/neev/Downloads/Ecopower/EcoPower2.0` on this machine) — not an iteration, a deliberate greenfield redo. The reasons are in `ROADMAP.md §2` and `DESIGN.md §1`, and boil down to: 2.0 had decorative UI that outlived its data (fake `+12%` badges over `0.0 kWh`), no real RLS, and a mocked payment flow. 3.0's entire design philosophy is the inverse of that — see `DESIGN.md` principle P1: **"no component may outlive its data."**
@@ -21,8 +34,8 @@ The docs in this repo (`README.md`, `ROADMAP.md`, `BUILD-ORDER.md`) still gestur
 | Path | Status |
 |---|---|
 | `apps/web` | **Real, working, deployed.** Next.js 15 App Router. This is 95% of what exists. |
-| `apps/simulator` | **Real.** Publishes physically-modelled AMI readings (solar yield + household load models) over MQTT. |
-| `services/ingest` | **Real.** MQTT subscriber → validates HMAC + register monotonicity → writes to partitioned Postgres. |
+| `apps/web/workers/simulator` | **Real.** Publishes physically-modelled AMI readings (solar yield + household load models) over MQTT. Runs as a long-lived Node process, not a Next.js route — MQTT needs a persistent connection. |
+| `apps/web/workers/ingest` | **Real.** MQTT subscriber → validates HMAC + register monotonicity → writes to partitioned Postgres. Same reason — a persistent MQTT subscriber can't be a serverless route. |
 | `packages/shared` | **Real.** Tariff engine, OBIS helpers, validated colour palette. Zero-dependency TS, imported by web + scripts. |
 | `supabase/` | **Real.** 38 migrations, RLS + FORCE on every table, a pgTAP suite (24 files / 160 assertions) run in CI. |
 | `apps/mobile` | **Empty.** Just a `.gitkeep`. No Expo app — the mobile channel is a real installable PWA in `apps/web` (`app/manifest.ts`, `next/og` icon, pass-through service worker). |
@@ -52,9 +65,9 @@ supabase db reset                 # applies all 38 migrations + resets to clean 
 SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SERVICE_ROLE_KEY=<local anon/service key from `supabase status`> \
   node scripts/seed_demo_users.mjs
 SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SERVICE_ROLE_KEY=<same> \
-  services/ingest/node_modules/.bin/tsx scripts/seed_discom_fleet.mjs
+  apps/web/node_modules/.bin/tsx scripts/seed_discom_fleet.mjs
 SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SERVICE_ROLE_KEY=<same> \
-  services/ingest/node_modules/.bin/tsx scripts/seed_society_units.mjs
+  apps/web/node_modules/.bin/tsx scripts/seed_society_units.mjs
 
 # Run the web app
 cd apps/web

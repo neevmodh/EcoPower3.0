@@ -55,7 +55,7 @@ The test for T3 is: *if you aggregate our synthetic population up to division le
 | Specific yield | **≈ 1,600 kWh/kWp/year** | `5.75 × 365 × 0.80 ≈ 1,679`; we use 1,600 as the conservative central value |
 | Daily, 1 kWp | **≈ 4.0 – 4.5 kWh/day** annual mean | seasonal swing modelled, not averaged away |
 
-We do **not** hardcode a yield number. `apps/simulator` (#12) computes a clear-sky curve from solar position for 23.03°N, 72.58°E, then applies cloud cover from a live weather API, a soiling ramp, and a temperature derate. The yield above is what the model should reproduce over a year — it is a **validation target**, not an input.
+We do **not** hardcode a yield number. `apps/web/workers/simulator` (#12) computes a clear-sky curve from solar position for 23.03°N, 72.58°E, then applies cloud cover from a live weather API, a soiling ramp, and a temperature derate. The yield above is what the model should reproduce over a year — it is a **validation target**, not an input.
 
 ### 3.2 Weather — drives the cloud/temperature terms
 Open-Meteo (free, no key, hourly forecast + historical reanalysis) as primary; IMD for citation. Feeds both the simulator (#12) and the forecasting service (#53).

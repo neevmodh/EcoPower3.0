@@ -7,7 +7,7 @@
 // Usage:
 //   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
 //   DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres \
-//   services/ingest/node_modules/.bin/tsx scripts/seed_society_units.mjs [--days=21]
+//   apps/web/node_modules/.bin/tsx scripts/seed_society_units.mjs [--days=21]
 
 import pg from "pg";
 import { pvYieldKw } from "../packages/shared/src/ami/pv-yield.ts";

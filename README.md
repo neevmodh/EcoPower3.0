@@ -170,15 +170,20 @@ The tariff seed is read from the actual Torrent Power Ahmedabad GERC order via `
 └───────────────▲───────────────────────────────┘
                 │ service_role (COPY, upsert, broadcast)
 ┌───────────────┴───────────────────────────────┐
-│         services/ingest  (Railway)            │   verify HMAC · monotonicity
-│         MQTT subscriber → batch COPY          │   · rollover · quarantine
+│  apps/web/workers/ingest  (Railway)           │   verify HMAC · monotonicity
+│  MQTT subscriber → batch COPY                 │   · rollover · quarantine
 └───────────────▲───────────────────────────────┘
                 │ ecopower/v1/{serial}/readings  (DLMS/OBIS, HMAC)
 ┌───────────────┴───────────────────────────────┐
-│  EMQX broker (Railway) ◄── apps/simulator     │   solar-position + Haurwitz
-│  per-device auth · topic ACL                  │   clear-sky + stochastic load
+│  EMQX broker (Railway) ◄── apps/web/workers/  │   solar-position + Haurwitz
+│  per-device auth · topic ACL         simulator│   clear-sky + stochastic load
 └───────────────────────────────────────────────┘
 ```
+
+Both workers live inside `apps/web` (one codebase, one `package.json`) but run as
+long-lived Node processes on Railway, not as Next.js routes — an MQTT
+subscriber needs a persistent connection, which a serverless request/response
+function can't hold.
 
 ---
 
@@ -187,8 +192,8 @@ The tariff seed is read from the actual Torrent Power Ahmedabad GERC order via `
 | Path | State |
 |---|---|
 | `apps/web` | **Real, deployed.** Next.js 15, 46 pages across 7 panels. ~95% of the codebase. |
-| `apps/simulator` | **Real.** Physically-modelled AMI readings over MQTT. |
-| `services/ingest` | **Real.** MQTT → HMAC + monotonicity validation → partitioned Postgres. |
+| `apps/web/workers/simulator` | **Real.** Physically-modelled AMI readings over MQTT. Runs as a persistent Node process (Railway), not a route — MQTT needs an open connection. |
+| `apps/web/workers/ingest` | **Real.** MQTT → HMAC + monotonicity validation → partitioned Postgres. Same reason, same deployment. |
 | `packages/shared` | **Real.** Zero-dependency TS — tariff engine, guarantee engine, OBIS / HESAdapter, design tokens + palette validator. |
 | `supabase/` | **Real.** 38 migrations, RLS + FORCE on every table, 24 pgTAP test files in CI. |
 | `apps/mobile` | **Empty.** No Expo app yet — the PWA covers the mobile channel. |
@@ -226,8 +231,8 @@ export SUPABASE_URL=http://127.0.0.1:54321
 export SUPABASE_SERVICE_ROLE_KEY=<from `supabase status`>
 
 node scripts/seed_demo_users.mjs
-services/ingest/node_modules/.bin/tsx scripts/seed_discom_fleet.mjs
-services/ingest/node_modules/.bin/tsx scripts/seed_society_units.mjs
+apps/web/node_modules/.bin/tsx scripts/seed_discom_fleet.mjs
+apps/web/node_modules/.bin/tsx scripts/seed_society_units.mjs
 ```
 
 ### 4. Run the web app
@@ -238,11 +243,13 @@ cd apps/web && pnpm dev            # http://localhost:3000
 
 ### 5. (Optional) Run the telemetry pipeline
 
+Both workers live inside `apps/web` — run them from there, each in its own terminal:
+
 ```bash
 # terminal A — ingest worker
-cd services/ingest && pnpm dev
+cd apps/web && pnpm worker:ingest
 # terminal B — AMI simulator
-cd apps/simulator && pnpm dev
+cd apps/web && pnpm worker:simulator
 ```
 
 ---
@@ -272,9 +279,10 @@ EcoPower3.0/
 ├── apps/web/            Next.js 15 — route group per panel
 │   ├── app/(consumer|society|discom|operator|field|support|admin)/
 │   ├── app/api/         Razorpay, AI, health, workflow RPCs
-│   └── lib/             auth (JWT claims → scope), supabase clients, i18n
-├── apps/simulator/      AMI simulator — solar + load physics → MQTT
-├── services/ingest/     MQTT subscriber — HMAC · monotonicity · COPY
+│   ├── lib/             auth (JWT claims → scope), supabase clients, i18n
+│   └── workers/         ingest (MQTT→Postgres) + simulator — long-lived
+│                        Node processes deployed separately (Railway), not
+│                        Next.js routes; one codebase, one package.json
 ├── packages/shared/     tariff + guarantee engine · OBIS · HESAdapter · tokens
 │   └── src/billing/     bigint-paise pure functions, golden + property tests
 ├── supabase/
@@ -290,9 +298,8 @@ EcoPower3.0/
 
 | Suite | Count |
 |---|---|
-| `packages/shared` (tariff, guarantee, OBIS, HESAdapter, tokens) | 145 tests |
-| `services/ingest` (HMAC, monotonicity, batcher) | 19 tests |
-| `apps/simulator` (meter tick, publisher) | 8 tests |
+| `packages/shared` (tariff, guarantee, OBIS, HESAdapter, tokens) | 151 tests |
+| `apps/web/workers` (HMAC, monotonicity, batcher, meter tick, publisher) | 27 tests |
 | pgTAP RLS suite (`supabase test db`) | 160 assertions / 24 files |
 
 **CI** (`.github/workflows/ci.yml`) runs on every push: palette validation → Biome lint → build → **client-bundle secret scan** (fails if a server secret reaches the browser) → tests → fresh `supabase db reset` → pgTAP.
