@@ -24,18 +24,36 @@ select isnt_empty(
   $$ select 1 from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1' $$,
   'tenant A provisioned'
 );
+select diag(coalesce(
+  (select 'tenant A provisioning failed: ' || error_message from sandbox_provisioning_errors where user_id = '9a000000-0000-0000-0000-0000000000a1'),
+  'tenant A: no provisioning error logged'
+));
+select diag(coalesce(
+  (select 'tenant B provisioning failed: ' || error_message from sandbox_provisioning_errors where user_id = '9a000000-0000-0000-0000-0000000000b1'),
+  'tenant B: no provisioning error logged'
+));
+
 select isnt_empty(
   $$ select 1 from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1' $$,
   'tenant B provisioned'
 );
 
-select discom_org_id as a_discom_org_id, society_org_id as a_society_org_id,
-       resco_org_id as a_resco_org_id, division_id as a_division_id, dt_id as a_dt_id
-from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1' \gset
-
-select discom_org_id as b_discom_org_id, society_org_id as b_society_org_id,
-       resco_org_id as b_resco_org_id, division_id as b_division_id, dt_id as b_dt_id
-from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1' \gset
+-- Scalar subqueries, not a plain SELECT ... WHERE — guarantees exactly one
+-- row (nulls if provisioning silently failed) so \gset itself can never
+-- abort the file; a failed provision surfaces as ordinary failed
+-- assertions below instead, with the diag() above already naming why.
+select
+  (select discom_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1') as a_discom_org_id,
+  (select society_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1') as a_society_org_id,
+  (select resco_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1') as a_resco_org_id,
+  (select division_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1') as a_division_id,
+  (select dt_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1') as a_dt_id,
+  (select discom_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') as b_discom_org_id,
+  (select society_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') as b_society_org_id,
+  (select resco_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') as b_resco_org_id,
+  (select division_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') as b_division_id,
+  (select dt_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') as b_dt_id
+\gset
 
 -- ============================================================
 -- Tenant A as discom_officer: sees tenant A's own service_connections,
