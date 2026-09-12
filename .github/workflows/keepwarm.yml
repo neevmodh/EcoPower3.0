@@ -1,0 +1,33 @@
+name: Keep warm
+
+# Pings the deployed app every 6 hours so Vercel's serverless function and
+# Supabase's connection pooler don't go cold between visits. Measured
+# 2026-09-12: a cold first request took 4.8s (landing) / 1.9s (/api/health);
+# once warm, both settled under 1s. Free Supabase projects also pause
+# entirely after 7 days with zero traffic — this keeps that from ever
+# happening, at zero cost (GitHub Actions free tier, one curl every 6h).
+#
+# This does not replace real uptime monitoring (#56/#103) — it's a side
+# effect of pinging, not a substitute for actually watching the health
+# response for failures.
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /api/health
+        run: |
+          url="${{ vars.APP_URL || 'https://ecopower3.vercel.app' }}/api/health"
+          echo "Pinging $url"
+          status=$(curl -s -o /tmp/health.json -w "%{http_code}" -m 20 "$url" || echo "000")
+          cat /tmp/health.json 2>/dev/null || true
+          echo
+          echo "HTTP status: $status"
+          if [ "$status" != "200" ]; then
+            echo "::warning::keep-warm ping got HTTP $status, not 200 — 503 means /api/health's own DB check failed, not just a cold start"
+          fi
