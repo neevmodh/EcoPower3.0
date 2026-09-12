@@ -237,6 +237,8 @@ Smart Meter → NIC → HES → MDM → EcoPower
 | DISCOM model | **Gujarat** — Torrent Power (Ahmedabad) + GUVNL's DGVCL/MGVCL/PGVCL/UGVCL, GERC tariffs | keeps 2.0's Ahmedabad grounding; real citable tariff orders |
 | Money | `bigint` paise everywhere | never float |
 
+**This is the original plan-time layout** — `apps/simulator` and `services/ingest` were later folded into `apps/web/workers/{simulator,ingest}` (one codebase, still deployed separately on Railway as persistent processes since MQTT needs an open connection). See README.md's Project Structure for the current tree.
+
 ```
 EcoPower3.0/
 ├── apps/web/            Next.js 15 — route groups per panel

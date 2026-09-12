@@ -19,9 +19,9 @@ import pg from "pg";
 import { pvYieldKw } from "../packages/shared/src/ami/pv-yield.ts";
 import { deriveHouseholdProfile, householdLoadKw } from "../packages/shared/src/ami/appliance-load.ts";
 
-// Reuses the exact same physics (#12) as apps/simulator/src/meter-tick.ts,
+// Reuses the exact same physics (#12) as apps/web/workers/simulator/meter-tick.ts,
 // recomposed locally — run via `tsx` (not plain `node`), same as every
-// other TS entrypoint in this repo (services/ingest's own "start" script).
+// other TS entrypoint in this repo (apps/web's ingest worker "start" script).
 function istHour(date) {
   const utcHour = date.getUTCHours() + date.getUTCMinutes() / 60;
   return (utcHour + 5.5) % 24;
