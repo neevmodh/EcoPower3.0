@@ -52,6 +52,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
   }
 
+  // Upgrade goes through upgrade_subscription() (0045), not a raw table
+  // update — a direct client PATCH of plan_id is now rejected outright
+  // by guard_subscription_update, since it's otherwise indistinguishable
+  // from a consumer self-upgrading without ever going through this route.
+  // The RPC changes plan_id and writes the subscription_events row in one
+  // atomic call, so there's no window where one happens without the other.
+  if (action === "upgrade") {
+    const { error: upgradeError } = await supabase.rpc("upgrade_subscription", {
+      p_subscription_id: id,
+      p_new_plan_id: body.toPlanId,
+    });
+    if (upgradeError) {
+      const status = upgradeError.code === "42501" ? 409 : 400;
+      return Response.json({ error: upgradeError.message }, { status });
+    }
+    return Response.json({ ok: true });
+  }
+
   const now = new Date().toISOString();
   let updatePayload: Record<string, unknown> = {};
   // subscription_event_type is past-tense ('paused', not 'pause') — the
@@ -61,10 +79,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     pause: "paused",
     resume: "resumed",
     cancel: "cancelled",
-    upgrade: "upgraded",
   };
   const eventType = EVENT_TYPE[action];
-  let toPlanId: string | null = null;
+  const toPlanId: string | null = null;
 
   switch (action) {
     case "pause":
@@ -76,19 +93,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     case "cancel":
       updatePayload = { status: "cancelled", cancelled_at: now, cancel_reason: body.reason ?? null };
       break;
-    case "upgrade": {
-      const { data: newPlan, error: newPlanError } = await supabase
-        .from("plans")
-        .select("id, active")
-        .eq("id", body.toPlanId)
-        .single();
-      if (newPlanError || !newPlan || !newPlan.active) {
-        return Response.json({ error: "target plan not found or inactive" }, { status: 404 });
-      }
-      updatePayload = { plan_id: newPlan.id };
-      toPlanId = newPlan.id;
-      break;
-    }
   }
 
   // Re-assert the allowed source states in the filter — a double-submit or a

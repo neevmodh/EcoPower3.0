@@ -9,7 +9,7 @@
 // hidden reasoning phase and is the right fit for a narration task this
 // small (verified: a complete, well-formed reply in ~160 tokens, no
 // truncation).
-const GEMINI_MODEL = "gemini-3.5-flash-lite";
+export const GEMINI_MODEL = "gemini-3.5-flash-lite";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 export async function geminiGenerate(systemPrompt: string, userMessage: string): Promise<string> {
