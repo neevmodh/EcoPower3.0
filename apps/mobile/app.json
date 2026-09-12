@@ -22,6 +22,16 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-router", "expo-secure-store", "expo-sqlite"]
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-sqlite",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "EcoPower uses the camera to scan a meter's QR code or barcode during commissioning and inspections."
+        }
+      ]
+    ]
   }
 }

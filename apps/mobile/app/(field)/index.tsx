@@ -138,21 +138,36 @@ export default function FieldHome() {
               <Text className="mt-1 text-xs text-gray-500">
                 {item.service_connections?.consumer_number ?? "—"} · {status}
               </Text>
-              {next ? (
+              <View className="mt-3 flex-row gap-2">
+                {next ? (
+                  <TouchableOpacity
+                    onPress={() =>
+                      enqueue("work_order_status", {
+                        workOrderId: item.id,
+                        action: next.action,
+                      })
+                    }
+                    className="self-start rounded-lg bg-categorical-consumption px-3 py-1.5"
+                  >
+                    <Text className="text-sm font-medium text-white">
+                      {next.label}
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
                 <TouchableOpacity
                   onPress={() =>
-                    enqueue("work_order_status", {
-                      workOrderId: item.id,
-                      action: next.action,
+                    router.push({
+                      pathname: "/(field)/scan",
+                      params: { workOrderId: item.id },
                     })
                   }
-                  className="mt-3 self-start rounded-lg bg-categorical-consumption px-3 py-1.5"
+                  className="self-start rounded-lg border border-gray-300 px-3 py-1.5"
                 >
-                  <Text className="text-sm font-medium text-white">
-                    {next.label}
+                  <Text className="text-sm font-medium text-diverging-zero">
+                    Scan meter
                   </Text>
                 </TouchableOpacity>
-              ) : null}
+              </View>
             </View>
           );
         }}
