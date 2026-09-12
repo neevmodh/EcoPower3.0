@@ -2,34 +2,48 @@
 -- CI run just found: every scope-key resolver/trigger function in this
 -- schema (0002, and the per-table set_scope_keys functions added in
 -- 0009/0010/0011/0012/0014/0019/0026/0027) was created with no search_path
--- override at all, calling resolve_scope_from_dt()/resolve_scope_from_meter()
--- or referencing service_connections/meters unqualified. That's fine for
--- every caller so far — ordinary PostgREST/API-route inserts run with the
--- normal default search_path, which reaches `public` — but any
--- SECURITY DEFINER function created with `set search_path = ''` (the
--- hardened pattern this codebase otherwise uses everywhere, e.g. 0020's
--- my_society_unit_ids) pushes that empty search_path onto the GUC stack for
--- its *entire* execution, including every trigger it fires. #105's
--- provision_sandbox_tenant() inserting into service_connections is the
--- first thing in this codebase to actually hit it: the BEFORE INSERT
--- trigger calls resolve_scope_from_dt(new.dt_id) unqualified, which cannot
--- even be looked up under an empty search_path, so it throws immediately
--- — before this migration, the *only* place this codebase had already hit
--- (and fixed) this exact class of bug was 0024's prepaid_set_scope_keys(),
--- whose own comment already names the precise mechanism and the fix
--- shape this migration applies everywhere else: full `public.` qualification
--- plus an explicit `set search_path = ''`, so these functions behave
--- identically regardless of what search_path the calling context is in.
+-- override, calling resolve_scope_from_dt()/resolve_scope_from_meter() or
+-- referencing service_connections/meters unqualified. A SECURITY DEFINER
+-- function created with `set search_path = ''` (the hardened pattern this
+-- codebase otherwise uses, e.g. 0020's my_society_unit_ids) pushes that
+-- empty search_path onto the GUC stack for its entire execution, including
+-- every trigger it fires — and a called function *without its own SET
+-- clause* simply inherits whatever search_path is currently active, rather
+-- than falling back to some session default. provision_sandbox_tenant()
+-- inserting into service_connections is the first thing in this codebase
+-- to hit this: the BEFORE INSERT trigger's unqualified
+-- resolve_scope_from_dt(new.dt_id) can't even be looked up under an empty
+-- search_path, so it throws immediately.
 --
--- Behavior-preserving for every existing caller — none of these functions
--- referenced anything outside `public` to begin with, so pinning that down
--- explicitly changes nothing for a normal-search-path caller and fixes
--- everything for an empty-search-path one.
+-- Fix applied here is qualification only — every unqualified table/function
+-- reference gets a `public.` prefix — deliberately WITHOUT adding each
+-- function's own `set search_path = ''`. A first pass of this migration did
+-- add that override everywhere and broke six unrelated, previously-green
+-- test files (netmetering, p2p_ev, payments, self_reads,
+-- subscription_write_guards, tickets_notifications): those tables' scope-key
+-- triggers also run under an `authenticated` role during normal use, which
+-- means an ordinary INSERT there evaluates that table's RLS policies too —
+-- and is_platform_admin() (0038), used in nearly every RLS policy in this
+-- schema, is itself unqualified (`select 'platform_admin' = any
+-- (auth_roles())`, no SET clause). Explicitly forcing search_path='' on the
+-- trigger function forced it onto that nested RLS evaluation too, breaking
+-- an unrelated, already-correct code path that had nothing to do with this
+-- fix. Full `public.` qualification alone is sufficient for
+-- provision_sandbox_tenant()'s own use (it runs as the security-definer
+-- owner — a superuser — so RLS never evaluates for its own inserts at all)
+-- and is strictly safer: it doesn't touch the ambient search_path for any
+-- other caller, so normal authenticated-role RLS evaluation elsewhere is
+-- completely unaffected.
+--
+-- Left alone, on purpose: is_platform_admin()/has_role()/auth_roles() and
+-- friends (0003/0038) have the identical latent unqualified-reference bug,
+-- but hardening the RLS policy layer itself is a materially larger, riskier
+-- change than this migration's scope — tracked as a follow-up, not bundled
+-- in here blind.
 
 create or replace function resolve_scope_from_dt(p_dt_id uuid, out division_id uuid, out org_id uuid)
 returns record
 language sql
-set search_path = ''
 as $$
   select s.division_id, dv.discom_org_id
   from public.distribution_transformers dt
@@ -48,7 +62,6 @@ create or replace function resolve_scope_from_meter(
 )
 language plpgsql
 stable
-set search_path = ''
 as $$
 declare
   v_meter public.meters%rowtype;
@@ -80,7 +93,6 @@ $$;
 
 create or replace function set_scope_keys_from_meter() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 declare
   v record;
@@ -96,7 +108,6 @@ $$;
 
 create or replace function service_connections_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 declare
   v_scope record;
@@ -110,7 +121,6 @@ $$;
 
 create or replace function meters_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 declare
   v_dt_id uuid;
@@ -140,7 +150,6 @@ $$;
 
 create or replace function assets_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 declare
   v_dt_id uuid;
@@ -161,7 +170,6 @@ $$;
 
 create or replace function invoices_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 begin
   select dt_id, division_id, org_id
@@ -174,7 +182,6 @@ $$;
 
 create or replace function service_guarantees_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 begin
   select dt_id, division_id, org_id
@@ -187,7 +194,6 @@ $$;
 
 create or replace function payment_orders_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 begin
   select dt_id, division_id, org_id
@@ -200,7 +206,6 @@ $$;
 
 create or replace function subscriptions_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 begin
   select dt_id, division_id, org_id
@@ -213,7 +218,6 @@ $$;
 
 create or replace function support_tickets_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 begin
   select dt_id, division_id, org_id
@@ -227,7 +231,6 @@ $$;
 
 create or replace function netmetering_applications_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 begin
   select dt_id, division_id, org_id
@@ -241,7 +244,6 @@ $$;
 
 create or replace function self_read_set_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 begin
   select m.dt_id, sc.division_id, sc.org_id
@@ -255,7 +257,6 @@ $$;
 
 create or replace function p2p_listing_scope_keys() returns trigger
 language plpgsql
-set search_path = ''
 as $$
 begin
   select sc.dt_id, sc.division_id into new.dt_id, new.division_id
