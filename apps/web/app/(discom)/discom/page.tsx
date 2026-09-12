@@ -7,7 +7,17 @@ import { RankedBar, type RankedRow } from "@/components/charts/RankedBar";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
-type LossRow = { dt_id: string; dt_name: string; loss_pct: number; delivered_kwh?: number; consumed_kwh?: number };
+// loss_pct is genuinely nullable — dt_loss_summary() (0017) returns null
+// when a DT has delivered 0 kWh (nothing to divide by), not a measured
+// zero. Number(null) is 0 in JS, so treating this as `number` here would
+// let a DT with no metering data render as "0.0% loss" and sort as the
+// greenest, safest-looking bar on the chart — the exact "decorative
+// element outlives its data" failure DESIGN.md P1 exists to prevent.
+type LossRow = { dt_id: string; dt_name: string; loss_pct: number | null; delivered_kwh?: number; consumed_kwh?: number };
+
+function hasMeasuredLoss(r: LossRow): r is LossRow & { loss_pct: number } {
+  return r.loss_pct != null;
+}
 
 // Server Component. Reads Supabase with the anon key + the user's session
 // cookie — no service_role, no ?role=. Every query below has no WHERE
@@ -47,14 +57,18 @@ export default async function DiscomPage() {
   const totalConsumers = connections?.length ?? 0;
   const totalDts = dts?.length ?? 0;
   const activeMeters = (meters ?? []).filter((m) => m.status === "active").length;
+  // Both averages and the "worst DT" callout below only ever consider DTs
+  // with a real measured loss — a DT with no delivered energy has nothing
+  // to average in or rank, not a 0% score.
+  const measuredLossRows = ((lossRows ?? []) as LossRow[]).filter(hasMeasuredLoss);
   const avgLossPct =
-    lossRows && lossRows.length > 0
-      ? lossRows.reduce((sum: number, r: { loss_pct: number }) => sum + Number(r.loss_pct), 0) / lossRows.length
+    measuredLossRows.length > 0
+      ? measuredLossRows.reduce((sum, r) => sum + r.loss_pct, 0) / measuredLossRows.length
       : null;
-  const worstDt = lossRows && lossRows.length > 0 ? [...lossRows].sort((a, b) => b.loss_pct - a.loss_pct)[0] : null;
+  const worstDt = measuredLossRows.length > 0 ? [...measuredLossRows].sort((a, b) => b.loss_pct - a.loss_pct)[0] : null;
 
-  const lossBarRows: RankedRow[] = ((lossRows ?? []) as LossRow[]).map((r) => {
-    const pct = Number(r.loss_pct);
+  const lossBarRows: RankedRow[] = measuredLossRows.map((r) => {
+    const pct = r.loss_pct;
     const color =
       pct < 0
         ? "var(--color-text-tertiary)"
@@ -196,13 +210,20 @@ export default async function DiscomPage() {
                 <tbody>
                   {((lossRows ?? []) as LossRow[])
                     .slice()
-                    .sort((a, b) => Number(b.loss_pct) - Number(a.loss_pct))
+                    // Unmeasured (null loss_pct) DTs sort last, never
+                    // compared as if they were a real 0% — there's nothing
+                    // to rank them against yet.
+                    .sort((a, b) => {
+                      if (a.loss_pct == null) return b.loss_pct == null ? 0 : 1;
+                      if (b.loss_pct == null) return -1;
+                      return b.loss_pct - a.loss_pct;
+                    })
                     .map((r) => (
                       <tr key={r.dt_id} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
                         <td className="py-1 pr-4">{r.dt_name}</td>
                         <td className="py-1 pr-4 text-right mono">{Number(r.delivered_kwh).toFixed(0)}</td>
                         <td className="py-1 pr-4 text-right mono">{Number(r.consumed_kwh).toFixed(0)}</td>
-                        <td className="py-1 text-right mono">{Number(r.loss_pct).toFixed(1)}%</td>
+                        <td className="py-1 text-right mono">{r.loss_pct != null ? `${r.loss_pct.toFixed(1)}%` : "—"}</td>
                       </tr>
                     ))}
                 </tbody>
