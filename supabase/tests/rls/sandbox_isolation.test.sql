@@ -6,9 +6,12 @@
 --
 -- Unlike every other fixture-based RLS test in this suite, the scope ids
 -- here (org/division ids) are randomly generated per tenant by
--- provision_sandbox_tenant() itself, not fixed UUIDs — so the JWT claims
--- below are built with set_config() from a real query against
--- sandbox_tenants, not a literal string.
+-- provision_sandbox_tenant() itself, not fixed UUIDs. sandbox_tenants
+-- itself is revoked from anon/authenticated (0051) — not user-facing — so
+-- its ids are captured into psql variables via \gset *before* switching to
+-- the authenticated role below; every later query references those
+-- variables instead of querying sandbox_tenants directly under a role that
+-- has no privileges on it.
 
 begin;
 select plan(14);
@@ -26,6 +29,14 @@ select isnt_empty(
   'tenant B provisioned'
 );
 
+select discom_org_id as a_discom_org_id, society_org_id as a_society_org_id,
+       resco_org_id as a_resco_org_id, division_id as a_division_id, dt_id as a_dt_id
+from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1' \gset
+
+select discom_org_id as b_discom_org_id, society_org_id as b_society_org_id,
+       resco_org_id as b_resco_org_id, division_id as b_division_id, dt_id as b_dt_id
+from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1' \gset
+
 -- ============================================================
 -- Tenant A as discom_officer: sees tenant A's own service_connections,
 -- sees none of tenant B's.
@@ -33,38 +44,34 @@ select isnt_empty(
 
 select set_config(
   'request.jwt.claims',
-  (select jsonb_build_object(
+  jsonb_build_object(
     'sub', '9a000000-0000-0000-0000-0000000000a1', 'role', 'authenticated',
-    'app_metadata', jsonb_build_object('roles', array['discom_officer'], 'org_ids', array[discom_org_id], 'division_ids', array[division_id])
-  )::text from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1'),
+    'app_metadata', jsonb_build_object('roles', array['discom_officer'], 'org_ids', array[:'a_discom_org_id'::uuid], 'division_ids', array[:'a_division_id'::uuid])
+  )::text,
   true
 );
 set local role authenticated;
 
 select ok(
-  (select count(*) from service_connections
-     where dt_id = (select dt_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1')) > 0,
+  (select count(*) from service_connections where dt_id = :'a_dt_id'::uuid) > 0,
   'tenant A''s discom_officer sees tenant A''s own connections'
 );
 
 select is_empty(
-  $$ select 1 from service_connections
-       where dt_id = (select dt_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') $$,
+  format($$ select 1 from service_connections where dt_id = %L::uuid $$, :'b_dt_id'),
   'tenant A''s discom_officer sees zero of tenant B''s connections'
 );
 
 select is_empty(
-  $$ select 1 from meter_readings mr join meters m on m.id = mr.meter_id
-       where m.dt_id = (select dt_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1')
-          or m.service_connection_id in (
-               select id from service_connections
-               where dt_id = (select dt_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1')
-             ) $$,
+  format($$ select 1 from meter_readings mr join meters m on m.id = mr.meter_id
+       where m.dt_id = %L::uuid
+          or m.service_connection_id in (select id from service_connections where dt_id = %L::uuid) $$,
+    :'b_dt_id', :'b_dt_id'),
   'tenant A''s discom_officer reads zero of tenant B''s meter_readings'
 );
 
 select is_empty(
-  $$ select 1 from work_orders where resco_org_id = (select resco_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') $$,
+  format($$ select 1 from work_orders where resco_org_id = %L::uuid $$, :'b_resco_org_id'),
   'tenant A''s discom_officer (not a RESCO role) sees zero work orders anywhere, let alone tenant B''s'
 );
 
@@ -72,13 +79,11 @@ select is_empty(
 -- society_admin does, 0020) — under RLS this matches zero rows rather than
 -- throwing, so verify the row is genuinely untouched with RLS bypassed,
 -- same pattern technician.test.sql already uses for this exact shape.
-update service_connections set sanctioned_load_kw = 999
-  where dt_id = (select dt_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1');
+update service_connections set sanctioned_load_kw = 999 where dt_id = :'b_dt_id'::uuid;
 
 reset role;
 select isnt(
-  (select sanctioned_load_kw from service_connections
-     where dt_id = (select dt_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') limit 1),
+  (select sanctioned_load_kw from service_connections where dt_id = :'b_dt_id'::uuid limit 1),
   999,
   'tenant A''s discom_officer''s write attempt on tenant B''s connection matched zero rows under RLS'
 );
@@ -90,21 +95,20 @@ set local role authenticated;
 
 select set_config(
   'request.jwt.claims',
-  (select jsonb_build_object(
+  jsonb_build_object(
     'sub', '9a000000-0000-0000-0000-0000000000a1', 'role', 'authenticated',
-    'app_metadata', jsonb_build_object('roles', array['resco_ops'], 'org_ids', array[resco_org_id], 'division_ids', '{}'::uuid[])
-  )::text from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1'),
+    'app_metadata', jsonb_build_object('roles', array['resco_ops'], 'org_ids', array[:'a_resco_org_id'::uuid], 'division_ids', '{}'::uuid[])
+  )::text,
   true
 );
 
 select ok(
-  (select count(*) from work_orders
-     where resco_org_id = (select resco_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1')) > 0,
+  (select count(*) from work_orders where resco_org_id = :'a_resco_org_id'::uuid) > 0,
   'tenant A''s resco_ops sees tenant A''s own work order'
 );
 
 select is_empty(
-  $$ select 1 from work_orders where resco_org_id = (select resco_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') $$,
+  format($$ select 1 from work_orders where resco_org_id = %L::uuid $$, :'b_resco_org_id'),
   'tenant A''s resco_ops sees zero of tenant B''s work orders'
 );
 
@@ -114,22 +118,20 @@ select is_empty(
 
 select set_config(
   'request.jwt.claims',
-  (select jsonb_build_object(
+  jsonb_build_object(
     'sub', '9a000000-0000-0000-0000-0000000000a1', 'role', 'authenticated',
-    'app_metadata', jsonb_build_object('roles', array['society_admin'], 'org_ids', array[society_org_id], 'division_ids', '{}'::uuid[])
-  )::text from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1'),
+    'app_metadata', jsonb_build_object('roles', array['society_admin'], 'org_ids', array[:'a_society_org_id'::uuid], 'division_ids', '{}'::uuid[])
+  )::text,
   true
 );
 
 select ok(
-  (select count(*) from service_connections
-     where society_org_id = (select society_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000a1')) > 0,
+  (select count(*) from service_connections where society_org_id = :'a_society_org_id'::uuid) > 0,
   'tenant A''s society_admin sees tenant A''s own society unit'
 );
 
 select is_empty(
-  $$ select 1 from service_connections
-       where society_org_id = (select society_org_id from sandbox_tenants where user_id = '9a000000-0000-0000-0000-0000000000b1') $$,
+  format($$ select 1 from service_connections where society_org_id = %L::uuid $$, :'b_society_org_id'),
   'tenant A''s society_admin sees zero of tenant B''s society units'
 );
 
@@ -157,11 +159,11 @@ select is_empty(
 -- No provisioned tenant role ever includes platform_admin.
 -- ============================================================
 
+reset role;
 select is_empty(
   $$ select 1 from user_roles where user_id in ('9a000000-0000-0000-0000-0000000000a1', '9a000000-0000-0000-0000-0000000000b1') and role = 'platform_admin' $$,
   'neither sandbox tenant was ever granted platform_admin'
 );
 
-reset role;
 select * from finish();
 rollback;
