@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 const STATUS_COLOR: Record<string, string> = {
   active: "var(--color-status-good)",
   inactive: "var(--color-text-secondary)",
+  offline: "var(--color-status-warning)",
   faulty: "var(--color-status-serious)",
   decommissioned: "var(--color-text-secondary)",
 };
