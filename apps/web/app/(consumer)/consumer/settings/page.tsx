@@ -45,12 +45,14 @@ export default async function ConsumerSettingsPage() {
   const t = await getT();
   const locale = await getLocale();
 
-  const { data: profile } = await supabase.from("profiles").select("full_name, phone, created_at").eq("id", user.id).maybeSingle();
-
-  const { data: connections } = await supabase
-    .from("service_connections")
-    .select("consumer_number, tariff_category, connection_type, phase, sanctioned_load_kw")
-    .order("consumer_number");
+  // Independent of each other — neither's query depends on the other's result.
+  const [{ data: profile }, { data: connections }] = await Promise.all([
+    supabase.from("profiles").select("full_name, phone, created_at").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("service_connections")
+      .select("consumer_number, tariff_category, connection_type, phase, sanctioned_load_kw")
+      .order("consumer_number"),
+  ]);
 
   const prepaidConn = (connections ?? []).find((c) => c.connection_type === "prepaid");
   const { data: prepaid } = prepaidConn

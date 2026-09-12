@@ -15,17 +15,19 @@ export default async function SocietyPage() {
   if (!scope) redirect("/login");
   const { user } = scope;
 
-  const { data: units } = await supabase
-    .from("service_connections")
-    .select("id, consumer_number, sanctioned_load_kw, allocation_pct")
-    .order("consumer_number");
-
   // society_unit_consumption() (0021) aggregates in SQL — a plain
   // .select().in() fetch of raw meter_readings hit PostgREST's 1000-row cap.
+  // Independent of the units query — no reason to run it after.
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: consumption } = (await supabase.rpc("society_unit_consumption", { p_since: since })) as {
-    data: Array<{ service_connection_id: string; consumer_number: string; kwh: number }> | null;
-  };
+  const [{ data: units }, { data: consumption }] = await Promise.all([
+    supabase
+      .from("service_connections")
+      .select("id, consumer_number, sanctioned_load_kw, allocation_pct")
+      .order("consumer_number"),
+    supabase.rpc("society_unit_consumption", { p_since: since }) as unknown as Promise<{
+      data: Array<{ service_connection_id: string; consumer_number: string; kwh: number }> | null;
+    }>,
+  ]);
 
   const consByConn = new Map((consumption ?? []).map((c) => [c.service_connection_id, Number(c.kwh)]));
   const totalKwh = (consumption ?? []).reduce((sum, c) => sum + Number(c.kwh), 0);

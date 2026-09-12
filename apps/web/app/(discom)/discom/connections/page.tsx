@@ -9,12 +9,13 @@ export default async function DiscomConnectionsPage() {
   if (!scope) redirect("/login");
   const { user, divisionIds } = scope;
 
-  const { data: connections } = await supabase
-    .from("service_connections")
-    .select("id, consumer_number, tariff_category, connection_type, phase, sanctioned_load_kw, connected_load_kw, distribution_transformers(name)")
-    .order("consumer_number");
-
-  const { data: metersData } = await supabase.from("meters").select("service_connection_id, status");
+  const [{ data: connections }, { data: metersData }] = await Promise.all([
+    supabase
+      .from("service_connections")
+      .select("id, consumer_number, tariff_category, connection_type, phase, sanctioned_load_kw, connected_load_kw, distribution_transformers(name)")
+      .order("consumer_number"),
+    supabase.from("meters").select("service_connection_id, status"),
+  ]);
   const meterStatusByConnection = new Map((metersData ?? []).map((m) => [m.service_connection_id, m.status]));
 
   return (

@@ -41,46 +41,43 @@ export default async function ConsumerPlanPage({
   if (!scope) redirect("/login");
   const { user } = scope;
 
-  const { data: connections } = await supabase
-    .from("service_connections")
-    .select("id, consumer_number")
-    .order("consumer_number");
+  // connections and allPlans have zero dependency on each other — no
+  // reason for allPlans (a plain catalog fetch) to wait behind a round trip
+  // it never needed the result of.
+  const [{ data: connections }, { data: allPlans }] = await Promise.all([
+    supabase.from("service_connections").select("id, consumer_number").order("consumer_number"),
+    supabase
+      .from("plans")
+      .select(
+        "id, code, name, description, price_paise_per_month, price_paise_per_year, billing_cycle, plan_services(included_quantity, guarantee_metric, guarantee_contracted_value, service_types(code, name, unit))",
+      )
+      .eq("active", true)
+      .order("price_paise_per_month"),
+  ]);
 
   const connectionIds = (connections ?? []).map((c) => c.id);
 
-  const { data: activeSubscription } =
+  // These three depend on connectionIds but not on each other — same
+  // parallelization as above, one round trip instead of three.
+  const [{ data: activeSubscription }, { data: pvAsset }, { data: netmeteringApp }] =
     connectionIds.length > 0
-      ? await supabase
-          .from("subscriptions")
-          .select("id, status, plan_id, started_at, paused_at, plans(name, price_paise_per_month)")
-          .in("service_connection_id", connectionIds)
-          .in("status", ["active", "paused"])
-          .maybeSingle()
-      : { data: null };
-
-  const { data: allPlans } = await supabase
-    .from("plans")
-    .select(
-      "id, code, name, description, price_paise_per_month, price_paise_per_year, billing_cycle, plan_services(included_quantity, guarantee_metric, guarantee_contracted_value, service_types(code, name, unit))",
-    )
-    .eq("active", true)
-    .order("price_paise_per_month");
-
-  const { data: pvAsset } =
-    connectionIds.length > 0
-      ? await supabase.from("assets").select("id, capacity_kw").eq("asset_type", "pv_array").in("service_connection_id", connectionIds).maybeSingle()
-      : { data: null };
-
-  const { data: netmeteringApp } =
-    connectionIds.length > 0
-      ? await supabase
-          .from("netmetering_applications")
-          .select("id, status, capacity_kw, decision_notes")
-          .in("service_connection_id", connectionIds)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle()
-      : { data: null };
+      ? await Promise.all([
+          supabase
+            .from("subscriptions")
+            .select("id, status, plan_id, started_at, paused_at, plans(name, price_paise_per_month)")
+            .in("service_connection_id", connectionIds)
+            .in("status", ["active", "paused"])
+            .maybeSingle(),
+          supabase.from("assets").select("id, capacity_kw").eq("asset_type", "pv_array").in("service_connection_id", connectionIds).maybeSingle(),
+          supabase
+            .from("netmetering_applications")
+            .select("id, status, capacity_kw, decision_notes")
+            .in("service_connection_id", connectionIds)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+        ])
+      : [{ data: null }, { data: null }, { data: null }];
 
   const plans = (allPlans ?? []).filter((p) =>
     cycle === "payg" ? p.code === "solar_payg" : p.billing_cycle === cycle && p.code !== "solar_payg",

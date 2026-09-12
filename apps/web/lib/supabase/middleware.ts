@@ -20,6 +20,19 @@ const ROLE_GATES: Array<{ prefix: string; roles: string[] }> = [
 ];
 
 export async function updateSession(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const gate = ROLE_GATES.find((g) => path.startsWith(g.prefix));
+
+  // Every request through this middleware was paying for a Supabase client
+  // + a JWT verification, even on routes no ROLE_GATE covers at all —
+  // marketing pages, /pricing, /how-it-works, even /login (which already
+  // does its own createClient() + redirect-if-authed server-side, making
+  // the middleware check here pure redundant work for that route too).
+  // Skip Supabase entirely when there's nothing to gate.
+  if (!gate) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -52,27 +65,22 @@ export async function updateSession(request: NextRequest) {
   const claims = claimsData?.claims as Record<string, unknown> | undefined;
   const authed = typeof claims?.sub === "string";
 
-  const path = request.nextUrl.pathname;
-  const gate = ROLE_GATES.find((g) => path.startsWith(g.prefix));
+  if (!authed) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", path);
+    return NextResponse.redirect(url);
+  }
 
-  if (gate) {
-    if (!authed) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("next", path);
-      return NextResponse.redirect(url);
-    }
-
-    const appMetadata = (claims?.app_metadata ?? {}) as Record<string, unknown>;
-    const roles = Array.isArray(appMetadata.roles)
-      ? (appMetadata.roles as unknown[]).filter((r): r is string => typeof r === "string")
-      : [];
-    const allowed = roles.some((r) => gate.roles.includes(r));
-    if (!allowed) {
-      // 404, not 403 — don't confirm the panel exists to someone who
-      // has no business knowing.
-      return NextResponse.rewrite(new URL("/not-found", request.url));
-    }
+  const appMetadata = (claims?.app_metadata ?? {}) as Record<string, unknown>;
+  const roles = Array.isArray(appMetadata.roles)
+    ? (appMetadata.roles as unknown[]).filter((r): r is string => typeof r === "string")
+    : [];
+  const allowed = roles.some((r) => gate.roles.includes(r));
+  if (!allowed) {
+    // 404, not 403 — don't confirm the panel exists to someone who
+    // has no business knowing.
+    return NextResponse.rewrite(new URL("/not-found", request.url));
   }
 
   return response;

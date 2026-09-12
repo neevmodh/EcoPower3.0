@@ -9,17 +9,19 @@ export default async function SocietyUnitsPage() {
   if (!scope) redirect("/login");
   const { user } = scope;
 
-  const { data: units } = await supabase
-    .from("service_connections")
-    .select("id, consumer_number, sanctioned_load_kw, connected_load_kw, allocation_pct, phase")
-    .order("consumer_number");
-
   // society_unit_consumption() (0021) — aggregated in SQL to avoid the
   // PostgREST 1000-row cap a raw meter_readings fetch hit here live.
+  // Independent of the units query.
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: consumption } = (await supabase.rpc("society_unit_consumption", { p_since: since })) as {
-    data: Array<{ service_connection_id: string; consumer_number: string; kwh: number }> | null;
-  };
+  const [{ data: units }, { data: consumption }] = await Promise.all([
+    supabase
+      .from("service_connections")
+      .select("id, consumer_number, sanctioned_load_kw, connected_load_kw, allocation_pct, phase")
+      .order("consumer_number"),
+    supabase.rpc("society_unit_consumption", { p_since: since }) as unknown as Promise<{
+      data: Array<{ service_connection_id: string; consumer_number: string; kwh: number }> | null;
+    }>,
+  ]);
 
   const consumptionByUnit = new Map<string, number>();
   for (const c of consumption ?? []) {

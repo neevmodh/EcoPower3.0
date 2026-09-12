@@ -31,20 +31,17 @@ export default async function DtLossDrilldownPage({ params }: { params: Promise<
   if (!scope) redirect("/login");
   const { user } = scope;
 
-  // RLS scopes this to the officer's own division — a DT id from another
-  // division returns no rows, same as every other query in this panel.
-  const { data: dt } = await supabase
-    .from("distribution_transformers")
-    .select("id, name")
-    .eq("id", dtId)
-    .maybeSingle();
-
-  const { data: lossRows } = await supabase.rpc("dt_loss_summary");
+  // All three depend only on dtId (already in hand from the route param),
+  // not on each other's results — RLS scopes each to the officer's own
+  // division independently, same as every other query in this panel.
+  const [{ data: dt }, { data: lossRows }, { data: breakdown }] = await Promise.all([
+    supabase.from("distribution_transformers").select("id, name").eq("id", dtId).maybeSingle(),
+    supabase.rpc("dt_loss_summary"),
+    supabase.rpc("dt_consumer_breakdown", { p_dt_id: dtId }),
+  ]);
   const lossRow = (lossRows ?? []).find((r: { dt_id: string }) => r.dt_id === dtId) as
     | { delivered_kwh: number; consumed_kwh: number; loss_pct: number | null }
     | undefined;
-
-  const { data: breakdown } = await supabase.rpc("dt_consumer_breakdown", { p_dt_id: dtId });
   const rows = (breakdown ?? []) as BreakdownRow[];
 
   const nav = [
