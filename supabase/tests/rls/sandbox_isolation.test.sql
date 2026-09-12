@@ -102,7 +102,7 @@ update service_connections set sanctioned_load_kw = 999 where dt_id = :'b_dt_id'
 reset role;
 select isnt(
   (select sanctioned_load_kw from service_connections where dt_id = :'b_dt_id'::uuid limit 1),
-  999,
+  999::numeric,
   'tenant A''s discom_officer''s write attempt on tenant B''s connection matched zero rows under RLS'
 );
 set local role authenticated;
