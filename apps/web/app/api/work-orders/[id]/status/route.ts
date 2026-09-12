@@ -56,13 +56,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (action === "claim") updatePayload.assigned_user_id = userData.user.id;
 
   // Re-assert the allowed pre-states in the UPDATE filter so two technicians
-  // acting on the same work order can't both win the transition.
-  const { data: updated, error: updateError } = await supabase
-    .from("work_orders")
-    .update(updatePayload)
-    .eq("id", id)
-    .in("status", VALID_TRANSITIONS[action])
-    .select("id");
+  // acting on the same work order can't both win the transition. This only
+  // works because every OTHER action's NEXT_STATUS differs from its
+  // precondition status — "claim" is the one action that doesn't touch
+  // status at all (NEXT_STATUS.claim === "open", the same value
+  // VALID_TRANSITIONS.claim requires), so the status filter alone is a
+  // no-op for it: two concurrent claims both see status="open" before
+  // either commits, both match, and the second silently overwrites the
+  // first's assigned_user_id. The real precondition for claiming is "still
+  // unclaimed," so assert that directly.
+  let query = supabase.from("work_orders").update(updatePayload).eq("id", id).in("status", VALID_TRANSITIONS[action]);
+  if (action === "claim") {
+    query = query.is("assigned_user_id", null);
+  }
+  const { data: updated, error: updateError } = await query.select("id");
   if (updateError) {
     return Response.json({ error: "failed to update work order" }, { status: 500 });
   }
