@@ -5,7 +5,7 @@
 -- writes a real notification back to the consumer, not just a status flip.
 
 begin;
-select plan(7);
+select plan(8);
 
 insert into orgs (id, name, type) values ('60000000-0000-0000-0000-000000000001', 'Test DISCOM', 'discom');
 insert into discom_divisions (id, discom_org_id, name, level) values
@@ -68,6 +68,16 @@ select results_eq(
   $$ select status::text from netmetering_applications where id = '60000000-0000-0000-0000-0000000000d1' $$,
   $$ values ('approved'::text) $$,
   'discom_officer can approve an application in their own division'
+);
+
+-- No policy ever allowed a DELETE — but per 0041/0046's lesson, "no policy"
+-- alone isn't a guard against Supabase's baseline grants. 0047 revokes
+-- DELETE explicitly; lock that in.
+select throws_ok(
+  $$ delete from netmetering_applications where id = '60000000-0000-0000-0000-0000000000d1' $$,
+  '42501',
+  null,
+  'a discom_officer cannot delete an application, even one they can approve'
 );
 
 update netmetering_applications set status = 'rejected' where id = '60000000-0000-0000-0000-0000000000d2';

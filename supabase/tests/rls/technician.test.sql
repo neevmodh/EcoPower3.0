@@ -6,7 +6,7 @@
 -- RESCO org's work orders, not another org's.
 
 begin;
-select plan(6);
+select plan(7);
 
 insert into orgs (id, name, type) values
   ('70000000-0000-0000-0000-000000000001', 'Test DISCOM', 'discom'),
@@ -56,6 +56,16 @@ select isnt_empty(
 );
 
 update work_orders set status = 'cancelled' where id = '70000000-0000-0000-0000-0000000000d2';
+
+-- No policy ever allowed a DELETE on work_orders — but per 0041/0046's
+-- lesson, "no policy" alone isn't a guard against Supabase's baseline
+-- grants. 0047 revokes DELETE explicitly; lock that in.
+select throws_ok(
+  $$ delete from work_orders where id = '70000000-0000-0000-0000-0000000000d1' $$,
+  '42501',
+  null,
+  'a field_technician cannot delete a work order, erasing the maintenance record'
+);
 
 reset role;
 select results_eq(
