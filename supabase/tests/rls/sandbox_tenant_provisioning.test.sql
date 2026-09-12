@@ -32,6 +32,14 @@ select is_empty(
 insert into auth.users (id, email, raw_user_meta_data) values
   ('99000000-0000-0000-0000-0000000000e2', 'sbx.real@test.local', '{"signup_source": "sandbox"}'::jsonb);
 
+-- Unconditional diagnostic, not an assertion: if provisioning silently
+-- failed (the trigger's whole job is to swallow that), print the real
+-- error here instead of leaving future failures to be re-diagnosed blind.
+select diag(coalesce(
+  (select 'provisioning failed: ' || error_message from sandbox_provisioning_errors where user_id = '99000000-0000-0000-0000-0000000000e2'),
+  'no provisioning error logged'
+));
+
 select isnt_empty(
   $$ select 1 from sandbox_tenants where user_id = '99000000-0000-0000-0000-0000000000e2' $$,
   'a flagged signup gets a sandbox_tenants tracking row'

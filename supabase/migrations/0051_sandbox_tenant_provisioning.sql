@@ -55,23 +55,27 @@ create function provision_sandbox_tenant(p_user_id uuid) returns void
   set search_path = ''
 as $$
 declare
-  v_discom_org   uuid := gen_random_uuid();
-  v_society_org  uuid := gen_random_uuid();
-  v_resco_org    uuid := gen_random_uuid();
-  v_division     uuid := gen_random_uuid();
-  v_substation   uuid := gen_random_uuid();
-  v_feeder       uuid := gen_random_uuid();
-  v_dt           uuid := gen_random_uuid();
-  v_conn_home    uuid := gen_random_uuid();  -- the signed-up user's own connection
-  v_conn_2       uuid := gen_random_uuid();
-  v_conn_3       uuid := gen_random_uuid();
-  v_conn_society uuid := gen_random_uuid();  -- lives in the sandbox's own society
-  v_meter_home   uuid := gen_random_uuid();
-  v_meter_2      uuid := gen_random_uuid();
-  v_meter_3      uuid := gen_random_uuid();
-  v_meter_society uuid := gen_random_uuid();
-  v_meter_dthead uuid := gen_random_uuid();
-  v_pv_asset     uuid := gen_random_uuid();
+  -- gen_random_uuid() (pgcrypto) lives in the extensions schema, not
+  -- public — under this function's search_path = '', an unqualified call
+  -- doesn't resolve at all. Same class of bug as 0048's meters fix; caught
+  -- here in CI, not by inspection.
+  v_discom_org   uuid := extensions.gen_random_uuid();
+  v_society_org  uuid := extensions.gen_random_uuid();
+  v_resco_org    uuid := extensions.gen_random_uuid();
+  v_division     uuid := extensions.gen_random_uuid();
+  v_substation   uuid := extensions.gen_random_uuid();
+  v_feeder       uuid := extensions.gen_random_uuid();
+  v_dt           uuid := extensions.gen_random_uuid();
+  v_conn_home    uuid := extensions.gen_random_uuid();  -- the signed-up user's own connection
+  v_conn_2       uuid := extensions.gen_random_uuid();
+  v_conn_3       uuid := extensions.gen_random_uuid();
+  v_conn_society uuid := extensions.gen_random_uuid();  -- lives in the sandbox's own society
+  v_meter_home   uuid := extensions.gen_random_uuid();
+  v_meter_2      uuid := extensions.gen_random_uuid();
+  v_meter_3      uuid := extensions.gen_random_uuid();
+  v_meter_society uuid := extensions.gen_random_uuid();
+  v_meter_dthead uuid := extensions.gen_random_uuid();
+  v_pv_asset     uuid := extensions.gen_random_uuid();
 begin
   insert into public.orgs (id, name, type) values
     (v_discom_org, 'Your Sandbox DISCOM', 'discom'),
@@ -104,7 +108,7 @@ begin
 
   insert into public.assets (id, service_connection_id, asset_type, capacity_kw, commissioning_ref, resco_org_id) values
     (v_pv_asset, v_conn_home, 'pv_array', 5, 'SBX-COM-001', v_resco_org),
-    (gen_random_uuid(), v_conn_home, 'inverter', 5, 'SBX-COM-001', v_resco_org);
+    (extensions.gen_random_uuid(), v_conn_home, 'inverter', 5, 'SBX-COM-001', v_resco_org);
 
   -- Every tenant-scoped role the sandbox promises, all pointed at this
   -- tenant's own division/orgs. Never platform_admin — that stays a
