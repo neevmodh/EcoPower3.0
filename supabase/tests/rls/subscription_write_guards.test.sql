@@ -21,7 +21,12 @@ insert into auth.users (id, email) values
 
 insert into service_connections (id, consumer_number, dt_id, owner_user_id, tariff_category, phase, connection_type) values
   ('93000000-0000-0000-0000-0000000000c1', 'CN-X-SUBG', '93000000-0000-0000-0000-0000000000a3', '93000000-0000-0000-0000-0000000000e1', 'RGP', 'single', 'postpaid'),
-  ('93000000-0000-0000-0000-0000000000c2', 'CN-Y-SUBG', '93000000-0000-0000-0000-0000000000a3', '93000000-0000-0000-0000-0000000000e2', 'RGP', 'single', 'postpaid');
+  -- c3/c4 are dedicated to the upgrade_subscription() RPC tests below —
+  -- separate connections from c1 so their fixture subscriptions don't
+  -- collide with subscriptions_one_active_per_connection (0012), the same
+  -- bug this suite already hit once with a same-plan_id no-op.
+  ('93000000-0000-0000-0000-0000000000c3', 'CN-X2-SUBG', '93000000-0000-0000-0000-0000000000a3', '93000000-0000-0000-0000-0000000000e1', 'RGP', 'single', 'postpaid'),
+  ('93000000-0000-0000-0000-0000000000c4', 'CN-Y-SUBG', '93000000-0000-0000-0000-0000000000a3', '93000000-0000-0000-0000-0000000000e2', 'RGP', 'single', 'postpaid');
 
 insert into service_types (id, code, name, unit, meter_source, billing_basis) values
   ('93000000-0000-0000-0000-0000000000d1', 'solar_kwh_guard', 'Solar', 'kwh', 'meter_readings', 'included_plus_overage');
@@ -37,8 +42,8 @@ insert into plan_services (plan_id, service_type_id, included_quantity, overage_
 -- insert guard) — one per consumer, dedicated to the upgrade_subscription()
 -- RPC tests so they don't get entangled with the direct-write tests' state.
 insert into subscriptions (id, service_connection_id, plan_id) values
-  ('93000000-0000-0000-0000-000000000060', '93000000-0000-0000-0000-0000000000c1', '93000000-0000-0000-0000-0000000000b1'),
-  ('93000000-0000-0000-0000-000000000061', '93000000-0000-0000-0000-0000000000c2', '93000000-0000-0000-0000-0000000000b1');
+  ('93000000-0000-0000-0000-000000000060', '93000000-0000-0000-0000-0000000000c3', '93000000-0000-0000-0000-0000000000b1'),
+  ('93000000-0000-0000-0000-000000000061', '93000000-0000-0000-0000-0000000000c4', '93000000-0000-0000-0000-0000000000b1');
 
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"93000000-0000-0000-0000-0000000000e1","role":"authenticated","app_metadata":{"roles":["consumer"],"org_ids":[],"division_ids":[]}}';
