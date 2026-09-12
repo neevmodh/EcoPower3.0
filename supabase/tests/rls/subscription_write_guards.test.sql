@@ -6,7 +6,7 @@
 -- PostgREST calls that never touch the app's actual business logic.
 
 begin;
-select plan(15);
+select plan(18);
 
 insert into orgs (id, name, type) values ('93000000-0000-0000-0000-000000000001', 'Test DISCOM', 'discom');
 insert into discom_divisions (id, discom_org_id, name, level) values
@@ -124,6 +124,30 @@ select lives_ok(
   $$ insert into service_guarantees (service_connection_id, subscription_id, metric, contracted_value, measurement_window, rate_paise_per_unit_shortfall, cap_paise, effective_from)
      values ('93000000-0000-0000-0000-0000000000c1', '93000000-0000-0000-0000-00000000005f', 'availability_pct', 0.98, 'monthly', 100000, 50000, current_date) $$,
   'inserting the plan''s real catalog terms verbatim (what /api/subscriptions actually does) still works'
+);
+
+-- No policy ever allowed DELETE on any of these three — but per 0041/0046's
+-- lesson, "no policy" alone isn't a guard against Supabase's baseline
+-- grants. 0047 revokes DELETE explicitly; lock that in.
+select throws_ok(
+  $$ delete from subscriptions where id = '93000000-0000-0000-0000-00000000005f' $$,
+  '42501',
+  null,
+  'a consumer cannot delete their own subscription, erasing its billing history'
+);
+
+select throws_ok(
+  $$ delete from subscription_events where subscription_id = '93000000-0000-0000-0000-00000000005f' $$,
+  '42501',
+  null,
+  'a consumer cannot delete an audit event off their own subscription'
+);
+
+select throws_ok(
+  $$ delete from service_guarantees where service_connection_id = '93000000-0000-0000-0000-0000000000c1' $$,
+  '42501',
+  null,
+  'a consumer cannot delete their own service guarantee record'
 );
 
 -- upgrade_subscription() (0045) — the RPC that replaces the direct write

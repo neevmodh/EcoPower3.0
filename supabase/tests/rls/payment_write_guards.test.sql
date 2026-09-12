@@ -5,7 +5,7 @@
 -- holds for the exact attack, not just that "some" error is thrown.
 
 begin;
-select plan(9);
+select plan(11);
 
 select create_monthly_partition(date '2026-08-01');
 
@@ -79,6 +79,23 @@ select lives_ok(
 select ok(
   (select status from payment_orders where id = '92000000-0000-0000-0000-0000000000fb') = 'attempted',
   'the legitimate transition actually took effect'
+);
+
+-- No policy ever allowed a DELETE on either table — but per 0041/0046's
+-- lesson, "no policy" alone isn't a guard against Supabase's baseline
+-- grants. 0047 revokes DELETE explicitly; lock that in.
+select throws_ok(
+  $$ delete from payment_orders where id = '92000000-0000-0000-0000-0000000000fb' $$,
+  '42501',
+  null,
+  'a consumer cannot delete their own payment order, erasing the payment trail'
+);
+
+select throws_ok(
+  $$ delete from payments where payment_order_id = '92000000-0000-0000-0000-0000000000fb' $$,
+  '42501',
+  null,
+  'a consumer cannot delete a payments row (none exist yet, but the grant itself must be gone)'
 );
 
 -- payments insert: status forgery.
