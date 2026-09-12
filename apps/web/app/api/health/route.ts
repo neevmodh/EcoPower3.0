@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 const TIMEOUT_MS = 4000;
 
 async function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
-  let timer: ReturnType<typeof setTimeout>;
+  let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(() => reject(new Error(`${label} timed out after ${TIMEOUT_MS}ms`)), TIMEOUT_MS);
   });
@@ -21,7 +21,7 @@ async function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
     // leaves the timer running — it fires later and rejects a promise
     // nothing is awaiting, an unhandled rejection on every single healthy
     // check. On a route meant to be polled continuously, that's not rare.
-    clearTimeout(timer!);
+    if (timer) clearTimeout(timer);
   }
 }
 
