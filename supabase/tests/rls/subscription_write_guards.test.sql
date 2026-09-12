@@ -26,7 +26,8 @@ insert into service_types (id, code, name, unit, meter_source, billing_basis) va
   ('93000000-0000-0000-0000-0000000000d1', 'solar_kwh_guard', 'Solar', 'kwh', 'meter_readings', 'included_plus_overage');
 
 insert into plans (id, code, name, description, price_paise_per_month) values
-  ('93000000-0000-0000-0000-0000000000b1', 'guard_basic', 'Guard Basic', 'test plan', 99900);
+  ('93000000-0000-0000-0000-0000000000b1', 'guard_basic', 'Guard Basic', 'test plan', 99900),
+  ('93000000-0000-0000-0000-0000000000b2', 'guard_premium', 'Guard Premium', 'a pricier plan to self-upgrade to', 399900);
 
 insert into plan_services (plan_id, service_type_id, included_quantity, overage_rate_paise_per_unit, guarantee_metric, guarantee_contracted_value, guarantee_rate_paise_per_unit_shortfall, guarantee_cap_paise) values
   ('93000000-0000-0000-0000-0000000000b1', '93000000-0000-0000-0000-0000000000d1', 300, 500, 'availability_pct', 0.98, 100000, 50000);
@@ -51,7 +52,7 @@ select lives_ok(
 -- subscriptions update: the exact self-upgrade-for-free attack — changing
 -- plan_id and status together in one write.
 select throws_ok(
-  $$ update subscriptions set plan_id = '93000000-0000-0000-0000-0000000000b1', status = 'cancelled' where id = '93000000-0000-0000-0000-00000000005f' $$,
+  $$ update subscriptions set plan_id = '93000000-0000-0000-0000-0000000000b2', status = 'cancelled' where id = '93000000-0000-0000-0000-00000000005f' $$,
   '42501',
   null,
   'a consumer cannot change plan_id and status in the same write'
@@ -64,7 +65,7 @@ select lives_ok(
 );
 
 select throws_ok(
-  $$ update subscriptions set status = 'active', plan_id = '93000000-0000-0000-0000-0000000000b1' where id = '93000000-0000-0000-0000-00000000005f' $$,
+  $$ update subscriptions set status = 'active', plan_id = '93000000-0000-0000-0000-0000000000b2' where id = '93000000-0000-0000-0000-00000000005f' $$,
   '42501',
   null,
   'resuming and changing plan in the same write is rejected (upgrade must be its own active->active write)'
