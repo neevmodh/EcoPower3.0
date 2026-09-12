@@ -18,18 +18,20 @@ export default async function OperatorEsgPage() {
   if (!scope) redirect("/login");
   const { user } = scope;
 
-  const { data: assets } = await supabase.from("assets").select("asset_type, capacity_kw, service_connections(consumer_number)");
+  // Independent of each other.
+  const [{ data: assets }, { data: genRaw }] = await Promise.all([
+    supabase.from("assets").select("asset_type, capacity_kw, service_connections(consumer_number)"),
+    // 7-day fleet generation, hourly, RLS-scoped via 0029/0032.
+    supabase.rpc("resco_generation_profile", { p_hours: 168 }) as unknown as Promise<{
+      data: Array<{ bucket: string; generation_kwh: number }> | null;
+    }>,
+  ]);
   const pvKw = (assets ?? []).filter((a) => a.asset_type === "pv_array").reduce((s, a) => s + (a.capacity_kw ?? 0), 0);
   const sitesServiced = new Set(
     (assets ?? [])
       .map((a) => (a.service_connections as unknown as { consumer_number: string } | null)?.consumer_number)
       .filter(Boolean),
   ).size;
-
-  // 7-day fleet generation, hourly, RLS-scoped via 0029/0032.
-  const { data: genRaw } = (await supabase.rpc("resco_generation_profile", { p_hours: 168 })) as {
-    data: Array<{ bucket: string; generation_kwh: number }> | null;
-  };
   const gen = (genRaw ?? []).map((r) => ({ bucket: r.bucket, kwh: Number(r.generation_kwh) }));
   const total7d = gen.reduce((s, r) => s + r.kwh, 0);
 

@@ -26,12 +26,13 @@ export default async function ConsumerAnalyticsPage() {
     ? await supabase.from("meters").select("id").eq("service_connection_id", connectionId).maybeSingle()
     : { data: null };
 
-  const { data: daily } = meter
-    ? await supabase.rpc("daily_energy_summary", { p_meter_id: meter.id, p_days: 90 })
-    : { data: null };
-  const { data: profileRaw } = meter
-    ? await supabase.rpc("hourly_load_profile", { p_meter_id: meter.id, p_days: 28 })
-    : { data: null };
+  // Both depend on meter.id but not on each other.
+  const [{ data: daily }, { data: profileRaw }] = meter
+    ? await Promise.all([
+        supabase.rpc("daily_energy_summary", { p_meter_id: meter.id, p_days: 90 }),
+        supabase.rpc("hourly_load_profile", { p_meter_id: meter.id, p_days: 28 }),
+      ])
+    : [{ data: null }, { data: null }];
 
   const rows = ((daily ?? []) as Array<{ day: string; import_kwh: number; export_kwh: number }>).map((d) => ({
     day: d.day,

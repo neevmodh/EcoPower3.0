@@ -28,24 +28,23 @@ export default async function SocietyCommonPage() {
   const { user } = scope;
   const isAdmin = scope.roles.includes("society_admin");
 
-  const { data: units } = await supabase
-    .from("service_connections")
-    .select("id, consumer_number, allocation_pct, society_org_id");
+  // All three are independent — none needs another's result to run.
+  const [{ data: units }, { data: chargesRaw }, { data: notices }] = await Promise.all([
+    supabase.from("service_connections").select("id, consumer_number, allocation_pct, society_org_id"),
+    supabase
+      .from("society_common_charges")
+      .select("id, label, category, amount_paise, split_basis, society_org_id")
+      .order("period_start", { ascending: false }),
+    supabase
+      .from("society_notices")
+      .select("id, title, body, pinned, created_at")
+      .order("pinned", { ascending: false })
+      .order("created_at", { ascending: false }),
+  ]);
   const flats = units ?? [];
   const societyOrgId = flats.find((u) => u.society_org_id)?.society_org_id ?? null;
   const unitCount = flats.length;
-
-  const { data: chargesRaw } = await supabase
-    .from("society_common_charges")
-    .select("id, label, category, amount_paise, split_basis, society_org_id")
-    .order("period_start", { ascending: false });
   const charges = (chargesRaw ?? []) as Charge[];
-
-  const { data: notices } = await supabase
-    .from("society_notices")
-    .select("id, title, body, pinned, created_at")
-    .order("pinned", { ascending: false })
-    .order("created_at", { ascending: false });
 
   const totalPaise = charges.reduce((s, c) => s + Number(c.amount_paise), 0);
 

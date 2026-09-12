@@ -46,17 +46,18 @@ export default async function OperatorGuaranteePage() {
   // 0029: resco_ops/resco_admin can now read service_guarantees + settlements
   // for connections the org services (asset-org join). No WHERE clause on org
   // here — RLS is the scope.
-  const { data: guaranteesRaw } = await supabase
-    .from("service_guarantees")
-    .select("id, metric, contracted_value, measurement_window, cap_paise, effective_from, service_connections(consumer_number)")
-    .order("effective_from", { ascending: false });
+  const [{ data: guaranteesRaw }, { data: settlementsRaw }] = await Promise.all([
+    supabase
+      .from("service_guarantees")
+      .select("id, metric, contracted_value, measurement_window, cap_paise, effective_from, service_connections(consumer_number)")
+      .order("effective_from", { ascending: false }),
+    supabase
+      .from("guarantee_settlements")
+      .select("service_guarantee_id, window_start, window_end, contracted, achieved, shortfall, credit_paise")
+      .order("window_start", { ascending: false }),
+  ]);
 
   const guarantees = (guaranteesRaw ?? []) as Guarantee[];
-
-  const { data: settlementsRaw } = await supabase
-    .from("guarantee_settlements")
-    .select("service_guarantee_id, window_start, window_end, contracted, achieved, shortfall, credit_paise")
-    .order("window_start", { ascending: false });
 
   const settlements = (settlementsRaw ?? []) as Settlement[];
   const latestByGuarantee = new Map<string, Settlement>();

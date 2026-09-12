@@ -21,19 +21,20 @@ export default async function FieldInspectionsPage() {
   if (!scope) redirect("/login");
   const { user } = scope;
 
-  const { data: workOrders } = await supabase
-    .from("work_orders")
-    .select("id, title, service_connection_id, service_connections(consumer_number)")
-    .in("status", ["open", "in_progress"])
-    .order("created_at", { ascending: false });
-
-  const { data: inspRaw } = await supabase
-    .from("site_inspections")
-    .select(
-      "id, inspection_type, status, findings, started_at, completed_at, checklist, service_connections(consumer_number)",
-    )
-    .order("started_at", { ascending: false })
-    .limit(30);
+  const [{ data: workOrders }, { data: inspRaw }] = await Promise.all([
+    supabase
+      .from("work_orders")
+      .select("id, title, service_connection_id, service_connections(consumer_number)")
+      .in("status", ["open", "in_progress"])
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("site_inspections")
+      .select(
+        "id, inspection_type, status, findings, started_at, completed_at, checklist, service_connections(consumer_number)",
+      )
+      .order("started_at", { ascending: false })
+      .limit(30),
+  ]);
 
   const inspections = ((inspRaw ?? []) as InspectionRow[]).map((r) => ({
     id: r.id,

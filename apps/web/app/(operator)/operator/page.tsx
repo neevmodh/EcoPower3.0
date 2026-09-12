@@ -27,19 +27,20 @@ export default async function OperatorPage() {
   if (!scope) redirect("/login");
   const { user } = scope;
 
-  const { data: assets } = await supabase
-    .from("assets")
-    .select("id, asset_type, capacity_kw, commissioning_ref, service_connections(consumer_number)")
-    .order("asset_type");
-
-  const { data: meters } = await supabase.from("meters").select("id, status");
-
-  // Fleet generation — hourly metered export across the connections this org
-  // services, last 48h. RLS (meter_readings_resco_scope, 0029) via the
-  // SECURITY INVOKER rollup (0032) is the scope.
-  const { data: genRaw } = (await supabase.rpc("resco_generation_profile", { p_hours: 48 })) as {
-    data: Array<{ bucket: string; generation_kwh: number; import_kwh: number; meters: number }> | null;
-  };
+  // Three fully independent reads — none depends on another's result.
+  const [{ data: assets }, { data: meters }, { data: genRaw }] = await Promise.all([
+    supabase
+      .from("assets")
+      .select("id, asset_type, capacity_kw, commissioning_ref, service_connections(consumer_number)")
+      .order("asset_type"),
+    supabase.from("meters").select("id, status"),
+    // Fleet generation — hourly metered export across the connections this
+    // org services, last 48h. RLS (meter_readings_resco_scope, 0029) via the
+    // SECURITY INVOKER rollup (0032) is the scope.
+    supabase.rpc("resco_generation_profile", { p_hours: 48 }) as unknown as Promise<{
+      data: Array<{ bucket: string; generation_kwh: number; import_kwh: number; meters: number }> | null;
+    }>,
+  ]);
   const gen = (genRaw ?? []).map((r) => ({ bucket: r.bucket, generationKwh: Number(r.generation_kwh) }));
   const genLabels = gen.map((r) =>
     new Date(r.bucket).toLocaleString("en-IN", { day: "numeric", hour: "2-digit", hour12: false }),

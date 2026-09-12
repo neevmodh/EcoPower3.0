@@ -23,9 +23,20 @@ export default async function ConsumerMeterReadPage() {
 
   const { data: connections } = await supabase.from("service_connections").select("id, consumer_number");
   const connection = connections?.[0];
-  const { data: meter } = connection
-    ? await supabase.from("meters").select("id").eq("service_connection_id", connection.id).limit(1).maybeSingle()
-    : { data: null };
+
+  // Both only depend on `connection` existing at all (submissions is
+  // RLS-scoped to the caller, not filtered by connection.id here) — no
+  // dependency on each other, so no reason for one to wait on the other.
+  const [{ data: meter }, { data: submissions }] = connection
+    ? await Promise.all([
+        supabase.from("meters").select("id").eq("service_connection_id", connection.id).limit(1).maybeSingle(),
+        supabase
+          .from("self_read_submissions")
+          .select("id, reading_kwh, submitted_at, status, review_note")
+          .order("submitted_at", { ascending: false })
+          .limit(20),
+      ])
+    : [{ data: null }, { data: [] }];
 
   const { data: lastReading } = meter
     ? await supabase
@@ -37,14 +48,6 @@ export default async function ConsumerMeterReadPage() {
         .limit(1)
         .maybeSingle()
     : { data: null };
-
-  const { data: submissions } = connection
-    ? await supabase
-        .from("self_read_submissions")
-        .select("id, reading_kwh, submitted_at, status, review_note")
-        .order("submitted_at", { ascending: false })
-        .limit(20)
-    : { data: [] };
 
   const prev =
     lastReading?.kwh_import != null
