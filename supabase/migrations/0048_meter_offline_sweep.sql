@@ -20,13 +20,13 @@ alter table meters add constraint meters_status_check
 
 create function sweep_meter_offline_status() returns void as $$
 begin
-  update meters
+  update public.meters
   set status = 'offline'
   where status = 'active'
     and last_seen_at is not null
     and last_seen_at < now() - interval '15 minutes';
 
-  update meters
+  update public.meters
   set status = 'active'
   where status = 'offline'
     and last_seen_at is not null
