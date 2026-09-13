@@ -109,10 +109,16 @@ begin
   select * into v_sc from service_connections where id = v_app.service_connection_id;
   select capacity_kva into v_dt_capacity_kva from distribution_transformers where id = v_app.dt_id;
 
+  -- Every already-installed pv_array on the DT counts, including one on the
+  -- applicant's own connection: an `assets` row only exists once a system is
+  -- actually commissioned, so a prior approved-and-installed array here is
+  -- real existing capacity, wholly separate from the not-yet-installed
+  -- proposed_kw this application is asking for. Excluding the applicant's
+  -- own connection would understate a repeat applicant's true footprint.
   select coalesce(sum(a.capacity_kw), 0) into v_existing_solar_kw
   from assets a
   join service_connections sc on sc.id = a.service_connection_id
-  where sc.dt_id = v_app.dt_id and a.asset_type = 'pv_array' and sc.id <> v_app.service_connection_id;
+  where sc.dt_id = v_app.dt_id and a.asset_type = 'pv_array';
 
   -- Measured, not nameplate: the DT-head meter's own instantaneous readings
   -- over the last 30 days, same meters.dt_id join dt_loss_summary() (0017)
@@ -124,9 +130,9 @@ begin
 
   v_total_solar_kw := v_existing_solar_kw + v_app.capacity_kw;
 
-  if v_peak_load_kw is null or v_dt_capacity_kva is null or v_sc.sanctioned_load_kw is null then
+  if v_peak_load_kw is null or coalesce(v_dt_capacity_kva, 0) <= 0 or v_sc.sanctioned_load_kw is null then
     v_verdict := 'insufficient_data';
-    v_detail := 'Missing one of: measured DT peak load (no readings in the last 30 days), DT nameplate capacity, or the applicant''s sanctioned load.';
+    v_detail := 'Missing one of: measured DT peak load (no readings in the last 30 days), a valid (non-zero) DT nameplate capacity, or the applicant''s sanctioned load.';
     v_penetration_pct := null;
     v_headroom_kw := null;
   else

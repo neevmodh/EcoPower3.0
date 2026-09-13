@@ -6,7 +6,7 @@
 -- mirrors netmetering_applications' own visibility.
 
 begin;
-select plan(7);
+select plan(9);
 
 -- Readings are dated relative to now() (they feed the function's own
 -- "last 30 days" window), so pre-create this month's partition and last
@@ -66,6 +66,40 @@ select results_eq(
 select isnt_empty(
   $$ select 1 from dt_feasibility_checks where application_id = '61000000-0000-0000-0000-0000000000d1' and verdict = 'feasible' $$,
   'the check was actually persisted to dt_feasibility_checks'
+);
+
+-- An already-installed array on the applicant's OWN connection (an assets
+-- row, not another application) must still count as existing_solar_kw —
+-- regression test for a fix that used to exclude the applicant's own
+-- connection entirely. 75kW existing + 10kW proposed = 85% of 100 kVA,
+-- over the 80% threshold, even though 10kW alone is well under it.
+insert into assets (service_connection_id, asset_type, capacity_kw) values
+  ('61000000-0000-0000-0000-0000000000c1', 'pv_array', 75);
+insert into netmetering_applications (id, service_connection_id, capacity_kw) values
+  ('61000000-0000-0000-0000-0000000000d3', '61000000-0000-0000-0000-0000000000c1', 10);
+
+select results_eq(
+  $$ select existing_solar_kw, verdict from run_dt_feasibility_check('61000000-0000-0000-0000-0000000000d3') $$,
+  $$ values (75::numeric, 'infeasible'::text) $$,
+  'an already-installed array on the applicant''s own connection still counts toward existing_solar_kw'
+);
+
+-- A DT with capacity_kva = 0 (bad data, not NULL) must degrade to
+-- insufficient_data, not divide-by-zero.
+insert into distribution_transformers (id, feeder_id, name, capacity_kva) values
+  ('61000000-0000-0000-0000-0000000000a4', '61000000-0000-0000-0000-0000000000a2', 'DT Zero', 0);
+insert into service_connections (id, consumer_number, dt_id, sanctioned_load_kw, tariff_category, phase, connection_type) values
+  ('61000000-0000-0000-0000-0000000000c2', 'CN-FEAS-02', '61000000-0000-0000-0000-0000000000a4', 10, 'RGP', 'single', 'postpaid');
+insert into meters (id, serial, dt_id) values ('61000000-0000-0000-0000-0000000000e2', 'MTR-DT-ZERO', '61000000-0000-0000-0000-0000000000a4');
+insert into meter_readings (meter_id, reading_ts, active_power_kw) values
+  ('61000000-0000-0000-0000-0000000000e2', now() - interval '1 day', 20);
+insert into netmetering_applications (id, service_connection_id, capacity_kw) values
+  ('61000000-0000-0000-0000-0000000000d4', '61000000-0000-0000-0000-0000000000c2', 5);
+
+select results_eq(
+  $$ select verdict from run_dt_feasibility_check('61000000-0000-0000-0000-0000000000d4') $$,
+  $$ values ('insufficient_data'::text) $$,
+  'a zero (not just NULL) DT capacity degrades to insufficient_data instead of a divide-by-zero error'
 );
 
 -- A second application for 15kW — exceeds the 10kW sanctioned load.

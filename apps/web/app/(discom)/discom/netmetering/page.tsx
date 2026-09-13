@@ -139,16 +139,23 @@ export default async function NetMeteringPage() {
                   </p>
                 )}
                 {decided ? (
-                  <p
-                    className="text-xs"
-                    style={{ color: "var(--color-text-secondary)" }}
-                  >
-                    Decided{" "}
-                    {a.decided_at
-                      ? new Date(a.decided_at).toLocaleString("en-IN")
-                      : ""}
-                    {a.decision_notes ? ` — ${a.decision_notes}` : ""}
-                  </p>
+                  <>
+                    <p
+                      className="text-xs"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Decided{" "}
+                      {a.decided_at
+                        ? new Date(a.decided_at).toLocaleString("en-IN")
+                        : ""}
+                      {a.decision_notes ? ` — ${a.decision_notes}` : ""}
+                    </p>
+                    <FeasibilityCheck
+                      applicationId={a.id}
+                      latest={latestCheckByApplication.get(a.id) ?? null}
+                      readOnly
+                    />
+                  </>
                 ) : (
                   <>
                     <FeasibilityCheck
