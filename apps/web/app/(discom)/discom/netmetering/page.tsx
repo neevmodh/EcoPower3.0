@@ -1,8 +1,12 @@
-import { redirect } from "next/navigation";
-import { PanelShell } from "@/components/PanelShell";
+import {
+  FeasibilityCheck,
+  type FeasibilityCheckRow,
+} from "@/components/FeasibilityCheck";
 import { NetMeteringDecisionForm } from "@/components/NetMeteringDecisionForm";
+import { PanelShell } from "@/components/PanelShell";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 // Issue #28, closed for real this time — PS1 §7 names net-metering
 // approval explicitly as the DISCOM-integration example. Deliberately
@@ -24,10 +28,34 @@ export default async function NetMeteringPage() {
 
   const { data: applications } = await supabase
     .from("netmetering_applications")
-    .select("id, capacity_kw, status, applicant_notes, decision_notes, created_at, decided_at, service_connections(consumer_number)")
+    .select(
+      "id, capacity_kw, status, applicant_notes, decision_notes, created_at, decided_at, service_connections(consumer_number)",
+    )
     .order("created_at", { ascending: false });
 
-  const pendingCount = (applications ?? []).filter((a) => a.status === "submitted" || a.status === "under_review").length;
+  const applicationIds = (applications ?? []).map((a) => a.id);
+  const { data: checksRaw } = applicationIds.length
+    ? await supabase
+        .from("dt_feasibility_checks")
+        .select(
+          "application_id, verdict, verdict_detail, computed_at, rule_version",
+        )
+        .in("application_id", applicationIds)
+        .order("computed_at", { ascending: false })
+    : { data: [] as never[] };
+
+  // One row per query result set, ordered newest-first — keep only the
+  // first (latest) check seen per application.
+  const latestCheckByApplication = new Map<string, FeasibilityCheckRow>();
+  for (const c of checksRaw ?? []) {
+    if (!latestCheckByApplication.has(c.application_id)) {
+      latestCheckByApplication.set(c.application_id, c as FeasibilityCheckRow);
+    }
+  }
+
+  const pendingCount = (applications ?? []).filter(
+    (a) => a.status === "submitted" || a.status === "under_review",
+  ).length;
 
   return (
     <PanelShell
@@ -46,15 +74,21 @@ export default async function NetMeteringPage() {
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Net-metering applications</h1>
-      <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
-        Division-scoped, same as every other read here — RLS confines this to Division A regardless of what
-        this query asks for.
+      <p
+        className="text-sm mb-6"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
+        Division-scoped, same as every other read here — RLS confines this to
+        Division A regardless of what this query asks for.
       </p>
 
       <div className="mb-6">
         <span
           className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold"
-          style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)" }}
+          style={{
+            borderColor: "var(--color-border)",
+            color: "var(--color-text-secondary)",
+          }}
         >
           {pendingCount} pending decision
         </span>
@@ -67,14 +101,25 @@ export default async function NetMeteringPage() {
       ) : (
         <div className="space-y-3">
           {(applications ?? []).map((a) => {
-            const sc = a.service_connections as unknown as { consumer_number: string } | null;
+            const sc = a.service_connections as unknown as {
+              consumer_number: string;
+            } | null;
             const decided = a.status === "approved" || a.status === "rejected";
             return (
-              <div key={a.id} className="rounded-card border card-shadow p-5" style={{ borderColor: "var(--color-border)" }}>
+              <div
+                key={a.id}
+                className="rounded-card border card-shadow p-5"
+                style={{ borderColor: "var(--color-border)" }}
+              >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div>
-                    <div className="font-medium text-sm tabular mb-0.5">{sc?.consumer_number ?? "—"}</div>
-                    <div className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                    <div className="font-medium text-sm tabular mb-0.5">
+                      {sc?.consumer_number ?? "—"}
+                    </div>
+                    <div
+                      className="text-xs"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
                       {a.capacity_kw} kW rooftop array
                     </div>
                   </div>
@@ -86,17 +131,32 @@ export default async function NetMeteringPage() {
                   </span>
                 </div>
                 {a.applicant_notes && (
-                  <p className="text-sm mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                  <p
+                    className="text-sm mb-2"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     {a.applicant_notes}
                   </p>
                 )}
                 {decided ? (
-                  <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-                    Decided {a.decided_at ? new Date(a.decided_at).toLocaleString("en-IN") : ""}
+                  <p
+                    className="text-xs"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    Decided{" "}
+                    {a.decided_at
+                      ? new Date(a.decided_at).toLocaleString("en-IN")
+                      : ""}
                     {a.decision_notes ? ` — ${a.decision_notes}` : ""}
                   </p>
                 ) : (
-                  <NetMeteringDecisionForm applicationId={a.id} />
+                  <>
+                    <FeasibilityCheck
+                      applicationId={a.id}
+                      latest={latestCheckByApplication.get(a.id) ?? null}
+                    />
+                    <NetMeteringDecisionForm applicationId={a.id} />
+                  </>
                 )}
               </div>
             );
