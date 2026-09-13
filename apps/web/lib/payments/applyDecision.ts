@@ -15,11 +15,14 @@ export type PaymentDecision = {
 // route (app/api/admin/reconcile-payment) — the only two paths trusted to
 // make this jump, both running as service_role.
 //
-// The payment_orders update is the gate: it only takes effect from
-// created/attempted, so if a webhook and a manual reconcile ever race for
-// the same order, whichever writes first wins and the second sees zero rows
+// The payment_orders update is the gate: it excludes only "paid", so a
+// webhook and a manual reconcile racing for the same order resolve by
+// whichever write reaches Postgres first, and the loser sees zero rows
 // updated — `skipped: true` — instead of blindly re-applying a possibly
-// stale decision on top of an already-resolved order.
+// stale decision. "failed" is deliberately still writable: Razorpay allows
+// a second payment attempt against the same order after a first one fails,
+// so a "failed" order must still be able to move to "paid" on a later
+// capture — only "paid" is truly terminal here.
 export async function applyPaymentDecision(
   admin: SupabaseClient,
   d: PaymentDecision,
@@ -28,7 +31,7 @@ export async function applyPaymentDecision(
     .from("payment_orders")
     .update({ status: d.captured ? "paid" : "failed" })
     .eq("id", d.orderId)
-    .in("status", ["created", "attempted"])
+    .neq("status", "paid")
     .select("id");
   if (orderUpdateError)
     return { error: orderUpdateError, skipped: false as const };

@@ -42,13 +42,12 @@ export async function POST(request: Request) {
   if (orderError || !order || !order.razorpay_order_id) {
     return Response.json({ error: "payment order not found" }, { status: 404 });
   }
-  // Only re-apply the transition to an order that's actually stuck. A "paid"
-  // or "failed" order is already terminal — reconciling it again would
-  // silently re-run the transition (e.g. on a stale Razorpay response) with
-  // no record of why a completed order was touched a second time.
-  if (order.status !== "created" && order.status !== "attempted") {
+  // "paid" is the only truly terminal state (see applyPaymentDecision) — a
+  // "failed" order can still legitimately move to "paid" if Razorpay shows a
+  // later successful attempt against the same order, so that's allowed here.
+  if (order.status === "paid") {
     return Response.json(
-      { error: `payment order is already ${order.status}, not stuck` },
+      { error: "payment order is already paid" },
       { status: 409 },
     );
   }
@@ -132,13 +131,15 @@ export async function POST(request: Request) {
       payload: { payment_order_id: order.id, razorpay_response: payment },
       processed_at: new Date().toISOString(),
     });
+  // The money-side transition already committed at this point — a failure
+  // here is a missing audit note, not a failed reconciliation. Reporting it
+  // as a 500 would make an admin think nothing happened and retry, which
+  // then 409s against the now-paid order for no reason. Log it and still
+  // report success.
   if (webhookEventError && webhookEventError.code !== "23505") {
-    return Response.json(
-      {
-        error: "failed to record reconciliation",
-        detail: webhookEventError.message,
-      },
-      { status: 500 },
+    console.error(
+      "reconcile-payment: webhook_events audit insert failed",
+      webhookEventError,
     );
   }
 
