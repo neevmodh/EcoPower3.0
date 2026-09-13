@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+// Only ever called with msRemaining > 0 — the caller already renders "SLA
+// BREACHED" itself once isBreached is true, so there's no <= 0 case here.
 function format(msRemaining: number): string {
-  if (msRemaining <= 0) return "BREACHED";
   const totalMinutes = Math.floor(msRemaining / 60000);
   const days = Math.floor(totalMinutes / (60 * 24));
   const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
