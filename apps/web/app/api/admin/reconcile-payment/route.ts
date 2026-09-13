@@ -6,16 +6,9 @@
 import crypto from "node:crypto";
 import { getScope } from "@/lib/auth";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { createClient } from "@supabase/supabase-js";
+import { serviceClient } from "@/lib/supabase/service";
 
 export const runtime = "nodejs";
-
-function serviceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.SUPABASE_SERVICE_ROLE_KEY as string,
-  );
-}
 
 export async function POST(request: Request) {
   const keyId = process.env.RAZORPAY_KEY_ID;
@@ -48,6 +41,16 @@ export async function POST(request: Request) {
     .single();
   if (orderError || !order || !order.razorpay_order_id) {
     return Response.json({ error: "payment order not found" }, { status: 404 });
+  }
+  // Only re-apply the transition to an order that's actually stuck. A "paid"
+  // or "failed" order is already terminal — reconciling it again would
+  // silently re-run the transition (e.g. on a stale Razorpay response) with
+  // no record of why a completed order was touched a second time.
+  if (order.status !== "created" && order.status !== "attempted") {
+    return Response.json(
+      { error: `payment order is already ${order.status}, not stuck` },
+      { status: 409 },
+    );
   }
 
   const basicAuth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
