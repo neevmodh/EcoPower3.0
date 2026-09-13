@@ -16,20 +16,33 @@ function format(msRemaining: number): string {
 // A genuinely ticking clock, not a value computed once at server-render
 // time and left stale until the next refresh — the demo value here (#29)
 // is specifically that it visibly moves.
+//
+// `remaining` starts null rather than seeded from Date.now(): computing it
+// during the render itself would give the server and the client's first
+// hydration pass two different "now"s, and a text mismatch across a minute
+// boundary is a React hydration warning. Null renders identically on both
+// sides; the real value fills in from useEffect right after mount, which
+// only ever runs client-side.
 export function SlaCountdown({
   dueAt,
   breached,
 }: { dueAt: string; breached: boolean }) {
   const due = new Date(dueAt).getTime();
-  const [now, setNow] = useState(() => Date.now());
+  const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 60_000);
+    const tick = () => setRemaining(due - Date.now());
+    tick();
+    const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
-  }, []);
+  }, [due]);
 
-  const remaining = due - now;
-  const isBreached = breached || remaining <= 0;
+  const isBreached = breached || (remaining !== null && remaining <= 0);
+  const label = isBreached
+    ? "SLA BREACHED"
+    : remaining === null
+      ? "SLA: —"
+      : `SLA: ${format(remaining)}`;
 
   return (
     <span
@@ -40,7 +53,7 @@ export function SlaCountdown({
           : "var(--color-status-warning)",
       }}
     >
-      {isBreached ? "SLA BREACHED" : `SLA: ${format(remaining)}`}
+      {label}
     </span>
   );
 }

@@ -18,11 +18,18 @@ alter table netmetering_applications add column sla_breached boolean not null de
 
 alter type notification_type add value if not exists 'netmetering_sla_breach';
 
-create or replace function netmetering_applications_set_scope_keys() returns trigger as $$
+-- 0052 qualified this function's table reference (public.service_connections)
+-- as a root-cause fix for #142 — an unqualified reference resolves against
+-- whatever search_path is active for the caller, including a temp table an
+-- authenticated attacker can create, letting a forged row supply fake scope
+-- keys. Keep that qualification; only add the new sla_due_at branch.
+create or replace function netmetering_applications_set_scope_keys() returns trigger
+language plpgsql
+as $$
 begin
   select dt_id, division_id, org_id
   into new.dt_id, new.division_id, new.org_id
-  from service_connections
+  from public.service_connections
   where id = new.service_connection_id;
   new.updated_at := now();
   if tg_op = 'INSERT' then
@@ -30,7 +37,7 @@ begin
   end if;
   return new;
 end;
-$$ language plpgsql;
+$$;
 
 -- sweep_netmetering_sla() — marks any still-pending application past its
 -- due date as breached, and notifies every discom_admin in that division
