@@ -7,6 +7,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres_·_RLS_·_Realtime-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![MQTT](https://img.shields.io/badge/AMI-EMQX_·_DLMS/OBIS-660066?style=for-the-badge&logo=eclipsemosquitto&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Payments-Razorpay-0C2451?style=for-the-badge&logo=razorpay&logoColor=white)
+![Expo](https://img.shields.io/badge/Mobile-Expo_·_React_Native-000020?style=for-the-badge&logo=expo&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?style=for-the-badge&logo=vercel)
 
 **A digital platform for Energy-as-a-Service — customers subscribe to energy services (solar, battery backup, uptime) instead of owning and maintaining the hardware.**
@@ -71,7 +72,7 @@ It is **one Next.js web app** with seven role-gated panels. Authorization is **P
 
 | PS1 Key Requirement | How EcoPower 3.0 delivers it |
 |---|---|
-| **Web & mobile app, simple UI/UX** | Next.js 15 web app, 46 pages across 7 panels, validated colour system, five states for every data component. Installable **PWA** (`manifest.ts`, icon, service worker) as the mobile channel; native Expo app is planned, not built. |
+| **Web & mobile app, simple UI/UX** | Next.js 15 web app, 47 pages across 7 panels, validated colour system, five states for every data component. Installable **PWA** as a mobile channel, plus a real **Expo/React Native app** (`apps/mobile`) — one binary, persona-routed by JWT role claim, live meter tile, offline-safe field-technician mutation queue. |
 | **Subscription management — tiered, monthly / annual / pay-as-you-go** | `plans` catalog — **Solar Basic** (₹999/mo), **Solar + Backup** (₹2,499/mo, 98% availability guarantee), **Solar + Comfort** (₹3,999/mo). `billing_cycle` supports monthly / annual; a real zero-base-fee **PAYG** plan exists. Full lifecycle: subscribe → pause → resume → upgrade → cancel, with a `subscription_events` audit chain. |
 | **IoT / smart-meter integration for real-time consumption** | An **AMI simulator** publishes DLMS-shaped, OBIS-keyed, HMAC-signed payloads over **MQTT (EMQX)** from a physical solar + load model driven by live weather. An **ingest worker** verifies signatures, checks register monotonicity, handles rollover, and batch-`COPY`s into partitioned Postgres. Supabase **Realtime** pushes to the live dashboard with an honest connected / reconnecting / polling indicator. |
 | **Billing & payment gateway (UPI / cards / net-banking / wallets)** | A **pure tariff engine** (bigint paise, telescopic slabs, ToU, net-metering, duty) seeded with the **real Torrent Power Ahmedabad GERC order**. **Razorpay** Orders + Checkout + signed-webhook verification (test mode) covers UPI / card / net-banking / wallet. Every invoice line is provable — see below. |
@@ -105,7 +106,7 @@ The tariff seed is read from the actual Torrent Power Ahmedabad GERC order via `
 
 **Telemetry is real, not a `setInterval`.** DLMS/OBIS payloads, per-device HMAC, register monotonicity, rollover handling, batch `COPY` into partitioned Postgres, RLS-gated Realtime broadcast.
 
-**Authorization is the database's job.** Every policy is Postgres RLS over JWT scope claims injected by a custom access-token hook. Proven by a **pgTAP suite — 160 assertions across 24 files** — run in CI against a fresh `supabase db reset`.
+**Authorization is the database's job.** Every policy is Postgres RLS over JWT scope claims injected by a custom access-token hook. Proven by a **pgTAP suite — 255 assertions across 37 files** — run in CI against a fresh `supabase db reset`.
 
 **Correctness is tested.** Golden-file billing tests + property tests (line-sum conservation, net-metering offset conservation, monotonic slab boundaries, half-up rounding) in `packages/shared`.
 
@@ -132,7 +133,8 @@ The tariff seed is read from the actual Torrent Power Ahmedabad GERC order via `
 | Layer | Technology | Purpose |
 |---|---|---|
 | **Web** | Next.js 15 App Router · React 19 · Tailwind 3 | SSR, route-group per panel, → **Vercel** (region `bom1`) |
-| **Data** | **Supabase** — Postgres 15 · RLS · Auth · Realtime | 38 migrations, RLS + FORCE on every table |
+| **Mobile** | Expo + expo-router · NativeWind | One binary, two personas (consumer, field technician); same JWT/RLS boundary as web, no bespoke session logic |
+| **Data** | **Supabase** — Postgres 15 · RLS · Auth · Realtime | 54 migrations, RLS + FORCE on every table |
 | **Telemetry** | **EMQX** (MQTT) · AMI simulator · ingest worker | DLMS/OBIS, per-device HMAC, → **Railway** |
 | **Billing** | `packages/shared` — zero-dependency pure TypeScript | tariff + guarantee engine, byte-identical across web & worker |
 | **Payments** | **Razorpay** — Orders · Checkout · signed webhooks | UPI / card / net-banking / wallet (test mode) |
@@ -185,18 +187,24 @@ long-lived Node processes on Railway, not as Next.js routes — an MQTT
 subscriber needs a persistent connection, which a serverless request/response
 function can't hold.
 
+`apps/mobile` (not pictured above) talks to the same Supabase project directly
+with the anon key via `@supabase/supabase-js` — the same RLS policies gate it,
+and there is no bespoke mobile authorization path to get wrong. The one
+platform-specific piece is session storage: `expo-secure-store` (Keychain /
+Keystore) instead of the browser's httpOnly cookie.
+
 ---
 
 ## 📦 What's Actually Built
 
 | Path | State |
 |---|---|
-| `apps/web` | **Real, deployed.** Next.js 15, 46 pages across 7 panels. ~95% of the codebase. |
+| `apps/web` | **Real, deployed.** Next.js 15, 47 pages across 7 panels. ~90% of the codebase. |
 | `apps/web/workers/simulator` | **Real.** Physically-modelled AMI readings over MQTT. Runs as a persistent Node process (Railway), not a route — MQTT needs an open connection. |
 | `apps/web/workers/ingest` | **Real.** MQTT → HMAC + monotonicity validation → partitioned Postgres. Same reason, same deployment. |
 | `packages/shared` | **Real.** Zero-dependency TS — tariff engine, guarantee engine, OBIS / HESAdapter, design tokens + palette validator. |
-| `supabase/` | **Real.** 38 migrations, RLS + FORCE on every table, 24 pgTAP test files in CI. |
-| `apps/mobile` | **Empty.** No Expo app yet — the PWA covers the mobile channel. |
+| `supabase/` | **Real.** 54 migrations, RLS + FORCE on every table, 37 pgTAP test files in CI. |
+| `apps/mobile` | **Real, not yet device-tested.** Expo + expo-router + NativeWind: auth + persona routing, a live-data tile with `AppState`-aware Realtime, an offline outbox for field-technician mutations, and meter QR/barcode scan. Verified via `tsc`, lint, and a real Metro bundle export in CI — **never booted on a physical device or simulator**, since none was available while it was built. Nameplate OCR, meter-reading OCR, the full commissioning flow, and an EAS-distributed build are not built yet — see [open mobile issues](../../issues?q=is%3Aissue+is%3Aopen+label%3Aarea%3Amobile). |
 | `services/ml` | **Empty.** No forecasting / anomaly service. Bill / meter OCR runs client-side via `tesseract.js`. |
 | `services/worker` | **Empty.** Scheduled work is `pg_cron`, not BullMQ. |
 
@@ -221,7 +229,7 @@ pnpm install
 
 ```bash
 supabase start
-supabase db reset          # applies all 38 migrations
+supabase db reset          # applies all 54 migrations
 ```
 
 ### 3. Seed demo data
@@ -252,6 +260,16 @@ cd apps/web && pnpm worker:ingest
 cd apps/web && pnpm worker:simulator
 ```
 
+### 6. (Optional) Run the mobile app
+
+```bash
+cd apps/mobile
+cp .env .env.local          # already gitignored — edit the URL for your target device
+pnpm start                  # scan the QR with Expo Go, or press `a` / `i` for an emulator
+```
+
+`127.0.0.1` in `.env` only resolves from the machine running `supabase start` — the Android emulator needs `10.0.2.2`, a physical device needs your machine's LAN IP. See `apps/mobile/README.md` for the full setup and what's built vs. not.
+
 ---
 
 ## 🔑 Demo Credentials
@@ -270,6 +288,8 @@ cd apps/web && pnpm worker:simulator
 
 > Every `supabase db reset` regenerates user UUIDs — sign out and use the demo buttons again after a reset.
 
+The same accounts work in the mobile app's login screen — it's the same Supabase project, same JWT, same RLS. `field@ecopower.demo` lands on the field-technician persona; anything else lands on consumer.
+
 ---
 
 ## 📁 Project Structure
@@ -285,11 +305,14 @@ EcoPower3.0/
 │                        Next.js routes; one codebase, one package.json
 ├── packages/shared/     tariff + guarantee engine · OBIS · HESAdapter · tokens
 │   └── src/billing/     bigint-paise pure functions, golden + property tests
+├── apps/mobile/         Expo + expo-router — auth, live tile, offline outbox, QR scan
+│   ├── app/(consumer|field)/
+│   └── lib/outbox/      SQLite-backed queue, retry/backoff, conflict surfacing
 ├── supabase/
-│   ├── migrations/      0001 … 0038
-│   └── tests/rls/       24 pgTAP files, 160 assertions
+│   ├── migrations/      0001 … 0054
+│   └── tests/rls/       37 pgTAP files, 255 assertions
 ├── scripts/             demo seed · palette validation · client-bundle secret scan
-└── apps/mobile · services/ml · services/worker · tools/loadtest   (scaffolded)
+└── services/ml · services/worker · tools/loadtest   (scaffolded)
 ```
 
 ---
@@ -300,14 +323,16 @@ EcoPower3.0/
 |---|---|
 | `packages/shared` (tariff, guarantee, OBIS, HESAdapter, tokens) | 151 tests |
 | `apps/web/workers` (HMAC, monotonicity, batcher, meter tick, publisher) | 27 tests |
-| pgTAP RLS suite (`supabase test db`) | 160 assertions / 24 files |
+| pgTAP RLS suite (`supabase test db`) | 255 assertions / 37 files |
+| `apps/mobile` | `tsc --noEmit` + Biome + a real `expo export` bundle in CI — no device/simulator test yet |
 
-**CI** (`.github/workflows/ci.yml`) runs on every push: palette validation → Biome lint → build → **client-bundle secret scan** (fails if a server secret reaches the browser) → tests → fresh `supabase db reset` → pgTAP.
+**CI** (`.github/workflows/ci.yml`) runs on every push: palette validation → Biome lint → build → **client-bundle secret scan** (fails if a server secret reaches the browser) → tests → fresh `supabase db reset` → pgTAP. `apps/mobile` is typechecked and bundled in the same run but is not part of the deployed web app's pipeline.
 
 ```bash
 pnpm test                 # all workspace unit tests
 supabase test db          # pgTAP RLS suite
-pnpm --dir apps/web exec tsc --noEmit   # typecheck
+pnpm --dir apps/web exec tsc --noEmit   # typecheck (web)
+pnpm --dir apps/mobile exec tsc --noEmit   # typecheck (mobile)
 ```
 
 ---
@@ -325,7 +350,9 @@ pnpm --dir apps/web exec tsc --noEmit   # typecheck
 
 ## 🧭 Where It's Going
 
-The next milestone (`sandbox-v1`, epic [#102](../../issues/102)) opens EcoPower to **public signup**: Google + email/password auth, and every new user gets an **isolated synthetic tenant** — their own division, connections, society and RESCO — provisioned automatically, explorable across all seven panels. Telemetry for the sandbox is generated in-database by `pg_cron`, so it runs entirely on free infrastructure. The real AMI path (simulator + EMQX + ingest, via `HESAdapter`) remains for utility pilots.
+The next milestone (`sandbox-v1`, epic [#102](../../issues/102)) opens EcoPower to **public signup**: Google + email/password auth, and every new user gets an **isolated synthetic tenant** — their own division, connections, society and RESCO — provisioned automatically, explorable across all seven panels. The provisioning trigger and its cross-tenant isolation pgTAP suite are built and CI-verified; the free-tier keep-alive/prune jobs and the auth UI itself are the remaining pieces. Telemetry for the sandbox is generated in-database by `pg_cron`, so it runs entirely on free infrastructure. The real AMI path (simulator + EMQX + ingest, via `HESAdapter`) remains for utility pilots.
+
+On mobile, the next steps need something this repo's CI can't provide — a physical device or simulator, and real meter photographs to build the nameplate/meter-reading OCR against honestly rather than guessing at accuracy no one can check.
 
 Open work is tracked in [ROADMAP.md](ROADMAP.md) — the tracker table matches GitHub issue numbers.
 

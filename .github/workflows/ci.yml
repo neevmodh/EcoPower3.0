@@ -26,8 +26,19 @@ jobs:
       - run: pnpm validate:palette
 
       # Biome lint — replaces the never-configured `next lint` (#9 groundwork).
+      # Covers apps/mobile too now that it has its own `lint` script (turbo
+      # runs a package's script only if the package defines it).
       - run: pnpm lint
 
+      # apps/mobile has no equivalent to `next build`'s implicit type
+      # checking — `expo export` below only transpiles, it doesn't run tsc.
+      # Explicit here since there's no generic `typecheck` turbo task any
+      # package in this repo uses yet.
+      - run: pnpm --filter @ecopower/mobile typecheck
+
+      # turbo run build now also covers apps/mobile (its own `build` script
+      # is `expo export --platform android` — a real Metro bundle, the
+      # closest thing to a smoke test without a device/simulator in CI).
       - run: pnpm build
 
       # Fail if a server-only secret reached the client bundle (#9).
