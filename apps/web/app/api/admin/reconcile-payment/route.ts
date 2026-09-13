@@ -3,8 +3,8 @@
 // delivery was lost (venue wifi, Razorpay retry exhausted, etc). Applies the
 // exact same state transition the webhook route applies, just triggered by an
 // admin click instead of a Razorpay delivery.
-import crypto from "node:crypto";
 import { getScope } from "@/lib/auth";
+import { applyPaymentDecision } from "@/lib/payments/applyDecision";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { serviceClient } from "@/lib/supabase/service";
 
@@ -84,71 +84,55 @@ export async function POST(request: Request) {
     });
   }
 
-  // These three transitions mirror the webhook route (app/api/webhooks/razorpay)
-  // exactly, and like that route they must run as service_role: the write
-  // guards on payments/payment_orders (0043) and invoices (0046) reject an
-  // `authenticated`-role write into a terminal status by design — only the
-  // webhook path (and now this one) is trusted to make that jump.
+  // Same transition the webhook route applies, via the same shared function
+  // — service_role, because the write guards on payments/payment_orders
+  // (0043) and invoices (0046) reject an authenticated-role write into a
+  // terminal status by design. The payment_orders update inside it is a
+  // compare-and-swap on status, so a webhook landing concurrently for this
+  // exact order is resolved by whichever write reaches Postgres first, not
+  // by whichever request started first.
   const admin = serviceClient();
-
-  const { error: paymentError } = await admin.from("payments").upsert(
-    {
-      payment_order_id: order.id,
-      razorpay_payment_id: payment.id as string,
-      method: typeof payment.method === "string" ? payment.method : null,
-      status: captured ? "captured" : "failed",
-      amount_paise: typeof payment.amount === "number" ? payment.amount : 0,
-      raw_response: payment,
-      captured_at: captured ? new Date().toISOString() : null,
-    },
-    { onConflict: "razorpay_payment_id", ignoreDuplicates: false },
-  );
-  if (paymentError) {
-    return Response.json(
-      { error: "failed to record payment", detail: paymentError.message },
-      { status: 500 },
-    );
-  }
-
-  const { error: orderUpdateError } = await admin
-    .from("payment_orders")
-    .update({ status: captured ? "paid" : "failed" })
-    .eq("id", order.id);
-  if (orderUpdateError) {
+  const result = await applyPaymentDecision(admin, {
+    orderId: order.id,
+    invoiceId: order.invoice_id,
+    captured: Boolean(captured),
+    razorpayPaymentId: payment.id as string,
+    method: typeof payment.method === "string" ? payment.method : null,
+    amountPaise: typeof payment.amount === "number" ? payment.amount : 0,
+    rawResponse: payment,
+  });
+  if (result.error) {
     return Response.json(
       {
-        error: "failed to update payment order",
-        detail: orderUpdateError.message,
+        error: "failed to apply payment decision",
+        detail: result.error.message,
       },
       { status: 500 },
     );
   }
-
-  if (captured) {
-    const { error: invoiceError } = await admin
-      .from("invoices")
-      .update({ status: "paid" })
-      .eq("id", order.invoice_id);
-    if (invoiceError) {
-      return Response.json(
-        { error: "failed to mark invoice paid", detail: invoiceError.message },
-        { status: 500 },
-      );
-    }
+  if (result.skipped) {
+    return Response.json({
+      reconciled: false,
+      reason: "order was already resolved (webhook likely won the race)",
+    });
   }
 
   // manual.reconcile, not payment.captured/failed — this delivery never went
   // through HMAC verification (there was no delivery), unlike every other
   // row in this table. The admin UI must not badge it "signature valid".
+  // event_id is deterministic on the actual Razorpay payment id, not random:
+  // a double-click or two admins reconciling the same stuck order collide on
+  // the unique constraint and become a no-op, the same idempotency story
+  // webhook_events already tells for real deliveries.
   const { error: webhookEventError } = await admin
     .from("webhook_events")
     .insert({
-      event_id: `manual-reconcile-${order.id}-${crypto.randomUUID()}`,
+      event_id: `manual-reconcile-${payment.id}`,
       event_type: "manual.reconcile",
       payload: { payment_order_id: order.id, razorpay_response: payment },
       processed_at: new Date().toISOString(),
     });
-  if (webhookEventError) {
+  if (webhookEventError && webhookEventError.code !== "23505") {
     return Response.json(
       {
         error: "failed to record reconciliation",

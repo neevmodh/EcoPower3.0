@@ -4,6 +4,7 @@
 // user session to scope RLS against, and the HMAC signature check below is
 // the actual authorization boundary, not a Supabase policy.
 import crypto from "node:crypto";
+import { applyPaymentDecision } from "@/lib/payments/applyDecision";
 import { serviceClient } from "@/lib/supabase/service";
 
 export const runtime = "nodejs";
@@ -93,31 +94,15 @@ export async function POST(request: Request) {
         .single();
 
       if (order) {
-        await supabase.from("payments").upsert(
-          {
-            payment_order_id: order.id,
-            razorpay_payment_id: payment.id,
-            method: typeof payment.method === "string" ? payment.method : null,
-            status: captured ? "captured" : "failed",
-            amount_paise:
-              typeof payment.amount === "number" ? payment.amount : 0,
-            raw_response: payment,
-            captured_at: captured ? new Date().toISOString() : null,
-          },
-          { onConflict: "razorpay_payment_id", ignoreDuplicates: false },
-        );
-
-        await supabase
-          .from("payment_orders")
-          .update({ status: captured ? "paid" : "failed" })
-          .eq("id", order.id);
-
-        if (captured) {
-          await supabase
-            .from("invoices")
-            .update({ status: "paid" })
-            .eq("id", order.invoice_id);
-        }
+        await applyPaymentDecision(supabase, {
+          orderId: order.id,
+          invoiceId: order.invoice_id,
+          captured,
+          razorpayPaymentId: payment.id,
+          method: typeof payment.method === "string" ? payment.method : null,
+          amountPaise: typeof payment.amount === "number" ? payment.amount : 0,
+          rawResponse: payment,
+        });
       }
     }
   }
