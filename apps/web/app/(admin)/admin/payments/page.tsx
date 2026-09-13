@@ -73,13 +73,21 @@ export default async function AdminPaymentsPage() {
     {
       key: "signature_valid",
       label: "Signature",
-      // Every row here passed HMAC verification before insert (0011) — an
-      // unsigned or mis-signed delivery is rejected with 401 and never
-      // reaches this table, so there is nothing to store per-row.
-      render: () => (
-        <span style={{ color: "var(--color-status-good)" }}>valid</span>
-      ),
-      cell: () => "valid",
+      // Every Razorpay-delivered row here passed HMAC verification before
+      // insert (0011) — an unsigned or mis-signed delivery is rejected with
+      // 401 and never reaches this table. "manual.reconcile" rows are the
+      // one exception: they're written by an admin action (#41), never a
+      // signed delivery, and must not be badged as if they were.
+      render: (r) =>
+        r.event_type === "manual.reconcile" ? (
+          <span style={{ color: "var(--color-text-secondary)" }}>
+            manual reconcile
+          </span>
+        ) : (
+          <span style={{ color: "var(--color-status-good)" }}>valid</span>
+        ),
+      cell: (r) =>
+        r.event_type === "manual.reconcile" ? "manual reconcile" : "valid",
     },
   ];
 

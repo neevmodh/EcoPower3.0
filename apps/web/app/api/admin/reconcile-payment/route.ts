@@ -81,7 +81,14 @@ export async function POST(request: Request) {
     });
   }
 
-  await supabase.from("payments").upsert(
+  // These three transitions mirror the webhook route (app/api/webhooks/razorpay)
+  // exactly, and like that route they must run as service_role: the write
+  // guards on payments/payment_orders (0043) and invoices (0046) reject an
+  // `authenticated`-role write into a terminal status by design — only the
+  // webhook path (and now this one) is trusted to make that jump.
+  const admin = serviceClient();
+
+  const { error: paymentError } = await admin.from("payments").upsert(
     {
       payment_order_id: order.id,
       razorpay_payment_id: payment.id as string,
@@ -93,22 +100,44 @@ export async function POST(request: Request) {
     },
     { onConflict: "razorpay_payment_id", ignoreDuplicates: false },
   );
+  if (paymentError) {
+    return Response.json(
+      { error: "failed to record payment", detail: paymentError.message },
+      { status: 500 },
+    );
+  }
 
-  await supabase
+  const { error: orderUpdateError } = await admin
     .from("payment_orders")
     .update({ status: captured ? "paid" : "failed" })
     .eq("id", order.id);
+  if (orderUpdateError) {
+    return Response.json(
+      {
+        error: "failed to update payment order",
+        detail: orderUpdateError.message,
+      },
+      { status: 500 },
+    );
+  }
 
   if (captured) {
-    await supabase
+    const { error: invoiceError } = await admin
       .from("invoices")
       .update({ status: "paid" })
       .eq("id", order.invoice_id);
+    if (invoiceError) {
+      return Response.json(
+        { error: "failed to mark invoice paid", detail: invoiceError.message },
+        { status: 500 },
+      );
+    }
   }
 
-  // Recorded via service_role, same as every other webhook_events row (0011)
-  // — keeps "who's allowed to write this ledger" to one answer.
-  await serviceClient()
+  // manual.reconcile, not payment.captured/failed — this delivery never went
+  // through HMAC verification (there was no delivery), unlike every other
+  // row in this table. The admin UI must not badge it "signature valid".
+  const { error: webhookEventError } = await admin
     .from("webhook_events")
     .insert({
       event_id: `manual-reconcile-${order.id}-${crypto.randomUUID()}`,
@@ -116,6 +145,15 @@ export async function POST(request: Request) {
       payload: { payment_order_id: order.id, razorpay_response: payment },
       processed_at: new Date().toISOString(),
     });
+  if (webhookEventError) {
+    return Response.json(
+      {
+        error: "failed to record reconciliation",
+        detail: webhookEventError.message,
+      },
+      { status: 500 },
+    );
+  }
 
   return Response.json({
     reconciled: true,
