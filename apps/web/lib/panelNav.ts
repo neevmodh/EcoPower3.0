@@ -22,7 +22,11 @@ export function consumerNav(active: string, t?: T): NavItem[] {
     ["/consumer/support", "nav.support"],
     ["/consumer/settings", "nav.settings"],
   ];
-  return items.map(([href, key]) => ({ href, label: tr(key), active: href === active }));
+  return items.map(([href, key]) => ({
+    href,
+    label: tr(key),
+    active: href === active,
+  }));
 }
 
 export function adminNav(active: string): NavItem[] {
@@ -32,10 +36,15 @@ export function adminNav(active: string): NavItem[] {
     ["/admin/tenants", "Tenants"],
     ["/admin/users", "Users & roles"],
     ["/admin/billing", "Billing"],
+    ["/admin/payments", "Payment reconciliation"],
     ["/admin/analytics", "Analytics"],
     ["/admin/tickets", "Tickets"],
   ];
-  return items.map(([href, label]) => ({ href, label, active: href === active }));
+  return items.map(([href, label]) => ({
+    href,
+    label,
+    active: href === active,
+  }));
 }
 
 const DEFAULT: Record<string, string> = {
