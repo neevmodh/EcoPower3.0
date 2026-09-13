@@ -98,7 +98,7 @@ Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 | 85 | Unit economics + 90-day pilot proposal (docs) | M7 | docs | high | — | ☐ | — |
 | 88 | Seed remote/prod Supabase with demo data for migrations 0014–0038 | M7 | db | high | — | ☐ | — |
 | 89 | Update Razorpay webhook URL from the placeholder | M4 | payments | normal | 1 | ☐ | 39 |
-| 90 | Verify the Gemini API key actually authenticates | M4 | ml | high | — | ☐ | [#65](../../issues/65) |
+| 90 | Verify the Gemini API key actually authenticates | M4 | ml | high | — | ☑ | [#65](../../issues/65) |
 | 91 | Reconcile P2P trading + EV panels against §7 "out of scope" | M7 | docs | normal | — | ☑ | — |
 | 92 | Platform superadmin panel — cross-tenant admin surface | M2 | web | normal | — | ☑ | — |
 | 93 | Ingest: batch-flush failure silently drops readings + desyncs delta state | M1 | ingest | high | — | ☑ | — |
