@@ -18,6 +18,16 @@ alter table netmetering_applications add column sla_breached boolean not null de
 
 alter type notification_type add value if not exists 'netmetering_sla_breach';
 
+-- Backfill: sla_due_at is only ever set by the trigger below on INSERT, so
+-- without this, every application already pending before this migration
+-- deploys keeps sla_due_at NULL forever — invisible to the sweeper's
+-- `sla_due_at < now()` (NULL compares to nothing), to the officer queue's
+-- countdown, and to the breach-rate stat, no matter how overdue it actually
+-- is. Backdated from created_at, same rule the trigger applies going forward.
+update netmetering_applications
+set sla_due_at = created_at + interval '15 days'
+where sla_due_at is null and status in ('submitted', 'under_review');
+
 -- 0052 qualified this function's table reference (public.service_connections)
 -- as a root-cause fix for #142 — an unqualified reference resolves against
 -- whatever search_path is active for the caller, including a temp table an

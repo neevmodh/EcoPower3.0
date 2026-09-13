@@ -43,7 +43,8 @@ export default async function DiscomPage() {
     { data: lossRows },
     loadResult,
     quarantineResult,
-    { data: netmeteringApps },
+    netmeteringTotalResult,
+    netmeteringBreachedResult,
   ] = await Promise.all([
     supabase.from("service_connections").select("id, dt_id"),
     supabase.from("distribution_transformers").select("id, name, capacity_kva"),
@@ -66,16 +67,21 @@ export default async function DiscomPage() {
     // SLA breach rate (#29) — lifetime, not just currently-pending: an
     // application that breached and was later decided still counts, the
     // same way a late train stays late in an on-time-performance stat.
+    // Two count-only queries, same shape as quarantine_readings above —
+    // this dashboard only ever needs the two tallies, never the rows.
     supabase
       .from("netmetering_applications")
-      .select("id, sla_breached"),
+      .select("id", { count: "exact", head: true }),
+    supabase
+      .from("netmetering_applications")
+      .select("id", { count: "exact", head: true })
+      .eq("sla_breached", true),
   ]);
   const quarantineCount = quarantineResult.count ?? 0;
+  const netmeteringTotal = netmeteringTotalResult.count ?? 0;
   const slaBreachRate =
-    netmeteringApps && netmeteringApps.length > 0
-      ? (netmeteringApps.filter((a) => a.sla_breached).length /
-          netmeteringApps.length) *
-        100
+    netmeteringTotal > 0
+      ? ((netmeteringBreachedResult.count ?? 0) / netmeteringTotal) * 100
       : null;
   const { data: loadRaw } = loadResult as {
     data: Array<{

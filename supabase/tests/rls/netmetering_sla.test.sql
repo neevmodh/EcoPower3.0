@@ -4,7 +4,7 @@
 -- subsequent sweep tick.
 
 begin;
-select plan(5);
+select plan(6);
 
 insert into orgs (id, name, type) values ('62000000-0000-0000-0000-000000000001', 'Test DISCOM', 'discom');
 insert into discom_divisions (id, discom_org_id, name, level) values
@@ -30,6 +30,20 @@ insert into netmetering_applications (id, service_connection_id, capacity_kw) va
 select ok(
   (select sla_due_at from netmetering_applications where id = '62000000-0000-0000-0000-0000000000d1') is not null,
   'sla_due_at is set automatically on submission'
+);
+
+-- Simulate a "legacy" application that predates this migration: the trigger
+-- always sets sla_due_at on INSERT, so the only way to get a pending row
+-- with sla_due_at null is to null it out directly, then re-run the exact
+-- backfill statement 0057 runs once at deploy time.
+update netmetering_applications set sla_due_at = null where id = '62000000-0000-0000-0000-0000000000d1';
+update netmetering_applications
+set sla_due_at = created_at + interval '15 days'
+where sla_due_at is null and status in ('submitted', 'under_review');
+
+select ok(
+  (select sla_due_at = created_at + interval '15 days' from netmetering_applications where id = '62000000-0000-0000-0000-0000000000d1'),
+  'the backfill statement recomputes sla_due_at (created_at + 15 days) for a pre-migration pending application'
 );
 
 -- Force it overdue — the trigger sets sla_due_at from now(), a fixture
