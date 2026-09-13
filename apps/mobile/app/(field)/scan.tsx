@@ -42,8 +42,13 @@ export default function ScanMeter() {
       .eq("serial", serial)
       .maybeSingle();
     if (meterError) {
+      // Deliberately not resetting `scanned` here: the camera view stays
+      // mounted and active, and if the same barcode is still in frame,
+      // onBarcodeScanned fires again almost immediately — without this
+      // guard, a lookup failure while pointed at a code turns into a tight
+      // loop hammering the same failing query. "Try again" below requires
+      // an explicit tap instead.
       setError(meterError.message);
-      setScanned(false);
       return;
     }
     if (!meter) {
@@ -154,9 +159,18 @@ export default function ScanMeter() {
       )}
 
       {error ? (
-        <Text className="bg-status-critical p-3 text-center text-white">
-          {error}
-        </Text>
+        <View className="items-center gap-3 bg-status-critical p-4">
+          <Text className="text-center text-white">{error}</Text>
+          <TouchableOpacity
+            onPress={() => {
+              setError(null);
+              setScanned(false);
+            }}
+            className="rounded-lg bg-white px-4 py-2"
+          >
+            <Text className="font-medium text-status-critical">Try again</Text>
+          </TouchableOpacity>
+        </View>
       ) : null}
 
       <TouchableOpacity

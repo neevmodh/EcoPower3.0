@@ -36,13 +36,28 @@ export async function runSync(): Promise<void> {
         [row.id],
       );
 
-      const execute = OPERATIONS[row.kind as OperationKind];
-      const result = await execute(JSON.parse(row.payload)).catch(
-        (err: unknown) => ({
-          outcome: "retry" as const,
+      // Wrapping the whole attempt, not just `.catch()`-ing execute()'s own
+      // promise: JSON.parse(row.payload) and the OPERATIONS[row.kind]
+      // lookup both throw *synchronously*, before execute() is even
+      // called, so a `.catch()` chained only onto execute()'s return value
+      // never sees them. Left unguarded, a corrupted payload (a crash
+      // mid-write, a full disk) or an unrecognized kind (an old queued row
+      // surviving an app update that renamed an operation) would leave the
+      // row stuck at status='syncing' forever — not matched by the
+      // pending/failed filter above, so it's retried nowhere, and never
+      // marked 'conflict' either, so it's invisible to the technician too.
+      let result: Awaited<ReturnType<(typeof OPERATIONS)[OperationKind]>>;
+      try {
+        const execute = OPERATIONS[row.kind as OperationKind];
+        if (!execute)
+          throw new Error(`unknown outbox operation kind: ${row.kind}`);
+        result = await execute(JSON.parse(row.payload));
+      } catch (err) {
+        result = {
+          outcome: "retry",
           error: err instanceof Error ? err.message : "unknown error",
-        }),
-      );
+        };
+      }
 
       if (result.outcome === "ok") {
         await db.runAsync("delete from outbox_operations where id = ?", [
