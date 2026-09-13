@@ -1,3 +1,4 @@
+import { DisburseSubsidyButton } from "@/components/DisburseSubsidyButton";
 import {
   FeasibilityCheck,
   type FeasibilityCheckRow,
@@ -7,6 +8,7 @@ import { PanelShell } from "@/components/PanelShell";
 import { SlaCountdown } from "@/components/SlaCountdown";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { formatInrFromPaise } from "@ecopower/shared";
 import { redirect } from "next/navigation";
 
 // Issue #28, closed for real this time — PS1 §7 names net-metering
@@ -30,7 +32,7 @@ export default async function NetMeteringPage() {
   const { data: applicationsRaw } = await supabase
     .from("netmetering_applications")
     .select(
-      "id, capacity_kw, status, applicant_notes, decision_notes, created_at, decided_at, sla_due_at, sla_breached, service_connections(consumer_number)",
+      "id, capacity_kw, status, applicant_notes, decision_notes, created_at, decided_at, sla_due_at, sla_breached, subsidy_claimed_paise, subsidy_disbursed_paise, subsidy_disbursed_at, service_connections(consumer_number)",
     )
     .order("created_at", { ascending: false });
 
@@ -186,6 +188,27 @@ export default async function NetMeteringPage() {
                       latest={latestCheckByApplication.get(a.id) ?? null}
                       readOnly
                     />
+                    {a.status === "approved" && (
+                      <div
+                        className="mt-2 pt-2"
+                        style={{ borderTop: "1px solid var(--color-border)" }}
+                      >
+                        <p
+                          className="text-xs"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
+                          PM Surya Ghar subsidy:{" "}
+                          {formatInrFromPaise(BigInt(a.subsidy_claimed_paise))}{" "}
+                          claimed
+                          {a.subsidy_disbursed_at
+                            ? ` · ${formatInrFromPaise(BigInt(a.subsidy_disbursed_paise ?? 0))} disbursed ${new Date(a.subsidy_disbursed_at).toLocaleDateString("en-IN")}`
+                            : " · not yet disbursed"}
+                        </p>
+                        {!a.subsidy_disbursed_at && (
+                          <DisburseSubsidyButton applicationId={a.id} />
+                        )}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
