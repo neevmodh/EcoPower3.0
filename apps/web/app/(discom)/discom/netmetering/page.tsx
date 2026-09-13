@@ -4,6 +4,7 @@ import {
 } from "@/components/FeasibilityCheck";
 import { NetMeteringDecisionForm } from "@/components/NetMeteringDecisionForm";
 import { PanelShell } from "@/components/PanelShell";
+import { SlaCountdown } from "@/components/SlaCountdown";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -26,12 +27,34 @@ export default async function NetMeteringPage() {
   if (!scope) redirect("/login");
   const { user, divisionIds } = scope;
 
-  const { data: applications } = await supabase
+  const { data: applicationsRaw } = await supabase
     .from("netmetering_applications")
     .select(
-      "id, capacity_kw, status, applicant_notes, decision_notes, created_at, decided_at, service_connections(consumer_number)",
+      "id, capacity_kw, status, applicant_notes, decision_notes, created_at, decided_at, sla_due_at, sla_breached, service_connections(consumer_number)",
     )
     .order("created_at", { ascending: false });
+
+  // Pending applications first, soonest-to-breach at the top of that group —
+  // the officer queue this issue asks for. Decided ones follow, most
+  // recently decided first. Dataset here is small (a division's net-
+  // metering queue), so a client-side sort keeps this readable without a
+  // compound ORDER BY expression.
+  const applications = [...(applicationsRaw ?? [])].sort((a, b) => {
+    const aPending = a.status === "submitted" || a.status === "under_review";
+    const bPending = b.status === "submitted" || b.status === "under_review";
+    if (aPending !== bPending) return aPending ? -1 : 1;
+    if (aPending) {
+      if (!a.sla_due_at) return 1;
+      if (!b.sla_due_at) return -1;
+      return (
+        new Date(a.sla_due_at).getTime() - new Date(b.sla_due_at).getTime()
+      );
+    }
+    return (
+      new Date(b.decided_at ?? 0).getTime() -
+      new Date(a.decided_at ?? 0).getTime()
+    );
+  });
 
   const applicationIds = (applications ?? []).map((a) => a.id);
   const { data: checksRaw } = applicationIds.length
@@ -130,6 +153,14 @@ export default async function NetMeteringPage() {
                     {a.status.replace("_", " ")}
                   </span>
                 </div>
+                {!decided && a.sla_due_at && (
+                  <div className="mb-2">
+                    <SlaCountdown
+                      dueAt={a.sla_due_at}
+                      breached={a.sla_breached}
+                    />
+                  </div>
+                )}
                 {a.applicant_notes && (
                   <p
                     className="text-sm mb-2"

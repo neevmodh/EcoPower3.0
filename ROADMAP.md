@@ -42,7 +42,7 @@ Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 | 26 | DT energy accounting + AT&C loss map | M3 | discom | critical | 1 | ☑ | 17 |
 | 27 | Theft / loss localization model | M3 | ml | critical | 3 | ☑ | 26 |
 | 28 | Net-metering application state machine | M3 | discom | high | 1 | ☑ | 5 |
-| 29 | SLA clocks per CEA/GERC norms | M3 | discom | normal | 1 | ☐ | 28 |
+| 29 | SLA clocks per CEA/GERC norms | M3 | discom | normal | 1 | ☑ | 28 |
 | 30 | DT feasibility check | M3 | discom | normal | 1 | ☑ | 28 |
 | 31 | PM Surya Ghar subsidy workflow | M3 | discom | normal | 1 | ☐ | 28 |
 | 32 | Prepaid oversight + disconnect queue (two-person) | M3 | security | high | 1 | ◐ | 22 |

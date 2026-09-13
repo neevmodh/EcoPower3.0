@@ -1,11 +1,11 @@
-import { redirect } from "next/navigation";
-import { PanelShell } from "@/components/PanelShell";
 import { PanelIcon } from "@/components/Icon";
-import { ChartFrame, LegendDot } from "@/components/charts/ChartFrame";
+import { PanelShell } from "@/components/PanelShell";
 import { AreaChart } from "@/components/charts/AreaChart";
+import { ChartFrame, LegendDot } from "@/components/charts/ChartFrame";
 import { RankedBar, type RankedRow } from "@/components/charts/RankedBar";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 // loss_pct is genuinely nullable — dt_loss_summary() (0017) returns null
 // when a DT has delivered 0 kWh (nothing to divide by), not a measured
@@ -13,7 +13,13 @@ import { createClient } from "@/lib/supabase/server";
 // let a DT with no metering data render as "0.0% loss" and sort as the
 // greenest, safest-looking bar on the chart — the exact "decorative
 // element outlives its data" failure DESIGN.md P1 exists to prevent.
-type LossRow = { dt_id: string; dt_name: string; loss_pct: number | null; delivered_kwh?: number; consumed_kwh?: number };
+type LossRow = {
+  dt_id: string;
+  dt_name: string;
+  loss_pct: number | null;
+  delivered_kwh?: number;
+  consumed_kwh?: number;
+};
 
 function hasMeasuredLoss(r: LossRow): r is LossRow & { loss_pct: number } {
   return r.loss_pct != null;
@@ -30,27 +36,60 @@ export default async function DiscomPage() {
   const { user, divisionIds } = scope;
 
   // All independent — one parallel round trip instead of six serial ones.
-  const [{ data: connections }, { data: dts }, { data: meters }, { data: lossRows }, loadResult, quarantineResult] =
-    await Promise.all([
-      supabase.from("service_connections").select("id, dt_id"),
-      supabase.from("distribution_transformers").select("id, name, capacity_kva"),
-      supabase.from("meters").select("id, status, dt_id, service_connection_id"),
-      supabase.rpc("dt_loss_summary"),
-      // Division load curve — hourly import vs behind-meter solar, last 48h;
-      // RLS on meter_readings (via the 0031 rollup) scopes it to this division.
-      supabase.rpc("division_load_profile", { p_hours: 48 }),
-      // Readings the ingest worker refused to silently drop (#15) — clock
-      // skew, a reading dated in the future. A real zero here is honest
-      // (nothing's gone wrong); this is a genuine count, not a comparison
-      // badge, so there's no null-vs-zero ambiguity to guard against.
-      supabase
-        .from("quarantine_readings")
-        .select("id", { count: "exact", head: true })
-        .gte("received_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-    ]);
+  const [
+    { data: connections },
+    { data: dts },
+    { data: meters },
+    { data: lossRows },
+    loadResult,
+    quarantineResult,
+    netmeteringTotalResult,
+    netmeteringBreachedResult,
+  ] = await Promise.all([
+    supabase.from("service_connections").select("id, dt_id"),
+    supabase.from("distribution_transformers").select("id, name, capacity_kva"),
+    supabase.from("meters").select("id, status, dt_id, service_connection_id"),
+    supabase.rpc("dt_loss_summary"),
+    // Division load curve — hourly import vs behind-meter solar, last 48h;
+    // RLS on meter_readings (via the 0031 rollup) scopes it to this division.
+    supabase.rpc("division_load_profile", { p_hours: 48 }),
+    // Readings the ingest worker refused to silently drop (#15) — clock
+    // skew, a reading dated in the future. A real zero here is honest
+    // (nothing's gone wrong); this is a genuine count, not a comparison
+    // badge, so there's no null-vs-zero ambiguity to guard against.
+    supabase
+      .from("quarantine_readings")
+      .select("id", { count: "exact", head: true })
+      .gte(
+        "received_at",
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      ),
+    // SLA breach rate (#29) — lifetime, not just currently-pending: an
+    // application that breached and was later decided still counts, the
+    // same way a late train stays late in an on-time-performance stat.
+    // Two count-only queries, same shape as quarantine_readings above —
+    // this dashboard only ever needs the two tallies, never the rows.
+    supabase
+      .from("netmetering_applications")
+      .select("id", { count: "exact", head: true }),
+    supabase
+      .from("netmetering_applications")
+      .select("id", { count: "exact", head: true })
+      .eq("sla_breached", true),
+  ]);
   const quarantineCount = quarantineResult.count ?? 0;
+  const netmeteringTotal = netmeteringTotalResult.count ?? 0;
+  const slaBreachRate =
+    netmeteringTotal > 0
+      ? ((netmeteringBreachedResult.count ?? 0) / netmeteringTotal) * 100
+      : null;
   const { data: loadRaw } = loadResult as {
-    data: Array<{ bucket: string; import_kwh: number; export_kwh: number; meters: number }> | null;
+    data: Array<{
+      bucket: string;
+      import_kwh: number;
+      export_kwh: number;
+      meters: number;
+    }> | null;
   };
   const load = (loadRaw ?? []).map((r) => ({
     bucket: r.bucket,
@@ -58,24 +97,39 @@ export default async function DiscomPage() {
     exportKwh: Number(r.export_kwh),
   }));
   const loadLabels = load.map((r) =>
-    new Date(r.bucket).toLocaleString("en-IN", { day: "numeric", hour: "2-digit", hour12: false }),
+    new Date(r.bucket).toLocaleString("en-IN", {
+      day: "numeric",
+      hour: "2-digit",
+      hour12: false,
+    }),
   );
   const importDay = load.slice(-24).reduce((s, r) => s + r.importKwh, 0);
   const exportDay = load.slice(-24).reduce((s, r) => s + r.exportKwh, 0);
-  const solarShare = importDay + exportDay > 0 ? (exportDay / (importDay + exportDay)) * 100 : null;
+  const solarShare =
+    importDay + exportDay > 0
+      ? (exportDay / (importDay + exportDay)) * 100
+      : null;
 
   const totalConsumers = connections?.length ?? 0;
   const totalDts = dts?.length ?? 0;
-  const activeMeters = (meters ?? []).filter((m) => m.status === "active").length;
+  const activeMeters = (meters ?? []).filter(
+    (m) => m.status === "active",
+  ).length;
   // Both averages and the "worst DT" callout below only ever consider DTs
   // with a real measured loss — a DT with no delivered energy has nothing
   // to average in or rank, not a 0% score.
-  const measuredLossRows = ((lossRows ?? []) as LossRow[]).filter(hasMeasuredLoss);
+  const measuredLossRows = ((lossRows ?? []) as LossRow[]).filter(
+    hasMeasuredLoss,
+  );
   const avgLossPct =
     measuredLossRows.length > 0
-      ? measuredLossRows.reduce((sum, r) => sum + r.loss_pct, 0) / measuredLossRows.length
+      ? measuredLossRows.reduce((sum, r) => sum + r.loss_pct, 0) /
+        measuredLossRows.length
       : null;
-  const worstDt = measuredLossRows.length > 0 ? [...measuredLossRows].sort((a, b) => b.loss_pct - a.loss_pct)[0] : null;
+  const worstDt =
+    measuredLossRows.length > 0
+      ? [...measuredLossRows].sort((a, b) => b.loss_pct - a.loss_pct)[0]
+      : null;
 
   const lossBarRows: RankedRow[] = measuredLossRows.map((r) => {
     const pct = r.loss_pct;
@@ -97,7 +151,10 @@ export default async function DiscomPage() {
       value: pct,
       color,
       display: `${pct.toFixed(1)}%`,
-      note: pct < 0 ? `${basis} — metered exceeds delivered, check the DT-head meter` : basis,
+      note:
+        pct < 0
+          ? `${basis} — metered exceeds delivered, check the DT-head meter`
+          : basis,
       href: `/discom/losses/${r.dt_id}`,
     };
   });
@@ -119,51 +176,157 @@ export default async function DiscomPage() {
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Division overview</h1>
-      <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
-        Scope claim covers {divisionIds.length} division{divisionIds.length === 1 ? "" : "s"}. Every number below is
-        unfiltered by this query — RLS is what confines it.
+      <p
+        className="text-sm mb-6"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
+        Scope claim covers {divisionIds.length} division
+        {divisionIds.length === 1 ? "" : "s"}. Every number below is unfiltered
+        by this query — RLS is what confines it.
       </p>
 
-      <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
-        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
-          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Service connections</div>
+      <div
+        className="grid gap-4 mb-8"
+        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}
+      >
+        <div
+          className="rounded-card border card-shadow p-4"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Service connections
+          </div>
           <div className="text-2xl font-semibold tabular">{totalConsumers}</div>
         </div>
-        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
-          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Distribution transformers</div>
+        <div
+          className="rounded-card border card-shadow p-4"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Distribution transformers
+          </div>
           <div className="text-2xl font-semibold tabular">{totalDts}</div>
         </div>
-        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
-          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Active meters</div>
+        <div
+          className="rounded-card border card-shadow p-4"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Active meters
+          </div>
           <div className="text-2xl font-semibold tabular">{activeMeters}</div>
         </div>
-        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
-          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Quarantined readings · 7d</div>
+        <div
+          className="rounded-card border card-shadow p-4"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Quarantined readings · 7d
+          </div>
           <div
             className="text-2xl font-semibold tabular"
-            style={{ color: quarantineCount > 0 ? "var(--color-status-warning)" : "var(--color-status-good)" }}
+            style={{
+              color:
+                quarantineCount > 0
+                  ? "var(--color-status-warning)"
+                  : "var(--color-status-good)",
+            }}
           >
             {quarantineCount}
           </div>
           {quarantineCount > 0 && (
-            <div className="text-xs mt-1" style={{ color: "var(--color-text-tertiary)" }}>
+            <div
+              className="text-xs mt-1"
+              style={{ color: "var(--color-text-tertiary)" }}
+            >
               Clock-skewed readings the ingest worker refused to drop silently
             </div>
           )}
         </div>
-        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
-          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Avg. AT&C loss</div>
-          <div className="text-2xl font-semibold tabular" style={{ color: avgLossPct != null && avgLossPct > 15 ? "var(--color-status-serious)" : "var(--color-status-good)" }}>
+        <div
+          className="rounded-card border card-shadow p-4"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Net-metering SLA breach rate
+          </div>
+          <div
+            className="text-2xl font-semibold tabular"
+            style={{
+              color:
+                slaBreachRate != null && slaBreachRate > 0
+                  ? "var(--color-status-warning)"
+                  : "var(--color-status-good)",
+            }}
+          >
+            {slaBreachRate != null ? `${slaBreachRate.toFixed(1)}%` : "—"}
+          </div>
+        </div>
+        <div
+          className="rounded-card border card-shadow p-4"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Avg. AT&C loss
+          </div>
+          <div
+            className="text-2xl font-semibold tabular"
+            style={{
+              color:
+                avgLossPct != null && avgLossPct > 15
+                  ? "var(--color-status-serious)"
+                  : "var(--color-status-good)",
+            }}
+          >
             {avgLossPct != null ? `${avgLossPct.toFixed(1)}%` : "—"}
           </div>
         </div>
-        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
-          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Division import · 24h</div>
-          <div className="text-2xl font-semibold tabular">{load.length > 0 ? `${importDay.toFixed(0)} kWh` : "—"}</div>
+        <div
+          className="rounded-card border card-shadow p-4"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Division import · 24h
+          </div>
+          <div className="text-2xl font-semibold tabular">
+            {load.length > 0 ? `${importDay.toFixed(0)} kWh` : "—"}
+          </div>
         </div>
-        <div className="rounded-card border card-shadow p-4" style={{ borderColor: "var(--color-border)" }}>
-          <div className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>Behind-meter solar share</div>
-          <div className="text-2xl font-semibold tabular" style={{ color: "var(--color-diverging-export)" }}>
+        <div
+          className="rounded-card border card-shadow p-4"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <div
+            className="text-xs mb-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            Behind-meter solar share
+          </div>
+          <div
+            className="text-2xl font-semibold tabular"
+            style={{ color: "var(--color-diverging-export)" }}
+          >
             {solarShare != null ? `${solarShare.toFixed(1)}%` : "—"}
           </div>
         </div>
@@ -176,17 +339,39 @@ export default async function DiscomPage() {
             caption="Hourly totals across every metered connection in your division, last 48 hours"
             legend={
               <>
-                <LegendDot color="var(--color-diverging-import)">Grid import</LegendDot>
-                <LegendDot color="var(--color-diverging-export)">Solar export</LegendDot>
+                <LegendDot color="var(--color-diverging-import)">
+                  Grid import
+                </LegendDot>
+                <LegendDot color="var(--color-diverging-export)">
+                  Solar export
+                </LegendDot>
               </>
             }
             table={
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
-                    <th className="py-1.5 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>Hour</th>
-                    <th className="py-1.5 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Import</th>
-                    <th className="py-1.5 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Export</th>
+                  <tr
+                    className="text-left border-b"
+                    style={{ borderColor: "var(--color-border)" }}
+                  >
+                    <th
+                      className="py-1.5 pr-4 font-medium"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Hour
+                    </th>
+                    <th
+                      className="py-1.5 pr-4 font-medium text-right"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Import
+                    </th>
+                    <th
+                      className="py-1.5 font-medium text-right"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Export
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -194,10 +379,20 @@ export default async function DiscomPage() {
                     .slice()
                     .reverse()
                     .map((r) => (
-                      <tr key={r.bucket} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
-                        <td className="py-1 pr-4 mono">{new Date(r.bucket).toLocaleString("en-GB")}</td>
-                        <td className="py-1 pr-4 text-right mono">{r.importKwh.toFixed(2)}</td>
-                        <td className="py-1 text-right mono">{r.exportKwh.toFixed(2)}</td>
+                      <tr
+                        key={r.bucket}
+                        className="border-b last:border-b-0"
+                        style={{ borderColor: "var(--color-border)" }}
+                      >
+                        <td className="py-1 pr-4 mono">
+                          {new Date(r.bucket).toLocaleString("en-GB")}
+                        </td>
+                        <td className="py-1 pr-4 text-right mono">
+                          {r.importKwh.toFixed(2)}
+                        </td>
+                        <td className="py-1 text-right mono">
+                          {r.exportKwh.toFixed(2)}
+                        </td>
                       </tr>
                     ))}
                 </tbody>
@@ -208,8 +403,18 @@ export default async function DiscomPage() {
               unit="kWh"
               labels={loadLabels}
               series={[
-                { key: "imp", label: "Grid import", color: "var(--color-diverging-import)", points: load.map((r) => r.importKwh) },
-                { key: "exp", label: "Solar export", color: "var(--color-diverging-export)", points: load.map((r) => r.exportKwh) },
+                {
+                  key: "imp",
+                  label: "Grid import",
+                  color: "var(--color-diverging-import)",
+                  points: load.map((r) => r.importKwh),
+                },
+                {
+                  key: "exp",
+                  label: "Solar export",
+                  color: "var(--color-diverging-export)",
+                  points: load.map((r) => r.exportKwh),
+                },
               ]}
             />
           </ChartFrame>
@@ -224,11 +429,34 @@ export default async function DiscomPage() {
             table={
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
-                    <th className="py-1.5 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>DT</th>
-                    <th className="py-1.5 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Delivered</th>
-                    <th className="py-1.5 pr-4 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Metered</th>
-                    <th className="py-1.5 font-medium text-right" style={{ color: "var(--color-text-secondary)" }}>Loss</th>
+                  <tr
+                    className="text-left border-b"
+                    style={{ borderColor: "var(--color-border)" }}
+                  >
+                    <th
+                      className="py-1.5 pr-4 font-medium"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      DT
+                    </th>
+                    <th
+                      className="py-1.5 pr-4 font-medium text-right"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Delivered
+                    </th>
+                    <th
+                      className="py-1.5 pr-4 font-medium text-right"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Metered
+                    </th>
+                    <th
+                      className="py-1.5 font-medium text-right"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Loss
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -243,11 +471,23 @@ export default async function DiscomPage() {
                       return b.loss_pct - a.loss_pct;
                     })
                     .map((r) => (
-                      <tr key={r.dt_id} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
+                      <tr
+                        key={r.dt_id}
+                        className="border-b last:border-b-0"
+                        style={{ borderColor: "var(--color-border)" }}
+                      >
                         <td className="py-1 pr-4">{r.dt_name}</td>
-                        <td className="py-1 pr-4 text-right mono">{Number(r.delivered_kwh).toFixed(0)}</td>
-                        <td className="py-1 pr-4 text-right mono">{Number(r.consumed_kwh).toFixed(0)}</td>
-                        <td className="py-1 text-right mono">{r.loss_pct != null ? `${r.loss_pct.toFixed(1)}%` : "—"}</td>
+                        <td className="py-1 pr-4 text-right mono">
+                          {Number(r.delivered_kwh).toFixed(0)}
+                        </td>
+                        <td className="py-1 pr-4 text-right mono">
+                          {Number(r.consumed_kwh).toFixed(0)}
+                        </td>
+                        <td className="py-1 text-right mono">
+                          {r.loss_pct != null
+                            ? `${r.loss_pct.toFixed(1)}%`
+                            : "—"}
+                        </td>
                       </tr>
                     ))}
                 </tbody>
@@ -263,8 +503,14 @@ export default async function DiscomPage() {
         <div
           className="rounded-card border card-shadow p-5 mb-2"
           style={{
-            borderColor: worstDt.loss_pct > 15 ? "var(--color-status-serious)" : "var(--color-border)",
-            background: worstDt.loss_pct > 15 ? "color-mix(in oklab, var(--color-status-serious) 6%, var(--color-surface-card))" : "var(--color-surface-card)",
+            borderColor:
+              worstDt.loss_pct > 15
+                ? "var(--color-status-serious)"
+                : "var(--color-border)",
+            background:
+              worstDt.loss_pct > 15
+                ? "color-mix(in oklab, var(--color-status-serious) 6%, var(--color-surface-card))"
+                : "var(--color-surface-card)",
           }}
         >
           <div className="text-sm font-semibold mb-1">
@@ -274,11 +520,17 @@ export default async function DiscomPage() {
                   <PanelIcon name="alert" size={15} />
                 </span>
               )}
-              {worstDt.loss_pct > 15 ? "Worst-performing DT this period" : "Best-performing DT this period"}
+              {worstDt.loss_pct > 15
+                ? "Worst-performing DT this period"
+                : "Best-performing DT this period"}
             </span>
           </div>
-          <div className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-            <strong>{worstDt.dt_name}</strong> — {Number(worstDt.loss_pct).toFixed(1)}% loss over the last 120 days,
+          <div
+            className="text-sm"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
+            <strong>{worstDt.dt_name}</strong> —{" "}
+            {Number(worstDt.loss_pct).toFixed(1)}% loss over the last 120 days,
             computed from real delivered-vs-consumed meter reads.{" "}
             <a href={`/discom/losses/${worstDt.dt_id}`} className="underline">
               Localize it →
