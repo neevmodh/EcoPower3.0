@@ -52,6 +52,17 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  // The DB only checks ends_at > starts_at, not that starts_at is still in
+  // the future — an event created with a past starts_at would insert fine
+  // and then get flipped straight to 'completed' by the next sweep tick
+  // with zero participants, since the opt-in policy requires starts_at >
+  // now(). Catch it here instead of shipping a dead, unusable event.
+  if (new Date(body.startsAt).getTime() <= Date.now()) {
+    return Response.json(
+      { error: "startsAt must be in the future" },
+      { status: 400 },
+    );
+  }
 
   const { data, error } = await supabase
     .from("demand_response_events")

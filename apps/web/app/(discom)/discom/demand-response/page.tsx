@@ -95,15 +95,18 @@ export default async function DemandResponsePage() {
           {events.map((e) => {
             const parts = byEvent.get(e.id) ?? [];
             const optedIn = parts.filter((p) => p.opted_in);
-            const settled = optedIn.filter(
+            // The sweep only ever sets achieved_reduction_kwh alongside
+            // verified_by_meter=true, together, in its one "real data"
+            // branch — a settled-but-unverified row can't exist, so this is
+            // one set, not two.
+            const verified = optedIn.filter(
               (p) => p.achieved_reduction_kwh != null,
             );
-            const verified = settled.filter((p) => p.verified_by_meter);
-            const totalReductionKwh = settled.reduce(
+            const totalReductionKwh = verified.reduce(
               (s, p) => s + Number(p.achieved_reduction_kwh ?? 0),
               0,
             );
-            const totalIncentivePaise = settled.reduce(
+            const totalIncentivePaise = verified.reduce(
               (s, p) => s + Number(p.incentive_paise ?? 0),
               0,
             );

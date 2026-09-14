@@ -51,9 +51,16 @@ export default async function ConsumerDemandResponsePage() {
         ),
     ]);
   const events = (eventsRaw ?? []) as EventRow[];
-  const myParticipationByEvent = new Map<string, ParticipationRow>();
+  // A consumer with more than one service_connection can have more than
+  // one participation row for the same event (dr_participations' unique
+  // key is (event_id, service_connection_id), not per-consumer) — group
+  // rather than keep just one, or a second connection's earned incentive
+  // would silently vanish from this page.
+  const myParticipationsByEvent = new Map<string, ParticipationRow[]>();
   for (const p of (myParticipationsRaw ?? []) as ParticipationRow[]) {
-    myParticipationByEvent.set(p.event_id, p);
+    if (!myParticipationsByEvent.has(p.event_id))
+      myParticipationsByEvent.set(p.event_id, []);
+    myParticipationsByEvent.get(p.event_id)?.push(p);
   }
 
   return (
@@ -79,7 +86,19 @@ export default async function ConsumerDemandResponsePage() {
       ) : (
         <div className="space-y-3">
           {events.map((e) => {
-            const mine = myParticipationByEvent.get(e.id);
+            const mine = myParticipationsByEvent.get(e.id) ?? [];
+            const settled = mine.filter(
+              (p) => p.achieved_reduction_kwh != null,
+            );
+            const totalReductionKwh = settled.reduce(
+              (s, p) => s + Number(p.achieved_reduction_kwh ?? 0),
+              0,
+            );
+            const totalIncentivePaise = settled.reduce(
+              (s, p) => s + Number(p.incentive_paise ?? 0),
+              0,
+            );
+            const anyVerified = settled.some((p) => p.verified_by_meter);
             const canOptIn =
               e.status === "scheduled" &&
               new Date(e.starts_at).getTime() > Date.now();
@@ -101,19 +120,17 @@ export default async function ConsumerDemandResponsePage() {
                   {formatInrFromPaise(BigInt(e.incentive_paise_per_kwh))}/kWh
                   reduced
                 </div>
-                {mine ? (
-                  mine.achieved_reduction_kwh != null ? (
+                {mine.length > 0 ? (
+                  settled.length > 0 ? (
                     <p
                       className="text-sm"
                       style={{ color: "var(--color-status-good)" }}
                     >
-                      You reduced{" "}
-                      {Number(mine.achieved_reduction_kwh).toFixed(2)} kWh —
-                      earned{" "}
+                      You reduced {totalReductionKwh.toFixed(2)} kWh — earned{" "}
                       {formatInrFromPaise(
-                        BigInt(Math.round(Number(mine.incentive_paise ?? 0))),
+                        BigInt(Math.round(totalIncentivePaise)),
                       )}
-                      {mine.verified_by_meter ? " (meter-verified)" : ""}
+                      {anyVerified ? " (meter-verified)" : ""}
                     </p>
                   ) : (
                     <p
