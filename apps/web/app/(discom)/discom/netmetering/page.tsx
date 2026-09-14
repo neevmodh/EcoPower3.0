@@ -92,6 +92,7 @@ export default async function NetMeteringPage() {
         { href: "/discom/connections", label: "Connections" },
         { href: "/discom/losses", label: "AT&C losses" },
         { href: "/discom/netmetering", label: "Net-metering", active: true },
+        { href: "/discom/demand-response", label: "Demand response" },
         { href: "/discom/prepaid", label: "Prepaid" },
         { href: "/discom/outages", label: "Outages" },
         { href: "/discom/p2p", label: "P2P market" },

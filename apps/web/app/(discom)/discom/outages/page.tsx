@@ -1,8 +1,8 @@
-import { redirect } from "next/navigation";
-import { PanelShell } from "@/components/PanelShell";
 import { OutageConsole } from "@/components/OutageConsole";
+import { PanelShell } from "@/components/PanelShell";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 type OutageRow = {
   id: string;
@@ -16,7 +16,12 @@ type OutageRow = {
   feeder_id: string | null;
   dt_id: string | null;
   division_id: string;
-  outage_updates: Array<{ id: string; note: string; new_eta: string | null; posted_at: string }>;
+  outage_updates: Array<{
+    id: string;
+    note: string;
+    new_eta: string | null;
+    posted_at: string;
+  }>;
 };
 
 export default async function DiscomOutagesPage() {
@@ -25,16 +30,20 @@ export default async function DiscomOutagesPage() {
   if (!scope) redirect("/login");
   const { user, divisionIds } = scope;
 
-  const [{ data: outagesRaw }, { data: feeders }, { data: dts }] = await Promise.all([
-    supabase
-      .from("outages")
-      .select(
-        "id, outage_type, cause, consumers_affected, started_at, estimated_restoration, restored_at, status, feeder_id, dt_id, division_id, outage_updates(id, note, new_eta, posted_at)",
-      )
-      .order("started_at", { ascending: false }),
-    supabase.from("feeders").select("id, name").order("name"),
-    supabase.from("distribution_transformers").select("id, name, feeder_id").order("name"),
-  ]);
+  const [{ data: outagesRaw }, { data: feeders }, { data: dts }] =
+    await Promise.all([
+      supabase
+        .from("outages")
+        .select(
+          "id, outage_type, cause, consumers_affected, started_at, estimated_restoration, restored_at, status, feeder_id, dt_id, division_id, outage_updates(id, note, new_eta, posted_at)",
+        )
+        .order("started_at", { ascending: false }),
+      supabase.from("feeders").select("id, name").order("name"),
+      supabase
+        .from("distribution_transformers")
+        .select("id, name, feeder_id")
+        .order("name"),
+    ]);
 
   const outages = ((outagesRaw ?? []) as OutageRow[]).map((o) => ({
     id: o.id,
@@ -47,10 +56,14 @@ export default async function DiscomOutagesPage() {
     status: o.status,
     feeder_id: o.feeder_id,
     dt_id: o.dt_id,
-    updates: [...(o.outage_updates ?? [])].sort((a, b) => a.posted_at.localeCompare(b.posted_at)),
+    updates: [...(o.outage_updates ?? [])].sort((a, b) =>
+      a.posted_at.localeCompare(b.posted_at),
+    ),
   }));
 
-  const activeCount = outages.filter((o) => o.status === "active" || o.status === "partial_restore").length;
+  const activeCount = outages.filter(
+    (o) => o.status === "active" || o.status === "partial_restore",
+  ).length;
   const affectedNow = outages
     .filter((o) => o.status === "active")
     .reduce((s, o) => s + (o.consumers_affected ?? 0), 0);
@@ -65,6 +78,7 @@ export default async function DiscomOutagesPage() {
         { href: "/discom/connections", label: "Connections" },
         { href: "/discom/losses", label: "AT&C losses" },
         { href: "/discom/netmetering", label: "Net-metering" },
+        { href: "/discom/demand-response", label: "Demand response" },
         { href: "/discom/prepaid", label: "Prepaid" },
         { href: "/discom/outages", label: "Outages", active: true },
         { href: "/discom/p2p", label: "P2P market" },
@@ -72,9 +86,12 @@ export default async function DiscomOutagesPage() {
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Outage management</h1>
-      <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
-        {activeCount} active · {affectedNow.toLocaleString("en-IN")} consumers off right now. Every write here is confined
-        to your division by RLS.
+      <p
+        className="text-sm mb-6"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
+        {activeCount} active · {affectedNow.toLocaleString("en-IN")} consumers
+        off right now. Every write here is confined to your division by RLS.
       </p>
 
       {divisionIds.length === 0 ? (
@@ -85,7 +102,11 @@ export default async function DiscomOutagesPage() {
         <OutageConsole
           divisionId={divisionIds[0]}
           feeders={feeders ?? []}
-          dts={(dts ?? []).map((d) => ({ id: d.id, name: d.name, feeder_id: d.feeder_id }))}
+          dts={(dts ?? []).map((d) => ({
+            id: d.id,
+            name: d.name,
+            feeder_id: d.feeder_id,
+          }))}
           outages={outages}
         />
       )}

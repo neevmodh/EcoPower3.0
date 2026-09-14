@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 type BreakdownRow = {
   service_connection_id: string;
@@ -24,7 +24,9 @@ function scoreColor(score: number): string {
   return "var(--color-status-good)";
 }
 
-export default async function DtLossDrilldownPage({ params }: { params: Promise<{ dtId: string }> }) {
+export default async function DtLossDrilldownPage({
+  params,
+}: { params: Promise<{ dtId: string }> }) {
   const { dtId } = await params;
   const supabase = await createClient();
   const scope = await getScope(supabase);
@@ -34,12 +36,19 @@ export default async function DtLossDrilldownPage({ params }: { params: Promise<
   // All three depend only on dtId (already in hand from the route param),
   // not on each other's results — RLS scopes each to the officer's own
   // division independently, same as every other query in this panel.
-  const [{ data: dt }, { data: lossRows }, { data: breakdown }] = await Promise.all([
-    supabase.from("distribution_transformers").select("id, name").eq("id", dtId).maybeSingle(),
-    supabase.rpc("dt_loss_summary"),
-    supabase.rpc("dt_consumer_breakdown", { p_dt_id: dtId }),
-  ]);
-  const lossRow = (lossRows ?? []).find((r: { dt_id: string }) => r.dt_id === dtId) as
+  const [{ data: dt }, { data: lossRows }, { data: breakdown }] =
+    await Promise.all([
+      supabase
+        .from("distribution_transformers")
+        .select("id, name")
+        .eq("id", dtId)
+        .maybeSingle(),
+      supabase.rpc("dt_loss_summary"),
+      supabase.rpc("dt_consumer_breakdown", { p_dt_id: dtId }),
+    ]);
+  const lossRow = (lossRows ?? []).find(
+    (r: { dt_id: string }) => r.dt_id === dtId,
+  ) as
     | { delivered_kwh: number; consumed_kwh: number; loss_pct: number | null }
     | undefined;
   const rows = (breakdown ?? []) as BreakdownRow[];
@@ -49,9 +58,10 @@ export default async function DtLossDrilldownPage({ params }: { params: Promise<
     { href: "/discom/connections", label: "Connections" },
     { href: "/discom/losses", label: "AT&C losses", active: true },
     { href: "/discom/netmetering", label: "Net-metering" },
+    { href: "/discom/demand-response", label: "Demand response" },
     { href: "/discom/prepaid", label: "Prepaid" },
-        { href: "/discom/outages", label: "Outages" },
-        { href: "/discom/p2p", label: "P2P market" },
+    { href: "/discom/outages", label: "Outages" },
+    { href: "/discom/p2p", label: "P2P market" },
     { href: "/discom/audit", label: "Audit log" },
   ];
 
@@ -60,31 +70,59 @@ export default async function DtLossDrilldownPage({ params }: { params: Promise<
       <PanelShell panel="discom" email={user.email ?? ""} nav={nav}>
         <h1 className="text-2xl font-semibold mb-1">DT not found</h1>
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          No transformer with this id in your division. <a href="/discom/losses" className="underline">Back to the loss map →</a>
+          No transformer with this id in your division.{" "}
+          <a href="/discom/losses" className="underline">
+            Back to the loss map →
+          </a>
         </p>
       </PanelShell>
     );
   }
 
   const unaccountedKwh =
-    lossRow != null ? Math.max(0, Number(lossRow.delivered_kwh) - Number(lossRow.consumed_kwh)) : null;
+    lossRow != null
+      ? Math.max(
+          0,
+          Number(lossRow.delivered_kwh) - Number(lossRow.consumed_kwh),
+        )
+      : null;
   const flagged = rows.filter((r) => r.suspicion_score > 0);
 
   return (
     <PanelShell panel="discom" email={user.email ?? ""} nav={nav}>
-      <a href="/discom/losses" className="text-sm underline" style={{ color: "var(--color-text-secondary)" }}>
+      <a
+        href="/discom/losses"
+        className="text-sm underline"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
         ← Loss map
       </a>
-      <h1 className="text-2xl font-semibold mt-2 mb-1">{dt.name} — loss localization</h1>
-      <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
+      <h1 className="text-2xl font-semibold mt-2 mb-1">
+        {dt.name} — loss localization
+      </h1>
+      <p
+        className="text-sm mb-6"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
         {lossRow != null ? (
           <>
-            {Number(lossRow.delivered_kwh).toLocaleString("en-IN", { maximumFractionDigits: 0 })} kWh delivered at the
-            DT head vs {Number(lossRow.consumed_kwh).toLocaleString("en-IN", { maximumFractionDigits: 0 })} kWh metered
-            across {rows.length} consumers —{" "}
-            <strong>{unaccountedKwh?.toLocaleString("en-IN", { maximumFractionDigits: 0 })} kWh unaccounted</strong>{" "}
-            ({lossRow.loss_pct != null ? `${lossRow.loss_pct}%` : "—"}). The ranking below is the meter signals an
-            investigator would use to decide whom to visit first — it does not by itself prove theft.
+            {Number(lossRow.delivered_kwh).toLocaleString("en-IN", {
+              maximumFractionDigits: 0,
+            })}{" "}
+            kWh delivered at the DT head vs{" "}
+            {Number(lossRow.consumed_kwh).toLocaleString("en-IN", {
+              maximumFractionDigits: 0,
+            })}{" "}
+            kWh metered across {rows.length} consumers —{" "}
+            <strong>
+              {unaccountedKwh?.toLocaleString("en-IN", {
+                maximumFractionDigits: 0,
+              })}{" "}
+              kWh unaccounted
+            </strong>{" "}
+            ({lossRow.loss_pct != null ? `${lossRow.loss_pct}%` : "—"}). The
+            ranking below is the meter signals an investigator would use to
+            decide whom to visit first — it does not by itself prove theft.
           </>
         ) : (
           "No DT-head metering for this transformer — loss can't be attributed without a delivered-energy reference."
@@ -92,14 +130,29 @@ export default async function DtLossDrilldownPage({ params }: { params: Promise<
       </p>
 
       {rows.length === 0 ? (
-        <p style={{ color: "var(--color-text-secondary)" }}>No consumer meters on this DT yet.</p>
+        <p style={{ color: "var(--color-text-secondary)" }}>
+          No consumer meters on this DT yet.
+        </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
-                {["Consumer", "Meter", "Consumed (kWh)", "Signals", "Priority"].map((h) => (
-                  <th key={h} className="py-2 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>
+              <tr
+                className="text-left border-b"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                {[
+                  "Consumer",
+                  "Meter",
+                  "Consumed (kWh)",
+                  "Signals",
+                  "Priority",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="py-2 pr-4 font-medium"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     {h}
                   </th>
                 ))}
@@ -107,20 +160,34 @@ export default async function DtLossDrilldownPage({ params }: { params: Promise<
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.service_connection_id} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
+                <tr
+                  key={r.service_connection_id}
+                  className="border-b last:border-b-0"
+                  style={{ borderColor: "var(--color-border)" }}
+                >
                   <td className="py-3 pr-4 font-medium">{r.consumer_number}</td>
-                  <td className="py-3 pr-4 tabular" style={{ color: "var(--color-text-secondary)" }}>
+                  <td
+                    className="py-3 pr-4 tabular"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     {r.meter_serial}
                     {r.meter_status !== "active" && (
-                      <span style={{ color: "var(--color-status-serious)" }}> · {r.meter_status}</span>
+                      <span style={{ color: "var(--color-status-serious)" }}>
+                        {" "}
+                        · {r.meter_status}
+                      </span>
                     )}
                   </td>
                   <td className="py-3 pr-4 tabular">
-                    {Number(r.consumed_kwh).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                    {Number(r.consumed_kwh).toLocaleString("en-IN", {
+                      maximumFractionDigits: 0,
+                    })}
                   </td>
                   <td className="py-3 pr-4">
                     {r.suspicion_reasons.length === 0 ? (
-                      <span style={{ color: "var(--color-text-secondary)" }}>—</span>
+                      <span style={{ color: "var(--color-text-secondary)" }}>
+                        —
+                      </span>
                     ) : (
                       <ul className="list-disc list-inside">
                         {r.suspicion_reasons.map((reason) => (
@@ -148,9 +215,13 @@ export default async function DtLossDrilldownPage({ params }: { params: Promise<
       )}
 
       {flagged.length === 0 && rows.length > 0 && (
-        <p className="text-sm mt-4" style={{ color: "var(--color-text-secondary)" }}>
-          No consumer on this DT is carrying a loss signal right now — the unaccounted energy is more likely technical
-          (transformer/line losses) than commercial.
+        <p
+          className="text-sm mt-4"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
+          No consumer on this DT is carrying a loss signal right now — the
+          unaccounted energy is more likely technical (transformer/line losses)
+          than commercial.
         </p>
       )}
     </PanelShell>

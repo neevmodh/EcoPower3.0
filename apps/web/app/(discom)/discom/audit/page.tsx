@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
 import { PanelShell } from "@/components/PanelShell";
 import { getScope } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 type AuditRow = {
   id: string;
@@ -29,7 +29,9 @@ export default async function DiscomAuditPage() {
   // the database — see 0023.
   const { data } = await supabase
     .from("audit_log")
-    .select("id, occurred_at, actor_user_id, entity_type, entity_id, from_state, to_state, detail")
+    .select(
+      "id, occurred_at, actor_user_id, entity_type, entity_id, from_state, to_state, detail",
+    )
     .order("occurred_at", { ascending: false })
     .limit(200);
   const rows = (data ?? []) as AuditRow[];
@@ -44,6 +46,7 @@ export default async function DiscomAuditPage() {
         { href: "/discom/connections", label: "Connections" },
         { href: "/discom/losses", label: "AT&C losses" },
         { href: "/discom/netmetering", label: "Net-metering" },
+        { href: "/discom/demand-response", label: "Demand response" },
         { href: "/discom/prepaid", label: "Prepaid" },
         { href: "/discom/outages", label: "Outages" },
         { href: "/discom/p2p", label: "P2P market" },
@@ -51,22 +54,34 @@ export default async function DiscomAuditPage() {
       ]}
     >
       <h1 className="text-2xl font-semibold mb-1">Audit log</h1>
-      <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
-        Every state change on a net-metering application or work order in your division, written by a database trigger
-        and append-only — no row here can be edited or deleted, by anyone.
+      <p
+        className="text-sm mb-6"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
+        Every state change on a net-metering application or work order in your
+        division, written by a database trigger and append-only — no row here
+        can be edited or deleted, by anyone.
       </p>
 
       {rows.length === 0 ? (
         <p style={{ color: "var(--color-text-secondary)" }}>
-          No recorded state changes yet. Approving or rejecting a net-metering application will appear here.
+          No recorded state changes yet. Approving or rejecting a net-metering
+          application will appear here.
         </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left border-b" style={{ borderColor: "var(--color-border)" }}>
+              <tr
+                className="text-left border-b"
+                style={{ borderColor: "var(--color-border)" }}
+              >
                 {["When", "What", "Change", "Note"].map((h) => (
-                  <th key={h} className="py-2 pr-4 font-medium" style={{ color: "var(--color-text-secondary)" }}>
+                  <th
+                    key={h}
+                    className="py-2 pr-4 font-medium"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     {h}
                   </th>
                 ))}
@@ -74,20 +89,35 @@ export default async function DiscomAuditPage() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-b last:border-b-0" style={{ borderColor: "var(--color-border)" }}>
-                  <td className="py-3 pr-4 tabular whitespace-nowrap" style={{ color: "var(--color-text-secondary)" }}>
-                    {new Date(r.occurred_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                <tr
+                  key={r.id}
+                  className="border-b last:border-b-0"
+                  style={{ borderColor: "var(--color-border)" }}
+                >
+                  <td
+                    className="py-3 pr-4 tabular whitespace-nowrap"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    {new Date(r.occurred_at).toLocaleString("en-IN", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
                   </td>
                   <td className="py-3 pr-4">
                     {ENTITY_LABEL[r.entity_type] ?? r.entity_type}
                     {r.detail?.consumer_number && (
-                      <span style={{ color: "var(--color-text-secondary)" }}> · {r.detail.consumer_number}</span>
+                      <span style={{ color: "var(--color-text-secondary)" }}>
+                        {" "}
+                        · {r.detail.consumer_number}
+                      </span>
                     )}
                   </td>
                   <td className="py-3 pr-4 tabular">
                     {r.from_state ? (
                       <>
-                        <span style={{ color: "var(--color-text-secondary)" }}>{r.from_state}</span>
+                        <span style={{ color: "var(--color-text-secondary)" }}>
+                          {r.from_state}
+                        </span>
                         {" → "}
                         <span className="font-medium">{r.to_state}</span>
                       </>
@@ -95,7 +125,10 @@ export default async function DiscomAuditPage() {
                       <span className="font-medium">{r.to_state}</span>
                     )}
                   </td>
-                  <td className="py-3" style={{ color: "var(--color-text-secondary)" }}>
+                  <td
+                    className="py-3"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     {r.detail?.decision_notes ?? "—"}
                   </td>
                 </tr>
