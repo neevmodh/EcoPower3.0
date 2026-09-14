@@ -1,5 +1,6 @@
 import { PanelShell } from "@/components/PanelShell";
 import { getScope } from "@/lib/auth";
+import { discomNav } from "@/lib/panelNav";
 import { createClient } from "@/lib/supabase/server";
 import { formatInrFromPaise } from "@ecopower/shared";
 import { redirect } from "next/navigation";
@@ -12,18 +13,6 @@ type Row = {
   last_settled_on: string | null;
   service_connections: { consumer_number: string } | null;
 };
-
-const NAV = [
-  { href: "/discom", label: "Overview" },
-  { href: "/discom/connections", label: "Connections" },
-  { href: "/discom/losses", label: "AT&C losses" },
-  { href: "/discom/netmetering", label: "Net-metering" },
-  { href: "/discom/demand-response", label: "Demand response" },
-  { href: "/discom/prepaid", label: "Prepaid", active: true },
-  { href: "/discom/outages", label: "Outages" },
-  { href: "/discom/p2p", label: "P2P market" },
-  { href: "/discom/audit", label: "Audit log" },
-];
 
 export default async function DiscomPrepaidPage() {
   const supabase = await createClient();
@@ -45,7 +34,7 @@ export default async function DiscomPrepaidPage() {
     <PanelShell
       panel="discom"
       email={user.email ?? ""}
-      nav={NAV}
+      nav={discomNav("/discom/prepaid")}
       scopeNote={`division_ids · ${divisionIds.length} claim${divisionIds.length === 1 ? "" : "s"}`}
     >
       <h1 className="text-2xl font-semibold mb-1">Prepaid oversight</h1>

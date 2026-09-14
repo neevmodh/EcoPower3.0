@@ -43,10 +43,15 @@ export async function POST(
     // connection matching THIS event's division picked, not an arbitrary
     // one of theirs — otherwise the insert below fails the RLS division
     // check with an opaque 500 for no reason visible to the caller.
+    // owner_user_id is explicit here rather than relying solely on
+    // service_connections' own SELECT policies: a caller who also holds a
+    // broader-visibility role (discom_officer, a society role) could
+    // otherwise have this pick a real connection that isn't theirs.
     const { data: connection } = await supabase
       .from("service_connections")
       .select("id")
       .eq("division_id", event.division_id)
+      .eq("owner_user_id", userData.user.id)
       .limit(1)
       .maybeSingle();
     if (!connection) {

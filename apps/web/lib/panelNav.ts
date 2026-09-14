@@ -30,6 +30,25 @@ export function consumerNav(active: string, t?: T): NavItem[] {
   }));
 }
 
+export function discomNav(active: string): NavItem[] {
+  const items: Array<[string, string]> = [
+    ["/discom", "Overview"],
+    ["/discom/connections", "Connections"],
+    ["/discom/losses", "AT&C losses"],
+    ["/discom/netmetering", "Net-metering"],
+    ["/discom/demand-response", "Demand response"],
+    ["/discom/prepaid", "Prepaid"],
+    ["/discom/outages", "Outages"],
+    ["/discom/p2p", "P2P market"],
+    ["/discom/audit", "Audit log"],
+  ];
+  return items.map(([href, label]) => ({
+    href,
+    label,
+    active: href === active,
+  }));
+}
+
 export function adminNav(active: string): NavItem[] {
   const items: Array<[string, string]> = [
     ["/admin", "Overview"],

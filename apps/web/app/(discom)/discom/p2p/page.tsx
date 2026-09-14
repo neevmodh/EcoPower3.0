@@ -2,6 +2,7 @@ import { PanelShell } from "@/components/PanelShell";
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { RankedBar, type RankedRow } from "@/components/charts/RankedBar";
 import { getScope } from "@/lib/auth";
+import { discomNav } from "@/lib/panelNav";
 import { createClient } from "@/lib/supabase/server";
 import { formatInrFromPaise } from "@ecopower/shared";
 import { redirect } from "next/navigation";
@@ -83,17 +84,7 @@ export default async function DiscomP2pPage() {
       scopeNote={`division_ids · ${divisionIds.length} claim${divisionIds.length === 1 ? "" : "s"}`}
       panel="discom"
       email={user.email ?? ""}
-      nav={[
-        { href: "/discom", label: "Overview" },
-        { href: "/discom/connections", label: "Connections" },
-        { href: "/discom/losses", label: "AT&C losses" },
-        { href: "/discom/netmetering", label: "Net-metering" },
-        { href: "/discom/demand-response", label: "Demand response" },
-        { href: "/discom/prepaid", label: "Prepaid" },
-        { href: "/discom/outages", label: "Outages" },
-        { href: "/discom/p2p", label: "P2P market", active: true },
-        { href: "/discom/audit", label: "Audit log" },
-      ]}
+      nav={discomNav("/discom/p2p")}
     >
       <h1 className="text-2xl font-semibold mb-1">P2P solar market</h1>
       <p

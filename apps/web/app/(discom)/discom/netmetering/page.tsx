@@ -7,6 +7,7 @@ import { NetMeteringDecisionForm } from "@/components/NetMeteringDecisionForm";
 import { PanelShell } from "@/components/PanelShell";
 import { SlaCountdown } from "@/components/SlaCountdown";
 import { getScope } from "@/lib/auth";
+import { discomNav } from "@/lib/panelNav";
 import { createClient } from "@/lib/supabase/server";
 import { formatInrFromPaise } from "@ecopower/shared";
 import { redirect } from "next/navigation";
@@ -87,17 +88,7 @@ export default async function NetMeteringPage() {
       scopeNote={`division_ids · ${divisionIds.length} claim${divisionIds.length === 1 ? "" : "s"}`}
       panel="discom"
       email={user.email ?? ""}
-      nav={[
-        { href: "/discom", label: "Overview" },
-        { href: "/discom/connections", label: "Connections" },
-        { href: "/discom/losses", label: "AT&C losses" },
-        { href: "/discom/netmetering", label: "Net-metering", active: true },
-        { href: "/discom/demand-response", label: "Demand response" },
-        { href: "/discom/prepaid", label: "Prepaid" },
-        { href: "/discom/outages", label: "Outages" },
-        { href: "/discom/p2p", label: "P2P market" },
-        { href: "/discom/audit", label: "Audit log" },
-      ]}
+      nav={discomNav("/discom/netmetering")}
     >
       <h1 className="text-2xl font-semibold mb-1">Net-metering applications</h1>
       <p

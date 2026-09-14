@@ -1,5 +1,6 @@
 import { PanelShell } from "@/components/PanelShell";
 import { getScope } from "@/lib/auth";
+import { discomNav } from "@/lib/panelNav";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -53,17 +54,7 @@ export default async function DtLossDrilldownPage({
     | undefined;
   const rows = (breakdown ?? []) as BreakdownRow[];
 
-  const nav = [
-    { href: "/discom", label: "Overview" },
-    { href: "/discom/connections", label: "Connections" },
-    { href: "/discom/losses", label: "AT&C losses", active: true },
-    { href: "/discom/netmetering", label: "Net-metering" },
-    { href: "/discom/demand-response", label: "Demand response" },
-    { href: "/discom/prepaid", label: "Prepaid" },
-    { href: "/discom/outages", label: "Outages" },
-    { href: "/discom/p2p", label: "P2P market" },
-    { href: "/discom/audit", label: "Audit log" },
-  ];
+  const nav = discomNav("/discom/losses");
 
   if (!dt) {
     return (
