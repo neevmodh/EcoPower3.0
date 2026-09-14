@@ -4,7 +4,7 @@
 -- from real meter reads, never by the client directly.
 
 begin;
-select plan(12);
+select plan(13);
 
 -- Readings span up to 9 days back from "now" — pre-create this month's and
 -- last month's partitions in case the suite runs near a boundary.
@@ -56,6 +56,20 @@ from generate_series(1, 7) n;
 insert into meter_readings (meter_id, reading_ts, delta_import_kwh) values
   ('64000000-0000-0000-0000-0000000000e4', now() - interval '20 hours', 0);
 
+-- A fifth connection with only 3 of the 7 baseline days covered (a new
+-- connection, or a mid-week meter swap) — the average must be over those
+-- 3 real days (12 kWh), never dragged down by the other 4 missing days as
+-- if they were real zeros.
+insert into service_connections (id, consumer_number, dt_id, owner_user_id, tariff_category, phase, connection_type) values
+  ('64000000-0000-0000-0000-0000000000c5', 'CN-DR-05', '64000000-0000-0000-0000-0000000000a3', '64000000-0000-0000-0000-0000000000f1', 'RGP', 'single', 'postpaid');
+insert into meters (id, serial, service_connection_id) values
+  ('64000000-0000-0000-0000-0000000000e5', 'MTR-DR-05', '64000000-0000-0000-0000-0000000000c5');
+insert into meter_readings (meter_id, reading_ts, delta_import_kwh)
+select '64000000-0000-0000-0000-0000000000e5', (now() - interval '25 hours') - (n || ' days')::interval + interval '1 minute', 12
+from generate_series(1, 3) n;
+insert into meter_readings (meter_id, reading_ts, delta_import_kwh) values
+  ('64000000-0000-0000-0000-0000000000e5', now() - interval '20 hours', 9);
+
 -- Event: already ended (25h ago -> 1h ago), Rs 5/kWh incentive.
 insert into demand_response_events (id, division_id, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh) values
   ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-00000000000a', now() - interval '25 hours', now() - interval '1 hour', 2, 500);
@@ -72,7 +86,8 @@ insert into meter_readings (meter_id, reading_ts, delta_import_kwh) values
 insert into dr_participations (event_id, service_connection_id) values
   ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c1'),
   ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c2'),
-  ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c4');
+  ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c4'),
+  ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c5');
 
 -- A future, not-yet-started Division B event — for the cross-division
 -- opt-in test below.
@@ -119,6 +134,11 @@ select results_eq(
   $$ select verified_by_meter, achieved_reduction_kwh from dr_participations where event_id = '64000000-0000-0000-0000-0000000000e9' and service_connection_id = '64000000-0000-0000-0000-0000000000c4' $$,
   $$ values (true, 0::numeric) $$,
   'consumer 4 (real meter, genuinely zero usage throughout) is verified with a real zero, not conflated with consumer 2''s missing-data case'
+);
+
+select ok(
+  (select abs(achieved_reduction_kwh - 3) < 0.01 from dr_participations where event_id = '64000000-0000-0000-0000-0000000000e9' and service_connection_id = '64000000-0000-0000-0000-0000000000c5'),
+  'consumer 5 (only 3 of 7 baseline days covered) averages over the real 3 days (12kWh) minus actual (9kWh) = 3kWh, not dragged down by the 4 missing days'
 );
 
 -- Write guard: a consumer cannot set their own achieved_reduction_kwh.

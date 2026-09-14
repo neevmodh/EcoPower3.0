@@ -119,6 +119,8 @@ begin
 
   if new.event_id is distinct from old.event_id
      or new.service_connection_id is distinct from old.service_connection_id
+     or new.division_id is distinct from old.division_id
+     or new.org_id is distinct from old.org_id
      or new.baseline_kw is distinct from old.baseline_kw
      or new.achieved_reduction_kwh is distinct from old.achieved_reduction_kwh
      or new.incentive_paise is distinct from old.incentive_paise
@@ -210,14 +212,18 @@ begin
       select * from public.dr_participations
       where event_id = v_event.id and opted_in and settled_at is null
     loop
-      -- 7 prior days, same clock-time window each day, averaged. Tracked
-      -- separately from the average itself: coalesce(sum(...),0) makes a
-      -- day with zero real readings indistinguishable from a day with real
-      -- readings that genuinely summed to zero consumption. Only a real,
+      -- 7 prior days, same clock-time window each day, averaged over only
+      -- the days that actually had a reading — a day with no data must
+      -- drop out of the average, not join it as a phantom zero and drag
+      -- the baseline down (a new connection or a mid-week meter swap would
+      -- otherwise understate the baseline and underpay every incentive).
+      -- has_reading is tracked separately from the sum itself:
+      -- coalesce(sum(...),0) alone can't tell "no real readings" apart
+      -- from "real readings that genuinely summed to zero." Only a real,
       -- currently-active meter counts — a decommissioned/replaced meter on
       -- the same connection (meters.service_connection_id has no
       -- uniqueness constraint) must not double the same period's energy.
-      select avg(daily.kwh), count(*) filter (where daily.has_reading)
+      select avg(daily.kwh) filter (where daily.has_reading), count(*) filter (where daily.has_reading)
       into v_baseline_kwh, v_baseline_reading_days
       from (
         select
