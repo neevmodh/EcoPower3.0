@@ -45,7 +45,7 @@ Built for **[INSTINCT 4.0](https://hack2skill.com/event/instinct4/)** — the in
 
 ## 🎯 The Problem (PS1)
 
-> **Energy-as-a-Service (EaaS)** lets customers subscribe to energy services — solar power, battery backup, lighting, cooling, uptime guarantees — instead of buying or maintaining equipment. It removes the upfront cost and technical complexity, making clean, reliable energy affordable and accessible.
+> **Energy-as-a-Service (EaaS)** let customers subscribe to energy services — solar power, battery backup, lighting, cooling, uptime guarantees — instead of buying or maintaining equipment. It removes the upfront cost and technical complexity, making clean, reliable energy affordable and accessible.
 >
 > **The challenge:** build a digital platform that lets end consumers easily **subscribe, track, and manage** energy services without owning infrastructure — with transparency, convenience, and integration with IoT / smart-meter data. It must be **scalable to millions of users and devices** and **future-ready** to integrate with DISCOM workflows (net-metering approval, billing sync, load management).
 
