@@ -145,9 +145,10 @@ alter table dr_participations force row level security;
 
 -- Ownership alone isn't enough here: without the event join, a consumer
 -- could opt into ANY division's event (not just their own — the visibility
--- policy above scopes SELECT, not this INSERT), or opt in after the event
--- has already started/ended, since the update guard only restricts changing
--- opted_in post-start, not the initial insert.
+-- policy above scopes SELECT, not this INSERT), opt in after the event has
+-- already started/ended (the update guard only restricts changing opted_in
+-- post-start, not the initial insert), or opt into an event a discom_admin
+-- has already cancelled.
 create policy dr_participations_consumer_insert on dr_participations
   for insert to authenticated
   with check (
@@ -158,6 +159,7 @@ create policy dr_participations_consumer_insert on dr_participations
       where e.id = dr_participations.event_id
       and e.division_id = sc.division_id
       and e.starts_at > now()
+      and e.status = 'scheduled'
     )
   );
 
@@ -189,6 +191,7 @@ declare
   v_participation record;
   v_duration_hours numeric;
   v_baseline_kwh numeric;
+  v_baseline_reading_days integer;
   v_actual_kwh numeric;
   v_reading_count integer;
   v_achieved_reduction_kwh numeric;
@@ -207,12 +210,21 @@ begin
       select * from public.dr_participations
       where event_id = v_event.id and opted_in and settled_at is null
     loop
-      -- 7 prior days, same clock-time window each day, averaged.
-      select avg(daily.kwh) into v_baseline_kwh
+      -- 7 prior days, same clock-time window each day, averaged. Tracked
+      -- separately from the average itself: coalesce(sum(...),0) makes a
+      -- day with zero real readings indistinguishable from a day with real
+      -- readings that genuinely summed to zero consumption. Only a real,
+      -- currently-active meter counts — a decommissioned/replaced meter on
+      -- the same connection (meters.service_connection_id has no
+      -- uniqueness constraint) must not double the same period's energy.
+      select avg(daily.kwh), count(*) filter (where daily.has_reading)
+      into v_baseline_kwh, v_baseline_reading_days
       from (
-        select coalesce(sum(mr.delta_import_kwh), 0) as kwh
+        select
+          coalesce(sum(mr.delta_import_kwh), 0) as kwh,
+          count(mr.*) > 0 as has_reading
         from generate_series(1, 7) as offset_days
-        left join public.meters m on m.service_connection_id = v_participation.service_connection_id
+        left join public.meters m on m.service_connection_id = v_participation.service_connection_id and m.status = 'active'
         left join public.meter_readings mr on mr.meter_id = m.id
           and mr.reading_ts >= v_event.starts_at - (offset_days || ' days')::interval
           and mr.reading_ts < v_event.ends_at - (offset_days || ' days')::interval
@@ -224,9 +236,9 @@ begin
       from public.meters m
       join public.meter_readings mr on mr.meter_id = m.id
         and mr.reading_ts >= v_event.starts_at and mr.reading_ts < v_event.ends_at
-      where m.service_connection_id = v_participation.service_connection_id;
+      where m.service_connection_id = v_participation.service_connection_id and m.status = 'active';
 
-      if v_baseline_kwh is null or v_reading_count = 0 then
+      if v_baseline_reading_days is null or v_baseline_reading_days = 0 or v_reading_count = 0 then
         -- No real meter data covering the baseline window or the event
         -- window itself — never falls back to a self-reported number.
         update public.dr_participations

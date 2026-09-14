@@ -80,7 +80,9 @@ export default async function ConsumerDemandResponsePage() {
         <div className="space-y-3">
           {events.map((e) => {
             const mine = myParticipationByEvent.get(e.id);
-            const notStarted = new Date(e.starts_at).getTime() > Date.now();
+            const canOptIn =
+              e.status === "scheduled" &&
+              new Date(e.starts_at).getTime() > Date.now();
             return (
               <div
                 key={e.id}
@@ -125,14 +127,16 @@ export default async function ConsumerDemandResponsePage() {
                       .
                     </p>
                   )
-                ) : notStarted ? (
+                ) : canOptIn ? (
                   <DemandResponseOptInButton eventId={e.id} />
                 ) : (
                   <p
                     className="text-xs"
                     style={{ color: "var(--color-text-tertiary)" }}
                   >
-                    Opt-in window closed.
+                    {e.status === "cancelled"
+                      ? "Event cancelled."
+                      : "Opt-in window closed."}
                   </p>
                 )}
               </div>

@@ -4,7 +4,7 @@
 -- from real meter reads, never by the client directly.
 
 begin;
-select plan(10);
+select plan(12);
 
 -- Readings span up to 9 days back from "now" — pre-create this month's and
 -- last month's partitions in case the suite runs near a boundary.
@@ -42,6 +42,20 @@ insert into distribution_transformers (id, feeder_id, name) values ('64000000-00
 insert into service_connections (id, consumer_number, dt_id, owner_user_id, tariff_category, phase, connection_type) values
   ('64000000-0000-0000-0000-0000000000c3', 'CN-DR-03', '64000000-0000-0000-0000-0000000000a3', '64000000-0000-0000-0000-0000000000f1', 'RGP', 'single', 'postpaid');
 
+-- A fourth connection with a real meter that genuinely used zero energy
+-- during both the baseline days and the event — distinct from consumer 2's
+-- "no meter at all" case: this one IS meter-verified, just with a real
+-- zero, not a fabricated one from missing data.
+insert into service_connections (id, consumer_number, dt_id, owner_user_id, tariff_category, phase, connection_type) values
+  ('64000000-0000-0000-0000-0000000000c4', 'CN-DR-04', '64000000-0000-0000-0000-0000000000a3', '64000000-0000-0000-0000-0000000000f1', 'RGP', 'single', 'postpaid');
+insert into meters (id, serial, service_connection_id) values
+  ('64000000-0000-0000-0000-0000000000e4', 'MTR-DR-04', '64000000-0000-0000-0000-0000000000c4');
+insert into meter_readings (meter_id, reading_ts, delta_import_kwh)
+select '64000000-0000-0000-0000-0000000000e4', (now() - interval '25 hours') - (n || ' days')::interval + interval '1 minute', 0
+from generate_series(1, 7) n;
+insert into meter_readings (meter_id, reading_ts, delta_import_kwh) values
+  ('64000000-0000-0000-0000-0000000000e4', now() - interval '20 hours', 0);
+
 -- Event: already ended (25h ago -> 1h ago), Rs 5/kWh incentive.
 insert into demand_response_events (id, division_id, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh) values
   ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-00000000000a', now() - interval '25 hours', now() - interval '1 hour', 2, 500);
@@ -57,12 +71,18 @@ insert into meter_readings (meter_id, reading_ts, delta_import_kwh) values
 
 insert into dr_participations (event_id, service_connection_id) values
   ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c1'),
-  ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c2');
+  ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c2'),
+  ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c4');
 
 -- A future, not-yet-started Division B event — for the cross-division
 -- opt-in test below.
 insert into demand_response_events (id, division_id, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh) values
   ('64000000-0000-0000-0000-0000000000eb', '64000000-0000-0000-0000-00000000000b', now() + interval '1 day', now() + interval '2 days', 2, 500);
+
+-- A future, not-yet-started Division A event that gets cancelled before
+-- anyone opts in — for the cancelled-event opt-in test below.
+insert into demand_response_events (id, division_id, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh, status) values
+  ('64000000-0000-0000-0000-0000000000ec', '64000000-0000-0000-0000-00000000000a', now() + interval '1 day', now() + interval '2 days', 2, 500, 'cancelled');
 
 select sweep_demand_response_events();
 
@@ -93,6 +113,12 @@ select results_eq(
   $$ select verified_by_meter, achieved_reduction_kwh is null from dr_participations where event_id = '64000000-0000-0000-0000-0000000000e9' and service_connection_id = '64000000-0000-0000-0000-0000000000c2' $$,
   $$ values (false, true) $$,
   'consumer 2 (no meter at all) settles as unverified with no achieved figure — never a self-reported fallback'
+);
+
+select results_eq(
+  $$ select verified_by_meter, achieved_reduction_kwh from dr_participations where event_id = '64000000-0000-0000-0000-0000000000e9' and service_connection_id = '64000000-0000-0000-0000-0000000000c4' $$,
+  $$ values (true, 0::numeric) $$,
+  'consumer 4 (real meter, genuinely zero usage throughout) is verified with a real zero, not conflated with consumer 2''s missing-data case'
 );
 
 -- Write guard: a consumer cannot set their own achieved_reduction_kwh.
@@ -131,6 +157,15 @@ select throws_ok(
   '42501',
   null,
   'a consumer cannot opt into another division''s event'
+);
+
+-- INSERT guard: cannot opt into an event a discom_admin already cancelled,
+-- even though it hasn't started yet and is in the caller's own division.
+select throws_ok(
+  $$ insert into dr_participations (event_id, service_connection_id) values ('64000000-0000-0000-0000-0000000000ec', '64000000-0000-0000-0000-0000000000c1') $$,
+  '42501',
+  null,
+  'a consumer cannot opt into a cancelled event'
 );
 
 reset role;
