@@ -20,7 +20,12 @@ create type dr_event_status as enum ('scheduled', 'active', 'completed', 'cancel
 create table demand_response_events (
   id uuid primary key default gen_random_uuid(),
   division_id uuid not null references discom_divisions (id),
-  feeder_id uuid references feeders (id), -- null = division-wide
+  -- null = division-wide. Not yet settable from either the create-event
+  -- API route or the DISCOM form — every event created today is
+  -- division-wide by construction, not by choice. The column and its
+  -- eligibility-matching semantics are real; the UI to target a single
+  -- feeder is future work, kept simple deliberately for this issue.
+  feeder_id uuid references feeders (id),
 
   event_type text not null default 'peak_shave',
   starts_at timestamptz not null,
@@ -202,6 +207,14 @@ begin
   set status = 'active'
   where status = 'scheduled' and starts_at <= now() and ends_at > now();
 
+  -- Accepted limitation, not fixed here: once an event flips to
+  -- 'completed' below, it's permanently out of this loop. A participant
+  -- whose meter reading for the event window is ingested a few minutes
+  -- after this exact sweep tick (ordinary ingest lag, not an error) settles
+  -- as unverified/no-data with no later correction pass. A full
+  -- re-open-and-resettle path is a real gap but disproportionate scope for
+  -- this issue — same call as #41 declining full transactional atomicity
+  -- for its payment reconciliation.
   for v_event in
     select * from public.demand_response_events
     where status in ('scheduled', 'active') and ends_at <= now()
@@ -219,10 +232,15 @@ begin
       -- otherwise understate the baseline and underpay every incentive).
       -- has_reading is tracked separately from the sum itself:
       -- coalesce(sum(...),0) alone can't tell "no real readings" apart
-      -- from "real readings that genuinely summed to zero." Only a real,
-      -- currently-active meter counts — a decommissioned/replaced meter on
-      -- the same connection (meters.service_connection_id has no
-      -- uniqueness constraint) must not double the same period's energy.
+      -- from "real readings that genuinely summed to zero." Deliberately
+      -- NOT filtered to m.status = 'active': a meter physically stops
+      -- reporting once it's decommissioned/replaced, so summing every
+      -- meter ever attached to this service_connection_id doesn't double
+      -- anything in practice — the readings are sequential in time, not
+      -- concurrent. Filtering to only the currently-active meter would
+      -- instead silently drop a since-replaced meter's real historical
+      -- readings from inside the 7-day baseline window, understating the
+      -- baseline for exactly the connections a meter swap just happened on.
       select avg(daily.kwh) filter (where daily.has_reading), count(*) filter (where daily.has_reading)
       into v_baseline_kwh, v_baseline_reading_days
       from (
@@ -230,7 +248,7 @@ begin
           coalesce(sum(mr.delta_import_kwh), 0) as kwh,
           count(mr.*) > 0 as has_reading
         from generate_series(1, 7) as offset_days
-        left join public.meters m on m.service_connection_id = v_participation.service_connection_id and m.status = 'active'
+        left join public.meters m on m.service_connection_id = v_participation.service_connection_id
         left join public.meter_readings mr on mr.meter_id = m.id
           and mr.reading_ts >= v_event.starts_at - (offset_days || ' days')::interval
           and mr.reading_ts < v_event.ends_at - (offset_days || ' days')::interval
@@ -242,7 +260,7 @@ begin
       from public.meters m
       join public.meter_readings mr on mr.meter_id = m.id
         and mr.reading_ts >= v_event.starts_at and mr.reading_ts < v_event.ends_at
-      where m.service_connection_id = v_participation.service_connection_id and m.status = 'active';
+      where m.service_connection_id = v_participation.service_connection_id;
 
       if v_baseline_reading_days is null or v_baseline_reading_days = 0 or v_reading_count = 0 then
         -- No real meter data covering the baseline window or the event
