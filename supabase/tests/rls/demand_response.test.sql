@@ -4,7 +4,7 @@
 -- from real meter reads, never by the client directly.
 
 begin;
-select plan(8);
+select plan(10);
 
 -- Readings span up to 9 days back from "now" — pre-create this month's and
 -- last month's partitions in case the suite runs near a boundary.
@@ -30,6 +30,18 @@ insert into meters (id, serial, service_connection_id) values
   ('64000000-0000-0000-0000-0000000000e1', 'MTR-DR-01', '64000000-0000-0000-0000-0000000000c1');
 -- Consumer 2 has no meter at all — the "insufficient data" path.
 
+-- A second division, for the cross-division opt-in test below.
+insert into discom_divisions (id, discom_org_id, name, level) values
+  ('64000000-0000-0000-0000-00000000000b', '64000000-0000-0000-0000-000000000001', 'Division B', 'division');
+insert into substations (id, division_id, name) values ('64000000-0000-0000-0000-0000000000b1', '64000000-0000-0000-0000-00000000000b', 'SS B');
+insert into feeders (id, substation_id, name) values ('64000000-0000-0000-0000-0000000000b2', '64000000-0000-0000-0000-0000000000b1', 'Feeder B');
+insert into distribution_transformers (id, feeder_id, name) values ('64000000-0000-0000-0000-0000000000b3', '64000000-0000-0000-0000-0000000000b2', 'DT B');
+
+-- A third connection, for the "opt into an event that already started"
+-- INSERT test below (c1 already has a row for the e9 event).
+insert into service_connections (id, consumer_number, dt_id, owner_user_id, tariff_category, phase, connection_type) values
+  ('64000000-0000-0000-0000-0000000000c3', 'CN-DR-03', '64000000-0000-0000-0000-0000000000a3', '64000000-0000-0000-0000-0000000000f1', 'RGP', 'single', 'postpaid');
+
 -- Event: already ended (25h ago -> 1h ago), Rs 5/kWh incentive.
 insert into demand_response_events (id, division_id, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh) values
   ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-00000000000a', now() - interval '25 hours', now() - interval '1 hour', 2, 500);
@@ -46,6 +58,11 @@ insert into meter_readings (meter_id, reading_ts, delta_import_kwh) values
 insert into dr_participations (event_id, service_connection_id) values
   ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c1'),
   ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c2');
+
+-- A future, not-yet-started Division B event — for the cross-division
+-- opt-in test below.
+insert into demand_response_events (id, division_id, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh) values
+  ('64000000-0000-0000-0000-0000000000eb', '64000000-0000-0000-0000-00000000000b', now() + interval '1 day', now() + interval '2 days', 2, 500);
 
 select sweep_demand_response_events();
 
@@ -96,6 +113,24 @@ select throws_ok(
   '42501',
   null,
   'a consumer cannot change their opt-in status after the event has started'
+);
+
+-- INSERT guard: cannot opt into an event that has already started (c3 has
+-- no existing row for e9, so this is a fresh insert, not an update).
+select throws_ok(
+  $$ insert into dr_participations (event_id, service_connection_id) values ('64000000-0000-0000-0000-0000000000e9', '64000000-0000-0000-0000-0000000000c3') $$,
+  '42501',
+  null,
+  'a consumer cannot opt into an event that has already started'
+);
+
+-- INSERT guard: cannot opt into another division's event, even with a
+-- valid own-connection id and a future (not-yet-started) event.
+select throws_ok(
+  $$ insert into dr_participations (event_id, service_connection_id) values ('64000000-0000-0000-0000-0000000000eb', '64000000-0000-0000-0000-0000000000c1') $$,
+  '42501',
+  null,
+  'a consumer cannot opt into another division''s event'
 );
 
 reset role;

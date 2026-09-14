@@ -143,9 +143,23 @@ create trigger dr_participations_guard_update
 alter table dr_participations enable row level security;
 alter table dr_participations force row level security;
 
+-- Ownership alone isn't enough here: without the event join, a consumer
+-- could opt into ANY division's event (not just their own — the visibility
+-- policy above scopes SELECT, not this INSERT), or opt in after the event
+-- has already started/ended, since the update guard only restricts changing
+-- opted_in post-start, not the initial insert.
 create policy dr_participations_consumer_insert on dr_participations
   for insert to authenticated
-  with check (service_connection_id = any ((select my_service_connection_ids())::uuid[]));
+  with check (
+    service_connection_id = any ((select my_service_connection_ids())::uuid[])
+    and exists (
+      select 1 from demand_response_events e
+      join service_connections sc on sc.id = dr_participations.service_connection_id
+      where e.id = dr_participations.event_id
+      and e.division_id = sc.division_id
+      and e.starts_at > now()
+    )
+  );
 
 create policy dr_participations_consumer_select on dr_participations
   for select to authenticated
