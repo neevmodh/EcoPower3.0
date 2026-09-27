@@ -1,6 +1,8 @@
+import { DemandResponseCountdown } from "@/components/DemandResponseCountdown";
 import { DemandResponseEventForm } from "@/components/DemandResponseEventForm";
 import { PanelShell } from "@/components/PanelShell";
 import { getScope } from "@/lib/auth";
+import { DR_STATUS_COLOR } from "@/lib/demandResponse";
 import { discomNav } from "@/lib/panelNav";
 import { createClient } from "@/lib/supabase/server";
 import { formatInrFromPaise } from "@ecopower/shared";
@@ -10,13 +12,6 @@ import { redirect } from "next/navigation";
 // reduction, incentive) is computed by sweep_demand_response_events() (0059)
 // once an event ends; this page only ever displays what that sweep wrote,
 // never a self-reported number.
-
-const STATUS_COLOR: Record<string, string> = {
-  scheduled: "var(--color-categorical-consumption)",
-  active: "var(--color-status-warning)",
-  completed: "var(--color-status-good)",
-  cancelled: "var(--color-text-tertiary)",
-};
 
 type EventRow = {
   id: string;
@@ -137,12 +132,19 @@ export default async function DemandResponsePage() {
                       {new Date(e.ends_at).toLocaleString("en-IN")}
                     </div>
                   </div>
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium on-accent shrink-0"
-                    style={{ background: STATUS_COLOR[e.status] }}
-                  >
-                    {e.status}
-                  </span>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium on-accent"
+                      style={{ background: DR_STATUS_COLOR[e.status] }}
+                    >
+                      {e.status}
+                    </span>
+                    <DemandResponseCountdown
+                      startsAt={e.starts_at}
+                      endsAt={e.ends_at}
+                      status={e.status}
+                    />
+                  </div>
                 </div>
                 <p
                   className="text-xs mb-2"

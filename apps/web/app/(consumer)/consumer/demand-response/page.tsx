@@ -1,6 +1,8 @@
+import { DemandResponseCountdown } from "@/components/DemandResponseCountdown";
 import { DemandResponseOptInButton } from "@/components/DemandResponseOptInButton";
 import { PanelShell } from "@/components/PanelShell";
 import { getScope } from "@/lib/auth";
+import { DR_STATUS_COLOR } from "@/lib/demandResponse";
 import { getT } from "@/lib/i18n.server";
 import { consumerNav } from "@/lib/panelNav";
 import { createClient } from "@/lib/supabase/server";
@@ -128,8 +130,23 @@ export default async function ConsumerDemandResponsePage() {
                 className="rounded-card border card-shadow p-5"
                 style={{ borderColor: "var(--color-border)" }}
               >
-                <div className="font-medium text-sm mb-1">
-                  {e.event_type.replace("_", " ")}
+                <div className="flex items-start justify-between gap-3 mb-1">
+                  <div className="font-medium text-sm">
+                    {e.event_type.replace("_", " ")}
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium on-accent"
+                      style={{ background: DR_STATUS_COLOR[e.status] }}
+                    >
+                      {e.status}
+                    </span>
+                    <DemandResponseCountdown
+                      startsAt={e.starts_at}
+                      endsAt={e.ends_at}
+                      status={e.status}
+                    />
+                  </div>
                 </div>
                 <div
                   className="text-xs mb-2"
