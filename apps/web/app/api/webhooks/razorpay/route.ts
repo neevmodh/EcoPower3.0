@@ -66,18 +66,37 @@ export async function POST(request: Request) {
     .single();
 
   if (insertEventError) {
-    // unique_violation on event_id — this exact delivery was already
-    // processed. That IS the exactly-once story: a no-op, not an error.
+    // unique_violation on event_id — this exact delivery was seen before.
+    // NOT necessarily "already processed": if the previous attempt threw
+    // (a network-level exception, not a query error — applyPaymentDecision
+    // itself never throws) between this insert and processed_at being set
+    // below, that prior row exists with processed_at still null and this
+    // delivery was never actually applied. Only a row that reached
+    // processed_at is a genuine no-op; anything else must still be
+    // processed, or a transient failure becomes permanently unretriable —
+    // this exact delivery's event_id can never be inserted again, so
+    // Razorpay's own retry can never get a fresh attempt at it.
     if (insertEventError.code === "23505") {
-      return Response.json({ received: true, duplicate: true });
+      const { data: existing } = await supabase
+        .from("webhook_events")
+        .select("processed_at")
+        .eq("event_id", eventId)
+        .single();
+      if (existing?.processed_at) {
+        return Response.json({ received: true, duplicate: true });
+      }
+      // else: fall through and process it now, same as a fresh delivery.
+    } else {
+      return Response.json(
+        { error: "failed to record webhook event" },
+        { status: 500 },
+      );
     }
-    return Response.json(
-      { error: "failed to record webhook event" },
-      { status: 500 },
-    );
   }
 
   const payment = parsed.payload?.payment?.entity;
+  let applyError: { message: string } | null = null;
+
   if (
     payment &&
     typeof payment.order_id === "string" &&
@@ -94,7 +113,7 @@ export async function POST(request: Request) {
         .single();
 
       if (order) {
-        await applyPaymentDecision(supabase, {
+        const result = await applyPaymentDecision(supabase, {
           orderId: order.id,
           invoiceId: order.invoice_id,
           captured,
@@ -103,8 +122,21 @@ export async function POST(request: Request) {
           amountPaise: typeof payment.amount === "number" ? payment.amount : 0,
           rawResponse: payment,
         });
+        if (result.error) applyError = result.error;
       }
     }
+  }
+
+  // A real failure here must NOT mark this event processed — leaving
+  // processed_at null is what lets a retried delivery (or the 23505 path
+  // above, on the next delivery of the same event_id) actually try again,
+  // instead of the order/invoice staying permanently out of sync with a
+  // payment Razorpay considers settled.
+  if (applyError) {
+    return Response.json(
+      { error: "failed to apply payment decision" },
+      { status: 500 },
+    );
   }
 
   await supabase
