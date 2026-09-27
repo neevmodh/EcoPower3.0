@@ -73,10 +73,19 @@ select isnt_empty(
 -- regression test for a fix that used to exclude the applicant's own
 -- connection entirely. 75kW existing + 10kW proposed = 85% of 100 kVA,
 -- over the 80% threshold, even though 10kW alone is well under it.
+--
+-- reset role: `authenticated` (set above, at line 45, and never reset
+-- since) has no INSERT policy of any kind on assets — force RLS means
+-- even the officer role used for the results_eq calls below can't write
+-- this fixture row; only the unrestricted test-setup role can.
+reset role;
 insert into assets (service_connection_id, asset_type, capacity_kw) values
   ('61000000-0000-0000-0000-0000000000c1', 'pv_array', 75);
 insert into netmetering_applications (id, service_connection_id, capacity_kw) values
   ('61000000-0000-0000-0000-0000000000d3', '61000000-0000-0000-0000-0000000000c1', 10);
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"61000000-0000-0000-0000-0000000000f2","role":"authenticated","app_metadata":{"roles":["discom_officer"],"org_ids":["61000000-0000-0000-0000-000000000001"],"division_ids":["61000000-0000-0000-0000-00000000000a"]}}';
 
 select results_eq(
   $$ select existing_solar_kw, verdict from run_dt_feasibility_check('61000000-0000-0000-0000-0000000000d3') $$,
@@ -85,7 +94,10 @@ select results_eq(
 );
 
 -- A DT with capacity_kva = 0 (bad data, not NULL) must degrade to
--- insufficient_data, not divide-by-zero.
+-- insufficient_data, not divide-by-zero. Same reset-role need as above:
+-- these are unrestricted test fixtures, not something the officer role
+-- itself is being tested on writing.
+reset role;
 insert into distribution_transformers (id, feeder_id, name, capacity_kva) values
   ('61000000-0000-0000-0000-0000000000a4', '61000000-0000-0000-0000-0000000000a2', 'DT Zero', 0);
 insert into service_connections (id, consumer_number, dt_id, sanctioned_load_kw, tariff_category, phase, connection_type) values
@@ -96,6 +108,9 @@ insert into meter_readings (meter_id, reading_ts, active_power_kw) values
 insert into netmetering_applications (id, service_connection_id, capacity_kw) values
   ('61000000-0000-0000-0000-0000000000d4', '61000000-0000-0000-0000-0000000000c2', 5);
 
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"61000000-0000-0000-0000-0000000000f2","role":"authenticated","app_metadata":{"roles":["discom_officer"],"org_ids":["61000000-0000-0000-0000-000000000001"],"division_ids":["61000000-0000-0000-0000-00000000000a"]}}';
+
 select results_eq(
   $$ select verdict from run_dt_feasibility_check('61000000-0000-0000-0000-0000000000d4') $$,
   $$ values ('insufficient_data'::text) $$,
@@ -103,8 +118,12 @@ select results_eq(
 );
 
 -- A second application for 15kW — exceeds the 10kW sanctioned load.
+reset role;
 insert into netmetering_applications (id, service_connection_id, capacity_kw) values
   ('61000000-0000-0000-0000-0000000000d2', '61000000-0000-0000-0000-0000000000c1', 15);
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"61000000-0000-0000-0000-0000000000f2","role":"authenticated","app_metadata":{"roles":["discom_officer"],"org_ids":["61000000-0000-0000-0000-000000000001"],"division_ids":["61000000-0000-0000-0000-00000000000a"]}}';
 
 select results_eq(
   $$ select verdict from run_dt_feasibility_check('61000000-0000-0000-0000-0000000000d2') $$,

@@ -46,7 +46,7 @@ Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 | 30 | DT feasibility check | M3 | discom | normal | 1 | ☑ | 28 |
 | 31 | PM Surya Ghar subsidy workflow | M3 | discom | normal | 1 | ☑ | 28 |
 | 32 | Prepaid oversight + disconnect queue (two-person) | M3 | security | high | 1 | ◐ | 22 |
-| 33 | Demand response | M3 | discom | high | 1 | ☐ | 26 |
+| 33 | Demand response | M3 | discom | high | 1 | ☑ | 26 |
 | 34 | Append-only audit ledger + UI | M3 | security | normal | — | ☑ | 5 |
 | 35 | Bill OCR service | M4 | ml | critical | 1 | ☐ | [#65](../../issues/65) |
 | 36 | OCR confirmation UI (never auto-commit) | M4 | web | high | 1 | ☐ | 35 |

@@ -48,5 +48,6 @@
   "nav.settings": "Settings",
   "nav.meterRead": "Submit reading",
   "nav.trade": "Solar trading",
-  "nav.ev": "EV charging"
+  "nav.ev": "EV charging",
+  "nav.demandResponse": "Demand response"
 }

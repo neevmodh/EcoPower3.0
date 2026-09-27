@@ -17,6 +17,7 @@ export function consumerNav(active: string, t?: T): NavItem[] {
     ["/consumer/meter-read", "nav.meterRead"],
     ["/consumer/trade", "nav.trade"],
     ["/consumer/ev", "nav.ev"],
+    ["/consumer/demand-response", "nav.demandResponse"],
     ["/consumer/carbon", "nav.carbon"],
     ["/consumer/notifications", "nav.notifications"],
     ["/consumer/support", "nav.support"],
@@ -25,6 +26,25 @@ export function consumerNav(active: string, t?: T): NavItem[] {
   return items.map(([href, key]) => ({
     href,
     label: tr(key),
+    active: href === active,
+  }));
+}
+
+export function discomNav(active: string): NavItem[] {
+  const items: Array<[string, string]> = [
+    ["/discom", "Overview"],
+    ["/discom/connections", "Connections"],
+    ["/discom/losses", "AT&C losses"],
+    ["/discom/netmetering", "Net-metering"],
+    ["/discom/demand-response", "Demand response"],
+    ["/discom/prepaid", "Prepaid"],
+    ["/discom/outages", "Outages"],
+    ["/discom/p2p", "P2P market"],
+    ["/discom/audit", "Audit log"],
+  ];
+  return items.map(([href, label]) => ({
+    href,
+    label,
     active: href === active,
   }));
 }
@@ -55,6 +75,7 @@ const DEFAULT: Record<string, string> = {
   "nav.meterRead": "Submit reading",
   "nav.trade": "Solar trading",
   "nav.ev": "EV charging",
+  "nav.demandResponse": "Demand response",
   "nav.carbon": "Carbon & solar",
   "nav.notifications": "Notifications",
   "nav.support": "Support",
