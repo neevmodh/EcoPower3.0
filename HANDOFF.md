@@ -1,6 +1,6 @@
 # HANDOFF — read this first
 
-Written for whichever AI assistant (or human) picks this project up next. This file exists so nothing has to be re-discovered from scratch. Reality-checked and reconciled against the code tree and the GitHub issue state on **2026-09-11**.
+Written for whichever AI assistant (or human) picks this project up next. This file exists so nothing has to be re-discovered from scratch. Reality-checked and reconciled against the code tree and the GitHub issue state on **2026-09-27** (previously 2026-09-11 — see [What's happened since](#whats-happened-since-2026-09-11) for the compressed diff).
 
 If you only read one section, read [Reality check](#reality-check-what-actually-works) and [How to run this locally](#how-to-run-this-locally).
 
@@ -10,7 +10,7 @@ If you only read one section, read [Reality check](#reality-check-what-actually-
 
 `apps/simulator` and `services/ingest` were folded into `apps/web/workers/{simulator,ingest}` — one codebase, one `package.json` — per a request to consolidate everything into the Next.js app as far as technically possible. **They still run as persistent Node processes on Railway, not as Next.js routes** — a serverless request/response function can't hold the open MQTT connection this needs. That part didn't change; only where the source code lives did.
 
-**This session had no access to the Railway account these services are deployed under** (`neev3377` — see [Identity gotcha](#identity-gotcha)), so the two Railway service configs were **not** updated and need a manual fix before their next deploy/restart, or they'll fail to find `src/index.ts` at the old path:
+**This session had no access to the Railway account these services are deployed under** (`neev3377` — see [Identity gotcha](#identity-gotcha)), so the two Railway service configs were **not** updated and need a manual fix before their next deploy/restart, or they'll fail to find `src/index.ts` at the old path. Tracked as **#133** (still open as of 2026-09-27 — needs the same Railway account access, still not available in any session since):
 
 - **ingest service** — root directory → `apps/web`, start command → `pnpm worker:ingest`
 - **simulator service** — root directory → `apps/web`, start command → `pnpm worker:simulator`
@@ -37,17 +37,17 @@ The docs in this repo (`README.md`, `ROADMAP.md`, `BUILD-ORDER.md`) still gestur
 | `apps/web/workers/simulator` | **Real.** Publishes physically-modelled AMI readings (solar yield + household load models) over MQTT. Runs as a long-lived Node process, not a Next.js route — MQTT needs a persistent connection. |
 | `apps/web/workers/ingest` | **Real.** MQTT subscriber → validates HMAC + register monotonicity → writes to partitioned Postgres. Same reason — a persistent MQTT subscriber can't be a serverless route. |
 | `packages/shared` | **Real.** Tariff engine, OBIS helpers, validated colour palette. Zero-dependency TS, imported by web + scripts. |
-| `supabase/` | **Real.** 38 migrations, RLS + FORCE on every table, a pgTAP suite (24 files / 160 assertions) run in CI. |
-| `apps/mobile` | **Empty.** Just a `.gitkeep`. No Expo app — the mobile channel is a real installable PWA in `apps/web` (`app/manifest.ts`, `next/og` icon, pass-through service worker). |
+| `supabase/` | **Real.** 64 migrations, RLS + FORCE on every table, a pgTAP suite (45 files / 309 assertions) run in CI. |
+| `apps/mobile` | **Real, not yet device-tested.** Expo + expo-router + NativeWind — auth + persona routing (consumer/field technician), a live-data tile with `AppState`-aware Realtime, an offline outbox for field-technician mutations, meter QR/barcode scan. Verified via `tsc`, lint, and a real Metro bundle export in CI — never booted on a physical device or simulator (none was available while it was built). The PWA in `apps/web` still exists too, as the always-available middle ground. |
 | `services/ml` | **Empty.** No FastAPI service. Bill/meter OCR runs **client-side** via `tesseract.js`; the AI advisor/bill-explainer are Next.js route handlers calling Gemini. No forecasting or anomaly-detection service. |
 | `services/worker` | **Empty.** No BullMQ job runner exists. |
-| `tools/loadtest` | **Empty.** No k6 scripts exist. |
+| `tools/loadtest` | **Partially real.** No k6 scripts yet (#57's throughput scenarios still need a live deployed target). `capture_explain.mjs` + a first real local run (`supabase/tests/perf/2026-09-27-local.txt`, 1.44M seeded rows) confirmed the InitPlan idiom and partition pruning both work as designed — read that file's own caveat section before trusting its absolute numbers past "the mechanism works." |
 
 So in practice: **this is a Next.js web app with a real Postgres/RLS backend and a real MQTT telemetry pipeline feeding it.** Seven *panels* exist inside that one web app — Consumer, Housing Society, DISCOM, Operator, Field Technician, **Support agent**, **Platform admin** — gated by role via middleware + enforced for real by RLS. There is no native mobile app, no ML service, no background job worker (scheduled work is `pg_cron`). If asked to "build the mobile app" or "add the ML forecasting service," that's new work from zero.
 
 Built beyond the original five panels: prepaid billing, DISCOM DT-loss map + theft localization + net-metering queue + audit ledger + outage console + P2P market oversight, Society allocation, Support Consumer-360 + KB, P2P solar trading + EV charging on the consumer side, i18n (EN/HI/GU), a platform-admin cross-tenant surface. **Note:** P2P trading + EV contradict `ROADMAP.md §7` ("out of scope") — tracked in #91.
 
-GitHub issue tracker: **92 filed, 45 closed, 47 open** (`gh issue list`). Closed = verified shipped. Open = the remainder — native mobile, ML services, k6 load testing, WhatsApp/SMS delivery, VEE, demo hardening, plus the ops items #88–#90. `ROADMAP.md`'s table is a snapshot reconciled 2026-09-11; **GitHub is the source of truth** if they disagree.
+GitHub issue tracker: **121 filed, 80 closed, 41 open** (`gh issue list --state all`). Closed = verified shipped. Open = the remainder — Bill/meter OCR services, k6 load testing, WhatsApp/SMS delivery, VEE, demo hardening, the whole public-sandbox epic (#102), plus a handful of DR follow-ups (#165, #166) and the standing ops items (#88, #89, #133). `ROADMAP.md`'s table is a snapshot; **GitHub is the source of truth** if they disagree.
 
 ---
 
@@ -59,7 +59,7 @@ pnpm install                      # from repo root, installs all workspaces
 
 # Local Supabase (Postgres + Auth + Realtime), via Docker
 supabase start                    # first time; supabase status if already running
-supabase db reset                 # applies all 38 migrations + resets to clean state
+supabase db reset                 # applies all 64 migrations + resets to clean state
 
 # Seed demo data (run in this order — each is additive/idempotent)
 SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SERVICE_ROLE_KEY=<local anon/service key from `supabase status`> \
@@ -75,7 +75,7 @@ pnpm dev                          # http://localhost:3000
 
 # Run the RLS test suite (do this after any migration change)
 cd /Users/neev/Downloads/Ecopower/EcoPower3.0
-supabase test db                  # expect 160/160 passing (24 files)
+supabase test db                  # expect 309/309 passing (45 files)
 
 # Typecheck (there's no configured lint — `next lint` prompts interactively and was never set up)
 cd apps/web && pnpm exec tsc --noEmit -p .
@@ -136,6 +136,19 @@ All of the above: 103 pgTAP assertions passing, CI green on every push, migratio
 
 ---
 
+## What's happened since 2026-09-11
+
+Compressed; `WORKLOG.md` has the full detail. Apps/mobile went from empty scaffolding to real (see the reality-check table above) in a session not otherwise covered here. Most recently:
+
+1. **Demand response (#33)** shipped — `discom_officer` declares a peak event, consumers opt in before it starts, `sweep_demand_response_events()` credits only the shortfall measured from real meter reads. Two follow-ups closed the same session: feeder-level targeting (event can scope to one feeder, not just division-wide — #164) and a bounded 24h resettlement pass for meter readings that arrive after the sweep already ran (#163). Two more (#165 invoice-line wiring, #166 baseline-methodology citation) are open, deliberately deferred — see `ROADMAP.md`.
+2. **#129** — `getClaims()`'s banned-account access window: `jwt_expiry` 900s → 300s in `supabase/config.toml`. **Only applied locally** — someone with production credentials still needs `supabase config push` (diff first) to push it to the deployed project.
+3. **#110** — `/api/health` now checks pg_cron freshness (`health_check_cron_jobs()`, 0062), not just the DB and Gemini.
+4. **A real, if small-scale, run of #57/#58's evidence plan** — `tools/loadtest/capture_explain.mjs` + `supabase/tests/perf/2026-09-27-local.txt`, see the reality-check table above.
+5. **A targeted ACID/pipeline audit** (payments/billing, telemetry+cron, RLS/grants) found and fixed two real, previously-silent bugs: the Razorpay webhook route discarded `applyPaymentDecision`'s error and recorded its idempotency row before processing succeeded (a transient failure could leave an invoice permanently unmarked paid, with no retry ever reaching it again); `prepaid_settle_day()` had no per-account fault isolation and no catch-up logic (one bad account rolled back every other account's settlement in the same tick, and a missed day's charge was gone forever). Both fixed with regression tests that force the actual failure mode, not just assert the fix. Also closed a schema-hygiene gap: 12 tables had RLS enabled but never forced, and 3 maintenance functions had no explicit `REVOKE` from `anon`/`authenticated`.
+6. **Still open, flagged not fixed**: `public.service_types` has RLS **disabled entirely** (surfaced by the local Supabase advisor) — needs a human decision on what policy it should have (it's likely low-sensitivity reference data, but that wasn't verified) before enabling RLS, since doing so with zero policies would silently lock out all access. A TOCTOU race in `apps/web/app/api/payments/create-order/route.ts` can create duplicate (not double-charged) `payment_orders` rows for the same invoice under a double-click/two-tabs race — low severity, not yet fixed.
+
+---
+
 ## Credentials & secrets
 
 **Never put actual secret values in this file or in git.** Locations only:
@@ -167,11 +180,13 @@ Three GitHub-adjacent accounts have been in play this project. Use the **`neevmo
 
 ## Immediate next steps, roughly prioritized
 
-1. **Seed the missing production demo data** (see Credentials section) — quick, unblocks a live demo of the newest features (work orders, net-metering, support queue, society units) on the deployed URL, not just localhost.
-2. **Mobile app scope decision** — still explicitly undecided (`PS1-PRIORITY-PLAN.md §4` flagged this early, never resolved). A PWA now exists as the practical middle ground (installable, real manifest+icon+SW) but no decision has been made on whether a thin native shell or full Expo app is worth building given remaining time. Don't start `apps/mobile` without this decision being made first — it's currently empty by choice, not by oversight.
-3. **Razorpay webhook URL** — update from the placeholder once there's a stable production URL to point it at.
-4. **Issue #66 ("BLOCKER: Confirm final-round timeline")** — open, marked `blocker`, needs a human answer about the actual competition schedule, not something to resolve in code.
-5. Beyond that: `ROADMAP.md`'s tracker table is the prioritized backlog (Tier A/B/C ship order) — 47 open issues, spanning WhatsApp/SMS delivery, the ML anomaly/forecast services, native mobile, k6 load testing, and the demo runbook. Read `BUILD-ORDER.md` before picking one — it explicitly sequences AMI spine + billing correctness *before* UI polish and payments, on the reasoning that "at 60% complete the project should have the 60% the jury cares about."
+1. **`public.service_types`'s disabled RLS** (see [What's happened since](#whats-happened-since-2026-09-11)) — needs a human decision on the right policy before it's enabled.
+2. **Seed the missing production demo data** (see Credentials section) — quick, unblocks a live demo on the deployed URL, not just localhost.
+3. **Push #129's `jwt_expiry` change to production** via `supabase config push` (diff first) — only applied to local `supabase/config.toml` so far.
+4. **Razorpay webhook URL** — update from the placeholder once there's a stable production URL to point it at.
+5. **Mobile: get it on a physical device or simulator at least once.** It's real code (auth, live tile, offline outbox, QR scan) verified only by `tsc`/lint/a Metro bundle export in CI — never actually booted. Nameplate/meter-reading OCR and an EAS-distributed build are the next real mobile work, but need real device access and real meter photographs to build honestly against, neither of which this session had.
+6. **Issue #66 ("BLOCKER: Confirm final-round timeline")** — open, marked `blocker`, needs a human answer about the actual competition schedule, not something to resolve in code.
+7. Beyond that: `ROADMAP.md`'s tracker table is the prioritized backlog (Tier A/B/C ship order) — 41 open issues, spanning Bill/meter OCR, k6 load testing, the public-sandbox epic (#102), WhatsApp/SMS delivery, and demo hardening. Read `BUILD-ORDER.md` before picking one.
 
 ---
 

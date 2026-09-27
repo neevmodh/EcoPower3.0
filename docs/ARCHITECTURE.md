@@ -18,7 +18,7 @@ flowchart LR
     MDM --> APP[EcoPower<br/>Next.js on Vercel]
     APP --> RLS[(Supabase Postgres + RLS)]
     APP -->|test-mode| PAY[Razorpay]
-    APP -.->|planned, not built| MOBILE[Expo field/consumer app]
+    APP -.->|built, not device-tested| MOBILE[Expo field/consumer app]
 
     style HES fill:#334,stroke:#88f,color:#fff
     style MDM fill:#334,stroke:#88f,color:#fff
@@ -37,7 +37,7 @@ adapter for a real head-end system (e.g. Trilliant UnitySuite) — the MDM side
 | Postgres + RLS + pg_cron | Supabase | real |
 | MQTT broker + simulator + ingest worker | Railway | real, persistent Node processes |
 | Razorpay payments | Razorpay (test mode) | real |
-| Mobile (consumer/field) | Expo/EAS | not built |
+| Mobile (consumer/field) | Expo/EAS | real (auth, live tile, offline outbox, QR scan) — never booted on a device or simulator; EAS distribution not built |
 | ML services (forecasting, anomaly, OCR) | — | not built |
 
 ## 2. Single points of failure
@@ -72,10 +72,10 @@ which is the substantive basis for any uptime claim, not a hopeful number.
 | PS | Covered by | Status |
 |---|---|---|
 | 1. Energy as a Service | the platform (billing, subscriptions, DISCOM panel) | shipped |
-| 2. Smart Metering Super App for consumers | Expo consumer app (#43, #18) | not built |
+| 2. Smart Metering Super App for consumers | Expo consumer app (#43, #18) | app built, never device-tested |
 | 3. Predictive Maintenance of Meters | anomaly detection (#54, #27) | #27 shipped, #54 not built |
-| 4. Meter reading via OCR from field photographs | #47, #46, #37 | not built |
-| 5. Real-time asset tracking | #45, #48, asset registry | not built |
+| 4. Meter reading via OCR from field photographs | #47, #46, #37 | #46's QR-scan half shipped; nameplate/meter-reading OCR (#46's other half, #47) and the OCR eval set (#37) not built |
+| 5. Real-time asset tracking | #45, #48, asset registry | #45 (offline outbox + AppState-aware Realtime) shipped; #48 (commissioning flow) and a dedicated asset registry not built |
 
 The competition is scoped to **PS1 only** for this team — see #91. This table
 exists for Q&A, not as a claim that PS2–5 are complete.
