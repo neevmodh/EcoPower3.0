@@ -346,6 +346,12 @@ Caveats noted on two "done" issues: #83 (low-literacy UX in the title never buil
 
 All four merged to `main`, green: 145 shared + 19 ingest + 8 simulator tests, web `tsc` clean, build clean.
 
+**(2026-09-27, demand response — #33, PR #167)** — Meter-verified demand response shipped: a `discom_officer` declares a peak event, consumers opt in before it starts, and `sweep_demand_response_events()` credits only the shortfall measured from real meter reads. Same session closed feeder-level targeting (#164 — `feeder_id` had schema and RLS-adjacent semantics but no UI/API path to set it; now wired through the create-event route, both opt-in default-connection pickers, and both panels' UIs) and #129 (`getClaims()`'s banned-account window — `jwt_expiry` 900s → 300s, PR #168) and #163 (late-arriving meter readings after an event completed used to settle permanently unverified — added a bounded 24h resettlement pass in `dr_settle_participation()`, PR #169; deliberately not a full re-open, same scope call as #41). Followed by a UI pass on both demand-response pages: shared status-color mapping (`lib/demandResponse.ts`), a live hydration-safe countdown (`DemandResponseCountdown`, same pattern as `SlaCountdown`), and immediate opt-in confirmation instead of waiting on `router.refresh()`.
+
+Also fixed a real bug found while chasing what looked like a pre-existing, unrelated pgTAP failure: `dt_feasibility_check.test.sql` switched to `role authenticated` early and never switched back, so its own later fixture inserts (an `assets` row with no INSERT policy for any authenticated role) silently failed under RLS on a fresh database. Full suite is now genuinely green: 299/299 pgTAP assertions across 43 files (up from 255/37), 61 migrations.
+
+Verified end-to-end in a real browser session for the UI pass — no extension available, so via server-rendered HTML against local Supabase with real auth users (`user_roles`, custom access-token hook) and a real `service_connections`/`meters`/`events`/`participations` fixture set covering scheduled/active/completed states in both panels.
+
 ## Open threads / next steps
 
 - [ ] **#93 shared-subscription path** — `MQTT_SHARED_GROUP` is untested against the live EMQX broker; smoke-test before relying on multi-worker.
@@ -355,4 +361,5 @@ All four merged to `main`, green: 145 shared + 19 ingest + 8 simulator tests, we
 - [ ] **#90 — verify the Gemini key authenticates** (`AQ.` prefix, not `AIza...`); blocks bill OCR (#35) and meter OCR eval (#47).
 - [ ] **#91 — reconcile P2P/EV** against ROADMAP §7 (keep and own them, or cut).
 - [ ] **#66 — confirm final-round timeline** (human answer needed).
+- [ ] **#129's chosen fix (PR #168) only updates local `supabase/config.toml`** — someone with production credentials still needs `supabase config push` (diff first) to apply the shortened `jwt_expiry` to the deployed project.
 - [ ] `supabase config push` pushes the *whole* auth config — always diff before/after pushing to remote.
