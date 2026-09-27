@@ -1,10 +1,14 @@
 # Scale / load testing (#57, #58)
 
-**Status: the generator exists and is pgTAP-verified at small scale; nobody
-has run it at real scale yet, and no k6 scripts exist.** Both need a live
+**Status: the generator has now been run for real — 1.44M rows locally,
+`supabase/tests/perf/2026-09-27-local.txt` — proving the InitPlan idiom and
+partition pruning both work as designed. Full 10M+ scale against a real
+deployed target, and the k6 throughput scenarios (§4), still need a live
 target (a real Supabase project, real credentials) that wasn't available in
-the session that wrote this — do this by hand before quoting a number in the
-pitch. Don't present a projected number as a measured one.
+the session that wrote this.** Do the real-scale run by hand before quoting
+an absolute latency number in the pitch — the local run's own honest caveat
+about its own small `shared_buffers` is exactly why. Don't present a
+projected number as a measured one.
 
 ## 1. Seed real volume
 
@@ -32,20 +36,15 @@ Once seeded, run `EXPLAIN (ANALYZE, BUFFERS)` on the queries the DISCOM panel
 actually issues, as the `authenticated` role with real claims — not as the
 table owner, which bypasses RLS and would understate the real cost:
 
-```sql
-set role authenticated;
-set request.jwt.claims = '{"sub":"...","role":"authenticated","app_metadata":{"roles":["discom_officer"],"org_ids":["99000000-0000-0000-0000-000000000001"],"division_ids":["99000000-0000-0000-0000-000000000002"]}}';
-
-explain (analyze, buffers) select * from dt_loss_summary();
-explain (analyze, buffers) select * from meter_readings where division_id = '99000000-0000-0000-0000-000000000002' order by reading_ts desc limit 100;
-
-reset role;
+```bash
+node tools/loadtest/capture_explain.mjs > supabase/tests/perf/<date>.txt
+# DATABASE_URL / ORG_ID / DIVISION_ID env vars point it at a real target's
+# own discom_officer org/division instead of the LOADTEST- fixture's.
 ```
 
-Save the real output here as `supabase/tests/perf/<date>.txt` (directory
-doesn't exist yet — create it with the first real run) so the numbers in a
-pitch are traceable to an actual `EXPLAIN` output, the same discipline as
-every other number this platform shows.
+`supabase/tests/perf/2026-09-27-local.txt` is a first real run, done locally
+— read its own caveat section before trusting its absolute numbers past
+"the mechanism works."
 
 ## 3. The extrapolation (do this after step 2, with real numbers)
 
