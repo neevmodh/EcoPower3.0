@@ -161,9 +161,15 @@ site_url = "http://127.0.0.1:3000"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = ["https://127.0.0.1:3000"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
-# 15 minutes: scope claims (roles/org_ids/division_ids) are stale until refresh —
-# revocation-sensitive ops must re-check user_roles directly, not trust the claim.
-jwt_expiry = 900
+# 5 minutes (#129): scope claims (roles/org_ids/division_ids) are stale until refresh —
+# revocation-sensitive ops must re-check user_roles directly, not trust the claim — and
+# a banned/deleted account's still-unexpired token keeps working against middleware's
+# local getClaims() check (052db3c) until this expiry, since that check never asks the
+# auth server whether the account is still live. Shortened from 900s to bound that
+# window at the cost of more frequent token refreshes — the explicit tradeoff #129
+# called out; revisit if the extra refresh traffic turns out to matter more than the
+# tighter window.
+jwt_expiry = 300
 # JWT issuer URL. If not set, defaults to auth.external_url.
 # jwt_issuer = ""
 # Path to JWT signing key. DO NOT commit your signing keys file to git.
