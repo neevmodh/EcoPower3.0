@@ -26,6 +26,7 @@ type EventRow = {
   target_kw_reduction: number;
   incentive_paise_per_kwh: number;
   status: string;
+  feeder_id: string | null;
 };
 
 type ParticipationRow = {
@@ -42,13 +43,20 @@ export default async function DemandResponsePage() {
   if (!scope) redirect("/login");
   const { user, divisionIds } = scope;
 
-  const { data: eventsRaw } = await supabase
-    .from("demand_response_events")
-    .select(
-      "id, event_type, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh, status",
-    )
-    .order("starts_at", { ascending: false });
+  const [{ data: eventsRaw }, { data: feedersRaw }] = await Promise.all([
+    supabase
+      .from("demand_response_events")
+      .select(
+        "id, event_type, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh, status, feeder_id",
+      )
+      .order("starts_at", { ascending: false }),
+    // feeders_division_scope (0004) already confines this to the caller's
+    // own division — no explicit filter needed.
+    supabase.from("feeders").select("id, name").order("name"),
+  ]);
   const events = (eventsRaw ?? []) as EventRow[];
+  const feeders = (feedersRaw ?? []) as { id: string; name: string }[];
+  const feederNameById = new Map(feeders.map((f) => [f.id, f.name]));
 
   const eventIds = events.map((e) => e.id);
   const { data: participationsRaw } = eventIds.length
@@ -84,7 +92,7 @@ export default async function DemandResponsePage() {
         their real meter reads once the event ends — never self-reported.
       </p>
 
-      <DemandResponseEventForm />
+      <DemandResponseEventForm feeders={feeders} />
 
       {events.length === 0 ? (
         <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
@@ -142,7 +150,10 @@ export default async function DemandResponsePage() {
                 >
                   Target {e.target_kw_reduction} kW ·{" "}
                   {formatInrFromPaise(BigInt(e.incentive_paise_per_kwh))}/kWh
-                  incentive · {optedIn.length} opted in
+                  incentive · {optedIn.length} opted in ·{" "}
+                  {e.feeder_id
+                    ? (feederNameById.get(e.feeder_id) ?? "feeder")
+                    : "division-wide"}
                 </p>
                 {e.status === "completed" && (
                   <p

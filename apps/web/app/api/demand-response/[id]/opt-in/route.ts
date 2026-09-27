@@ -33,7 +33,7 @@ export async function POST(
   if (!serviceConnectionId) {
     const { data: event, error: eventError } = await supabase
       .from("demand_response_events")
-      .select("division_id")
+      .select("division_id, feeder_id")
       .eq("id", eventId)
       .single();
     if (eventError || !event) {
@@ -42,21 +42,40 @@ export async function POST(
     // A consumer with connections in more than one division must have a
     // connection matching THIS event's division picked, not an arbitrary
     // one of theirs — otherwise the insert below fails the RLS division
-    // check with an opaque 500 for no reason visible to the caller.
+    // check with an opaque 500 for no reason visible to the caller. Same
+    // reasoning extends to feeder_id (0060): a feeder-targeted event needs
+    // a connection whose distribution_transformers.feeder_id actually
+    // matches, or the insert fails the RLS feeder check just as opaquely.
     // owner_user_id is explicit here rather than relying solely on
     // service_connections' own SELECT policies: a caller who also holds a
     // broader-visibility role (discom_officer, a society role) could
     // otherwise have this pick a real connection that isn't theirs.
-    const { data: connection } = await supabase
+    const { data: candidates } = await supabase
       .from("service_connections")
-      .select("id")
+      .select("id, dt_id")
       .eq("division_id", event.division_id)
-      .eq("owner_user_id", userData.user.id)
-      .limit(1)
-      .maybeSingle();
+      .eq("owner_user_id", userData.user.id);
+
+    let connection: { id: string; dt_id: string } | null =
+      (candidates ?? [])[0] ?? null;
+    if (event.feeder_id && candidates?.length) {
+      const dtIds = [...new Set(candidates.map((c) => c.dt_id))];
+      const { data: dts } = await supabase
+        .from("distribution_transformers")
+        .select("id, feeder_id")
+        .in("id", dtIds);
+      const feederByDt = new Map((dts ?? []).map((d) => [d.id, d.feeder_id]));
+      connection =
+        candidates.find((c) => feederByDt.get(c.dt_id) === event.feeder_id) ??
+        null;
+    }
     if (!connection) {
       return Response.json(
-        { error: "no service connection of yours is in this event's division" },
+        {
+          error: event.feeder_id
+            ? "no service connection of yours is on this event's targeted feeder"
+            : "no service connection of yours is in this event's division",
+        },
         { status: 404 },
       );
     }

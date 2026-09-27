@@ -4,7 +4,7 @@
 -- from real meter reads, never by the client directly.
 
 begin;
-select plan(13);
+select plan(15);
 
 -- Readings span up to 9 days back from "now" — pre-create this month's and
 -- last month's partitions in case the suite runs near a boundary.
@@ -99,6 +99,19 @@ insert into demand_response_events (id, division_id, starts_at, ends_at, target_
 insert into demand_response_events (id, division_id, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh, status) values
   ('64000000-0000-0000-0000-0000000000ec', '64000000-0000-0000-0000-00000000000a', now() + interval '1 day', now() + interval '2 days', 2, 500, 'cancelled');
 
+-- A second feeder within Division A (c1 stays on the first, DT A / Feeder
+-- A), plus a sixth connection on it — for the feeder-targeted event tests
+-- below (0060).
+insert into feeders (id, substation_id, name) values ('64000000-0000-0000-0000-0000000000a4', '64000000-0000-0000-0000-0000000000a1', 'Feeder A2');
+insert into distribution_transformers (id, feeder_id, name) values ('64000000-0000-0000-0000-0000000000a5', '64000000-0000-0000-0000-0000000000a4', 'DT A2');
+insert into service_connections (id, consumer_number, dt_id, owner_user_id, tariff_category, phase, connection_type) values
+  ('64000000-0000-0000-0000-0000000000c6', 'CN-DR-06', '64000000-0000-0000-0000-0000000000a5', '64000000-0000-0000-0000-0000000000f1', 'RGP', 'single', 'postpaid');
+
+-- A future, not-yet-started Division A event targeted at Feeder A
+-- specifically (c1 is on it; c6 is on Feeder A2, not it).
+insert into demand_response_events (id, division_id, feeder_id, starts_at, ends_at, target_kw_reduction, incentive_paise_per_kwh) values
+  ('64000000-0000-0000-0000-0000000000ed', '64000000-0000-0000-0000-00000000000a', '64000000-0000-0000-0000-0000000000a2', now() + interval '1 day', now() + interval '2 days', 2, 500);
+
 select sweep_demand_response_events();
 
 select results_eq(
@@ -186,6 +199,22 @@ select throws_ok(
   '42501',
   null,
   'a consumer cannot opt into a cancelled event'
+);
+
+-- INSERT guard (0060): cannot opt a connection on a different feeder into
+-- an event targeted at one specific feeder, even though it's the same
+-- division and the same owner.
+select throws_ok(
+  $$ insert into dr_participations (event_id, service_connection_id) values ('64000000-0000-0000-0000-0000000000ed', '64000000-0000-0000-0000-0000000000c6') $$,
+  '42501',
+  null,
+  'a consumer cannot opt a connection on a different feeder into a feeder-targeted event'
+);
+
+-- INSERT: a connection that IS on the targeted feeder succeeds.
+select lives_ok(
+  $$ insert into dr_participations (event_id, service_connection_id) values ('64000000-0000-0000-0000-0000000000ed', '64000000-0000-0000-0000-0000000000c1') $$,
+  'a consumer CAN opt a connection on the targeted feeder into a feeder-targeted event'
 );
 
 reset role;

@@ -32,6 +32,7 @@ export async function POST(request: Request) {
     endsAt?: string;
     targetKwReduction?: number;
     incentivePaisePerKwh?: number;
+    feederId?: string;
   };
   try {
     body = await request.json();
@@ -51,6 +52,27 @@ export async function POST(request: Request) {
       },
       { status: 400 },
     );
+  }
+
+  // feeders_division_scope (0004) already confines a plain SELECT to
+  // feeders in the caller's own division — reusing that read as the
+  // validation means a feeder id from another division (or a bogus one)
+  // comes back empty here rather than getting silently accepted onto an
+  // event that then targets nothing.
+  let feederId: string | null = null;
+  if (body.feederId) {
+    const { data: feeder } = await supabase
+      .from("feeders")
+      .select("id")
+      .eq("id", body.feederId)
+      .maybeSingle();
+    if (!feeder) {
+      return Response.json(
+        { error: "feeder not found in your division" },
+        { status: 400 },
+      );
+    }
+    feederId = feeder.id;
   }
   // The DB only checks ends_at > starts_at, not that starts_at is still in
   // the future — an event created with a past starts_at would insert fine
@@ -72,6 +94,7 @@ export async function POST(request: Request) {
       ends_at: body.endsAt,
       target_kw_reduction: body.targetKwReduction,
       incentive_paise_per_kwh: body.incentivePaisePerKwh,
+      feeder_id: feederId,
       created_by_user_id: scope.user.id,
     })
     .select("id")

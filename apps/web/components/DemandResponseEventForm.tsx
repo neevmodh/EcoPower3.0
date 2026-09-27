@@ -3,12 +3,19 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function DemandResponseEventForm() {
+type Feeder = { id: string; name: string };
+
+export function DemandResponseEventForm({
+  feeders = [],
+}: {
+  feeders?: Feeder[];
+}) {
   const router = useRouter();
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [targetKw, setTargetKw] = useState("");
   const [incentiveRupeesPerKwh, setIncentiveRupeesPerKwh] = useState("5");
+  const [feederId, setFeederId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +38,7 @@ export function DemandResponseEventForm() {
               incentivePaisePerKwh: Math.round(
                 Number(incentiveRupeesPerKwh) * 100,
               ),
+              feederId: feederId || undefined,
             }),
           });
           const json = await res.json();
@@ -38,6 +46,7 @@ export function DemandResponseEventForm() {
           setStartsAt("");
           setEndsAt("");
           setTargetKw("");
+          setFeederId("");
           router.refresh();
         } catch (err) {
           setError(err instanceof Error ? err.message : "failed");
@@ -112,6 +121,25 @@ export function DemandResponseEventForm() {
             className="mt-1 w-full rounded-control border px-2 py-1.5 text-sm bg-transparent"
             style={{ borderColor: "var(--color-border)" }}
           />
+        </label>
+        <label
+          className="text-xs"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
+          Feeder (optional)
+          <select
+            value={feederId}
+            onChange={(e) => setFeederId(e.target.value)}
+            className="mt-1 w-full rounded-control border px-2 py-1.5 text-sm bg-transparent"
+            style={{ borderColor: "var(--color-border)" }}
+          >
+            <option value="">Division-wide</option>
+            {feeders.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.name}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
       <button
