@@ -5,11 +5,14 @@ technician, and consumer/society-member — selected by the `roles` claim on
 the session's JWT after sign-in (`lib/auth.ts`), same idea as web's
 `landingFor()` (`apps/web/lib/landing.ts`).
 
-**Status: the auth + routing shell exists and type-checks; nobody has run it
-on a device or simulator.** This session had no iOS/Android simulator or a
-physical device to test against — `tsc --noEmit`, lint, and `expo export`
-(a real Metro bundle, not a syntax check) are the only verification that
-happened. Treat first boot as a real test, not a formality.
+**Status (2026-09-27): auth/routing, a live-data tile with `AppState`-aware
+Realtime, a field-technician offline outbox, and meter QR/barcode scan are
+all built and type-check — nobody has run any of it on a device or
+simulator.** No iOS/Android simulator or physical device has been available
+in any session that touched this app — `tsc --noEmit`, lint, and
+`expo export` (a real Metro bundle, not a syntax check) are the only
+verification that's happened. Treat first boot as a real test, not a
+formality.
 
 ## Setup
 
@@ -49,18 +52,25 @@ RLS is the boundary, not the key, same as web's own `NEXT_PUBLIC_*` pair).
   from the JWT claim the same way web's middleware does — RLS is the actual
   gate on every query either app makes.
 
-## What's not built yet
+## What's built, what's not
 
-Everything past the login screen and two empty persona homes — that's the
-rest of the mobile backlog, each its own issue and each needing a real
-device to build against safely:
-
-- #44 Realtime with `AppState` handling (backgrounding kills the websocket
-  silently on Android without it)
-- #45 Offline outbox (MMKV/SQLite queue, idempotency keys, retry)
-- #46 Meter QR scan + nameplate OCR (`expo-camera`)
-- #47 Meter reading OCR from field photographs (harder: 7-segment/dial
-  digit recognition, not general OCR)
+- #44 Realtime with `AppState` handling — **done** (backgrounding kills the
+  websocket silently on Android without it; handled).
+- #45 Offline outbox — **done** (SQLite-backed queue, idempotency keys,
+  retry/backoff, conflict surfacing).
+- #46 Meter QR scan — **done** (`expo-camera`, `app/(field)/scan.tsx`).
+  Nameplate OCR (the other half of #46) is **not** built — deliberately:
+  it needs real meter photos to tune against, which no session working on
+  this app has had a way to produce or judge, so #46 stays open for that
+  half.
+- #47 Meter reading OCR from field photographs — **not built** (harder:
+  7-segment/dial digit recognition, not general OCR; same "needs real
+  photos" constraint as nameplate OCR above).
 - #48 Commissioning flow with fraud controls (geo, clock-tamper detection,
-  photo hashing)
-- #49 EAS build → distributable APK
+  photo hashing) — **not built**.
+- #49 EAS build → distributable APK — **not built**; needs real signing
+  credentials no session has had access to.
+
+Each remaining item is its own issue, and each genuinely needs a real
+device or real field photographs to build against safely — that's the
+actual blocker, not a scope choice.

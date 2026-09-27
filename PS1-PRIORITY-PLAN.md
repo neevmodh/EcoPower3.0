@@ -1,6 +1,6 @@
 # PS1 re-prioritization plan
 
-> **Historical — superseded 2026-09-11.** The PS1 core loop is built. §4 (mobile scope: Expo vs PWA) is the one open decision — PWA shipped, native undecided (#43).
+> **Historical — superseded 2026-09-11, §4 resolved 2026-09-27.** The PS1 core loop is built. §4 (mobile scope: Expo vs PWA) was the one open decision — both shipped: the PWA remains the always-available middle ground, and a real Expo/React Native app now also exists in `apps/mobile` (#43, closed) — verified via typecheck/lint/bundle export in CI, not yet booted on a physical device or simulator.
 > Kept for the reasoning it records. Current status: **[HANDOFF.md](HANDOFF.md)**; live backlog: GitHub issues.
 
 **Update (2026-08-30, later same day):** tightened further — PS1 gets

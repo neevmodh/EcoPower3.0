@@ -72,7 +72,7 @@ Status key: `☐` todo · `◐` partial · `☑` done · `⊘` cut
 | 54 | Asset anomaly detection | M6 | ml | high | 3 | ☐ | 27 |
 | 55 | LLM copilot — one day, hard budget | M6 | ml | low | — | ◐ | 6 |
 | 56 | Uptime monitoring from day one | M7 | infra | high | — | ☑ | 8 |
-| 57 | k6 load test + honest extrapolation | M7 | test | high | — | ☐ | 15, 58 |
+| 57 | k6 load test + honest extrapolation | M7 | test | high | — | ◐ | 15, 58 |
 | 58 | Seed 10M+ readings | M7 | db | normal | — | ◐ | 16 |
 | 59 | Plant findable defects in demo seed | M7 | demo | critical | — | ☐ | 58, 27 |
 | 60 | SPOF diagram + architecture slide | M7 | docs | normal | — | ☐ | — |
