@@ -42,6 +42,30 @@ async function checkDatabase(): Promise<{ ok: boolean; detail?: string }> {
   }
 }
 
+type CronJobStatus = { jobname: string; last_success: string | null; stale: boolean };
+
+async function checkCronJobs(): Promise<{ ok: boolean; detail?: string; jobs?: CronJobStatus[] }> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await withTimeout(
+      Promise.resolve(supabase.rpc("health_check_cron_jobs")),
+      "cron",
+    );
+    if (error) return { ok: false, detail: error.message };
+    const jobs = (data ?? []) as CronJobStatus[];
+    const stale = jobs.filter((j) => j.stale);
+    return {
+      ok: stale.length === 0,
+      detail: stale.length
+        ? `stale: ${stale.map((j) => j.jobname).join(", ")}`
+        : undefined,
+      jobs,
+    };
+  } catch (err) {
+    return { ok: false, detail: err instanceof Error ? err.message : "unknown error" };
+  }
+}
+
 async function checkGemini(): Promise<{ ok: boolean; detail?: string }> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return { ok: false, detail: "GEMINI_API_KEY not configured" };
@@ -61,19 +85,24 @@ async function checkGemini(): Promise<{ ok: boolean; detail?: string }> {
 }
 
 export async function GET() {
-  const [database, gemini] = await Promise.all([checkDatabase(), checkGemini()]);
+  const [database, gemini, cron] = await Promise.all([
+    checkDatabase(),
+    checkGemini(),
+    checkCronJobs(),
+  ]);
 
-  // Gemini being down degrades the AI advisor/bill-explainer, not the core
-  // product — reflected in overall status, not treated as equally fatal to
-  // the database being unreachable.
-  const overall = !database.ok ? "down" : !gemini.ok ? "degraded" : "ok";
+  // Gemini or a stale cron sweeper degrades the product (AI features, or a
+  // sweeper's own downstream effect like SLA credit / offline status) but
+  // isn't fatal the way an unreachable database is — reflected in overall
+  // status, not treated as equally severe.
+  const overall = !database.ok ? "down" : !gemini.ok || !cron.ok ? "degraded" : "ok";
 
   return Response.json(
     {
       status: overall,
       service: "ecopower-web",
       time: new Date().toISOString(),
-      components: { database, gemini },
+      components: { database, gemini, cron },
     },
     { status: database.ok ? 200 : 503 },
   );
